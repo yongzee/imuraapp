@@ -1,0 +1,253 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<style>
+body {
+    background: linear-gradient(135deg, #f7f7f7, #f0f0ff);
+}
+.product-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    animation: fadeSlide 0.6s ease;
+}
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(25px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.field-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+.form-control, .form-select {
+    border-radius: 14px;
+    padding: 12px 15px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #7b4bff;
+    box-shadow: 0 0 8px rgba(123, 75, 255, 0.4);
+}
+.tooltip-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #7b4bff;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 8px;
+}
+.upload-zone {
+    border: 2px dashed #c5baff;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    background: #faf8ff;
+}
+.upload-zone:hover {
+    border-color: #7b4bff;
+    background: #f3ecff;
+}
+.add-more-btn {
+    border-radius: 30px;
+    padding: 7px 18px;
+    font-size: 13px;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    margin-left: 10px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: #7b4bff;
+}
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+.submit-btn {
+    background: #7b4bff;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 25px;
+    font-size: 16px;
+    color: white;
+}
+/* Notifications */
+#messages .alert {
+    border-radius: 12px;
+    padding: 10px 15px;
+}
+
+
+</style>
+
+
+<!-- Form errors -->
+{% if form.errors %}
+<div class="alert alert-danger mb-3">
+  <ul class="mb-0">
+    {% for field in form %}
+      {% for error in field.errors %}
+        <li>{{ field.label }}: {{ error }}</li>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="container mt-5 mb-5">
+  <div class="product-card">
+    <h3 class="mb-4">Post a Product</h3>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.title.label }}</label>
+          {{ form.title }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.brand.label }}</label>
+          {{ form.brand }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.condition.label }}</label>
+          {{ form.condition }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.size_available.label }}</label>
+          {{ form.size_available }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.color.label }}</label>
+          {{ form.color }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.shipping_from.label }}</label>
+          {{ form.shipping_from }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.delivery_zones.label }}</label>
+          {{ form.delivery_zones }}
+        </div>
+
+        <!-- Images -->
+        <div class="col-md-6 mb-3">
+          <label class="field-label">Product Images</label>
+          <div id="image-wrapper">
+            <div class="upload-zone">
+              <input type="file" name="images" class="form-control" multiple>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2"
+                  onclick="addImageField()">+ Add More Images</button>
+
+          <div class="mt-3">
+            <label class="field-label">Enable Digital Try-On</label>
+            <label class="switch">
+              {{ form.enable_digital_tryon }}
+              <span class="slider"></span>
+            </label>
+            <span class="tooltip-icon" data-bs-toggle="tooltip"
+                  title="Allows users to digitally try the outfit using AR.">?</span>
+          </div>
+        </div>
+
+        <!-- Videos -->
+        <div class="col-md-6 mb-3">
+          <label class="field-label">Product Videos</label>
+          <div id="video-wrapper">
+            <div class="upload-zone">
+              <input type="file" name="videos" class="form-control" multiple accept="video/*">
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2"
+                  onclick="addVideoField()">+ Add More Videos</button>
+        </div>
+
+        <div class="col-12 mb-3">
+          <label class="field-label">{{ form.description.label }}</label>
+          {{ form.description }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.price.label }}</label>
+          {{ form.price }}
+          <div class="mt-2">
+            <label class="field-label">Enable Product Pricing</label>
+            <label class="switch">
+              {{ form.enable_product_pricing }}
+              <span class="slider"></span>
+            </label>
+            <span class="tooltip-icon" data-bs-toggle="tooltip"
+                  title="Disable to hide price on product display.">?</span>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="field-label">{{ form.category.label }}</label>
+          {{ form.category }}
+        </div>
+
+      </div>
+
+      <button type="submit" class="submit-btn mt-4">Post Product</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// Re‑usable helper for adding new inputs
+function addImageField() {
+  const wrapper = document.getElementById("image-wrapper");
+  const div = document.createElement("div");
+  div.className = "upload-zone mt-2";
+  div.innerHTML = `<input type="file" name="images" class="form-control" multiple>`;
+  wrapper.appendChild(div);
+}
+function addVideoField() {
+  const wrapper = document.getElementById("video-wrapper");
+  const div = document.createElement("div");
+  div.className = "upload-zone mt-2";
+  div.innerHTML = `<input type="file" name="videos" class="form-control" multiple>`;
+  wrapper.appendChild(div);
+}
+
+
+</script>
+
+{% endblock %}

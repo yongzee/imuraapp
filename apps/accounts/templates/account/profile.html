@@ -1,0 +1,853 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+/* ---------- HEADER ---------- */
+.profile-header {
+  background: linear-gradient(135deg, #111, #2b2b2b);
+  color: #fff;
+  border-radius: 18px;
+  padding: 30px;
+}
+/* ---------- PROFILE HEADER ---------- */
+.profile-header {
+  position: relative;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  border-radius: 22px;
+  padding: 30px;
+  overflow: hidden;
+}
+
+.profile-header-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.12),
+    transparent 60%
+  );
+}
+
+.profile-header-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- AVATAR ---------- */
+.profile-avatar-wrap {
+  padding: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffcc70, #ff6f91, #845ec2);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #111;
+  background: #000;
+}
+
+/* ---------- INFO ---------- */
+.profile-meta span {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.profile-meta i {
+  margin-right: 6px;
+}
+
+/* ---------- SOCIAL ICONS ---------- */
+.profile-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 17px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.profile-socials a:hover {
+  background: #fff;
+  color: #111;
+  transform: translateY(-3px);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .profile-header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar-wrap {
+    margin-bottom: 15px;
+  }
+
+  .profile-meta span {
+    display: block;
+    margin-bottom: 6px;
+  }
+}
+
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #fff;
+}
+
+/* ---------- MEDIA TABS ---------- */
+.media-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  overflow-x: auto;
+}
+
+.media-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.media-tabs button {
+  border-radius: 30px;
+  padding: 8px 22px;
+  transition: 0.3s ease;
+}
+
+.media-tabs button.active {
+  background: #111;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* ---------- MEDIA GRID ---------- */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.media-grid img,
+.media-grid video {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+/* MODAL OVERLAY */
+.media-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 10px;
+}
+/* ---------- MODAL CONTAINER ---------- */
+.media-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ---------- MODAL CONTENT ---------- */
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 900px;
+  max-height: 90vh;              /* 🔥 NEVER exceed screen */
+  overflow: hidden;              /* 🔥 Prevent body overlap */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- MODAL BODY ---------- */
+.modal-body {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;              /* 🔥 Enables scrolling */
+  flex: 1;                       /* 🔥 Fill available height */
+}
+
+/* ---------- MEDIA AREA ---------- */
+.modal-media {
+  flex: 1;
+  min-height: 260px;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modal-media img,
+.modal-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- DETAILS AREA ---------- */
+.modal-details {
+  flex: 1;
+  overflow-y: auto;              /* 🔥 Independent scroll */
+}
+
+/* ---------- MOBILE FIX ---------- */
+@media (max-width: 768px) {
+  .modal-body {
+    flex-direction: column;      /* 🔥 Stack vertically */
+    padding: 12px;
+  }
+
+  .modal-media {
+    height: 240px;               /* 🔥 Controlled height */
+    min-height: unset;
+  }
+
+  .modal-details {
+    max-height: calc(90vh - 260px);
+    overflow-y: auto;
+  }
+}
+
+/* MODAL CONTAINER */
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 900px;
+  max-height: 95vh;              /* 🔥 KEY FIX */
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* CLOSE BUTTON */
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  z-index: 20;
+}
+
+/* OWNER ACTIONS */
+.modal-actions {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+}
+
+.hamburger-btn {
+  background: #fff;
+  border: none;
+  font-size: 20px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* OWNER MENU */
+.owner-menu {
+  margin-top: 6px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.owner-menu-item {
+  display: block;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: #000;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+/* BODY (SCROLLABLE AREA) */
+.modal-body {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;              /* 🔥 KEY FIX */
+}
+
+/* MEDIA */
+.modal-media {
+  flex: 1;
+  max-height: 60vh;
+}
+
+.modal-media img,
+.modal-media video {
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* DETAILS */
+.modal-details {
+  flex: 1;
+}
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+  .modal-body {
+    flex-direction: column;
+  }
+
+  .modal-media {
+    max-height: 40vh;
+  }
+}
+/* ---------- TABLET & DESKTOP ---------- */
+@media (min-width: 992px) {
+  .media-grid {
+    grid-template-columns: repeat(5, 1fr); /* 💻 Desktop */
+  }
+
+  .media-grid img,
+  .media-grid video {
+    height: 220px;
+  }
+}
+
+.profile-actions .btn {
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-weight: 500;
+}
+
+/* ===== MESSAGE PANEL (slide in like comment window) ===== */
+.message-panel{
+  position: fixed;
+  background: rgba(0,0,0,0.95);
+  color: #fff;
+  z-index: 12000; /* above everything */
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s ease;
+  border-left: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Desktop: slide from right */
+@media (min-width: 769px){
+  .message-panel{
+    top: 0;
+    right: 0;
+    width: 380px;
+    height: 100vh;
+    transform: translateX(100%);
+  }
+  .message-panel.open{
+    transform: translateX(0);
+  }
+}
+
+/* Mobile: slide from bottom */
+@media (max-width: 768px){
+  .message-panel{
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 45%;
+    transform: translateY(100%);
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .message-panel.open{
+    transform: translateY(0);
+  }
+}
+
+.message-header{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.message-form{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 1rem;
+}
+
+.message-textarea{
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  outline: none;
+  resize: none;
+}
+
+.message-send-btn{
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ff3b5c;
+  color: #fff;
+  font-weight: 600;
+}
+.message-send-btn:hover{
+  background: #ff6b85;
+}
+</style>
+
+<div class="container mt-4">
+
+  <!-- ================= PROFILE HEADER ================= -->
+  <div class="profile-header mb-4 shadow-lg">
+    <div class="profile-header-overlay"></div>
+
+    <div class="profile-header-content d-flex align-items-center flex-wrap">
+
+      <!-- AVATAR -->
+      <div class="profile-avatar-wrap me-4">
+        {% if profile_user.profile.avatar %}
+          <img src="{{ profile_user.profile.avatar.url }}"
+               class="profile-avatar"
+               alt="Profile Avatar">
+        {% else %}
+          <img src="{% static 'images/default-avatar.png' %}"
+               class="profile-avatar"
+               alt="Default Avatar">
+        {% endif %}
+      </div>
+
+      <!-- USER INFO -->
+      <div class="profile-info text-white">
+
+        <h3 class="fw-bold mb-1">{{ profile_user.username }}</h3>
+
+        <p class="mb-2 opacity-75">
+          {{ profile_user.profile.bio|default:"Fashion creator & stylist" }}
+        </p>
+
+        <!-- META -->
+        <div class="profile-meta mb-3">
+          {% if profile_user.profile.phone %}
+            <span class="me-3">
+              <i class="bi bi-telephone-fill"></i>
+              {{ profile_user.profile.phone }}
+            </span>
+          {% endif %}
+
+          {% if profile_user.profile.location %}
+            <span>
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ profile_user.profile.location }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- SOCIAL LINKS -->
+        <div class="profile-socials mb-3">
+          {% if profile_user.profile.whatsapp %}
+            <a href="https://wa.me/{{ profile_user.profile.whatsapp|cut:'+' }}"
+               target="_blank">
+              <i class="bi bi-whatsapp"></i>
+            </a>
+          {% endif %}
+
+          {% if profile_user.profile.instagram %}
+            <a href="{{ profile_user.profile.instagram }}" target="_blank">
+              <i class="bi bi-instagram"></i>
+            </a>
+          {% endif %}
+
+          {% if profile_user.profile.facebook %}
+            <a href="{{ profile_user.profile.facebook }}" target="_blank">
+              <i class="bi bi-facebook"></i>
+            </a>
+          {% endif %}
+
+          {% if profile_user.profile.twitter %}
+            <a href="{{ profile_user.profile.twitter }}" target="_blank">
+              <i class="bi bi-twitter-x"></i>
+            </a>
+          {% endif %}
+
+          {% if profile_user.profile.tiktok %}
+            <a href="{{ profile_user.profile.tiktok }}" target="_blank">
+              <i class="bi bi-tiktok"></i>
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <!-- ACTION BUTTONS -->
+        <div class="profile-actions d-flex gap-2 flex-wrap">
+
+          {# MESSAGE → only when viewing OTHER users #}
+          {% if user.is_authenticated and user != profile_user %}
+            <button type="button"
+                    class="btn btn-outline-light btn-sm"
+                    onclick="openMessageModal()">
+              <i class="bi bi-chat-dots-fill"></i> Message
+            </button>
+          {% endif %}
+
+          {# TAKE MEASUREMENT → ONLY own profile #}
+          {% if user.is_authenticated and user == profile_user %}
+            <a href="{% url 'measureApp:index' %}"
+              class="btn btn-light btn-sm">
+              <i class="bi bi-rulers"></i> Take Measurement
+            </a>
+          {% endif %}
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- MEDIA TABS -->
+  <div class="media-tabs-wrapper">
+    <div class="media-tabs">
+      <button id="photosBtn" class="btn btn-dark active" onclick="showPhotos()">📸 Photos</button>
+      <button id="videosBtn" class="btn btn-outline-dark" onclick="showVideos()">🎥 Videos</button>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div id="photos-section">
+    <div class="media-grid">
+      {% for img in images %}
+        <img
+          src="{{ img.image.url }}"
+          data-src="{{ img.image.url }}"
+          data-type="image"
+          data-seller="{{ img.product.seller.id }}"
+          data-title="{{ img.product.title }}"
+          data-desc="{{ img.product.description }}"
+          data-size="{{ img.product.size }}"
+          data-area="{{ img.product.delivery_area }}"
+          data-price="{{ img.product.price }}"
+          data-url="{% url 'orders:create' img.product.id %}"
+          data-edit-url="{% url 'products:product_edit' img.product.id %}"
+          data-delete-url="{% url 'products:product_delete' img.product.id %}"
+          onclick="openModal(this)"
+        >
+
+
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- VIDEOS -->
+  <div id="videos-section" style="display:none;">
+    <div class="media-grid">
+      {% for vid in videos %}
+        <video
+          src="{{ vid.video.url }}"
+          muted loop autoplay
+          data-src="{{ vid.video.url }}"
+          data-seller="{{ vid.product.seller.id }}"
+          data-title="{{ vid.product.title }}"
+          data-desc="{{ vid.product.description }}"
+          data-size="{{ vid.product.size }}"
+          data-area="{{ vid.product.delivery_area }}"
+          data-price="{{ vid.product.price }}"
+          data-url="{% url 'orders:create' vid.product.id %}"
+          data-edit-url="{% url 'products:product_edit' vid.product.id %}"
+          data-delete-url="{% url 'products:product_delete' vid.product.id %}"
+          data-owner="{% if vid.product.seller == user %}true{% else %}false{% endif %}"
+          data-type="video"
+          onclick="openModal(this)"
+        ></video>
+
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE PANEL (like comment window) -->
+<div class="message-panel" id="messagePanel">
+  <div class="message-header">
+    <h4>Message {{ profile_user.username }}</h4>
+    <button id="closeMessagePanel" type="button"
+            style="background:none;border:none;color:#fff;font-size:1.5rem;">×</button>
+  </div>
+
+  <form class="message-form"
+        method="post"
+        action="{% url 'accounts:send_message' profile_user.username %}">
+    {% csrf_token %}
+
+    <textarea name="message"
+              class="message-textarea"
+              rows="4"
+              placeholder="Write your message..."
+              required></textarea>
+
+    <button type="submit" class="message-send-btn">Send</button>
+  </form>
+</div>
+
+
+<!-- MEDIA MODAL -->
+<div class="media-modal" id="mediaModal" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+
+    <!-- CLOSE BUTTON -->
+    <button class="modal-close-btn" type="button" onclick="closeModal(event)">
+      ✕
+    </button>
+
+    <!-- OWNER ACTIONS (HAMBURGER) -->
+    <div id="ownerActions"
+         class="modal-actions d-none"
+         onclick="event.stopPropagation()">
+
+      <button class="hamburger-btn" type="button" onclick="toggleOwnerMenu()">
+        ☰
+      </button>
+
+      <div id="ownerMenu" class="owner-menu d-none">
+        <a id="editPostBtn" class="owner-menu-item">✏️ Edit Post</a>
+
+        <form id="deletePostForm" method="post">
+          {% csrf_token %}
+          <button type="submit"
+                  class="owner-menu-item text-danger"
+                  onclick="return confirm('Delete this post?');">
+            🗑️ Delete Post
+          </button>
+        </form>
+      </div>
+    </div>
+
+  <!-- MODAL BODY (SCROLLABLE) -->
+  <div class="modal-body">
+
+    <div class="modal-media" id="modalMedia"></div>
+
+    <div class="modal-details">
+      <h5 id="modalTitle"></h5>
+      <p id="modalDesc"></p>
+
+      <p><b>Size:</b> <span id="modalSize"></span></p>
+      <p><b>Delivery Area:</b> <span id="modalArea"></span></p>
+
+      <h4 class="text-success mb-3">
+        ₦<span id="modalPrice"></span>
+      </h4>
+
+      {% if user.is_authenticated %}
+        <a id="orderBtn" class="btn btn-dark w-100">🛒 Order Now</a>
+      {% else %}
+        <a href="{% url 'account_login' %}" class="btn btn-dark w-100">
+          🔐 Login to Order
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+/* ---------------- MEDIA TABS ---------------- */
+const photosSection = document.getElementById("photos-section");
+const videosSection = document.getElementById("videos-section");
+const photosBtn = document.getElementById("photosBtn");
+const videosBtn = document.getElementById("videosBtn");
+
+function showPhotos() {
+  photosSection.style.display = "block";
+  videosSection.style.display = "none";
+  photosBtn.classList.add("active");
+  videosBtn.classList.remove("active");
+}
+
+function showVideos() {
+  photosSection.style.display = "none";
+  videosSection.style.display = "block";
+  videosBtn.classList.add("active");
+  photosBtn.classList.remove("active");
+}
+
+/* ---------------- MODAL ELEMENTS ---------------- */
+const modal = document.getElementById("mediaModal");
+const mediaBox = document.getElementById("modalMedia");
+const orderBtn = document.getElementById("orderBtn");
+
+const ownerActions = document.getElementById("ownerActions");
+const ownerMenu = document.getElementById("ownerMenu");
+const editPostBtn = document.getElementById("editPostBtn");
+const deletePostForm = document.getElementById("deletePostForm");
+
+const modalTitle = document.getElementById("modalTitle");
+const modalDesc = document.getElementById("modalDesc");
+const modalSize = document.getElementById("modalSize");
+const modalArea = document.getElementById("modalArea");
+const modalPrice = document.getElementById("modalPrice");
+
+/* ---------------- OWNER MENU ---------------- */
+function toggleOwnerMenu() {
+  ownerMenu.classList.toggle("d-none");
+}
+
+/* ---------------- OPEN MODAL ---------------- */
+function openModal(el) {
+  const sellerId = String(el.dataset.seller || "");
+  const userId = String("{{ user.id|default:'' }}");
+  const isOwner = sellerId && sellerId === userId;
+
+  /* MEDIA */
+  if (el.dataset.type === "video") {
+    mediaBox.innerHTML = `
+      <video src="${el.dataset.src}"
+             controls autoplay playsinline
+             style="width:100%;height:100%;object-fit:cover"></video>`;
+  } else {
+    mediaBox.innerHTML = `
+      <img src="${el.dataset.src}"
+           style="width:100%;height:100%;object-fit:cover">`;
+  }
+
+  /* DETAILS */
+  modalTitle.textContent = el.dataset.title || "";
+  modalDesc.textContent = el.dataset.desc || "";
+  modalSize.textContent = el.dataset.size || "—";
+  modalArea.textContent = el.dataset.area || "—";
+  modalPrice.textContent = el.dataset.price || "";
+
+  /* OWNER VS BUYER */
+  if (isOwner) {
+    ownerActions.classList.remove("d-none");
+    ownerMenu.classList.add("d-none");
+
+    editPostBtn.href = el.dataset.editUrl || "#";
+    deletePostForm.action = el.dataset.deleteUrl || "#";
+
+    orderBtn.classList.add("disabled");
+    orderBtn.style.pointerEvents = "none";
+    orderBtn.textContent = "🚫 You cannot order your own product";
+    orderBtn.removeAttribute("href");
+  } else {
+    ownerActions.classList.add("d-none");
+
+    orderBtn.classList.remove("disabled");
+    orderBtn.style.pointerEvents = "auto";
+    orderBtn.textContent = "🛒 Order Now";
+    orderBtn.href = el.dataset.url || "#";
+  }
+
+  modal.style.display = "flex";
+}
+
+function toggleOwnerMenu() {
+  document.getElementById("ownerMenu").classList.toggle("d-none");
+}
+
+function closeModal(e) {
+  if (
+    e.target.id === "mediaModal" ||
+    e.target.classList.contains("modal-close-btn")
+  ) {
+    const media = document.querySelector("#modalMedia video");
+    if (media) {
+      media.pause();
+      media.currentTime = 0;
+    }
+    document.getElementById("mediaModal").style.display = "none";
+    document.getElementById("modalMedia").innerHTML = "";
+    document.getElementById("ownerMenu")?.classList.add("d-none");
+  }
+}
+
+function openMessageModal() {
+  // Optional: close media modal if it’s open so they don’t overlap
+  const mediaModal = document.getElementById("mediaModal");
+  if (mediaModal && mediaModal.style.display === "flex") {
+    closeModal({ target: mediaModal }); // uses your existing closeModal
+  }
+
+  document.getElementById("messagePanel").classList.add("open");
+}
+
+document.getElementById("closeMessagePanel")?.addEventListener("click", () => {
+  document.getElementById("messagePanel").classList.remove("open");
+});
+
+
+  // Send profile message using notifications:send_message (so it appears in Notifications)
+  const msgForm = document.querySelector("#messagePanel .message-form");
+  if (msgForm) {
+    msgForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const textarea = msgForm.querySelector('textarea[name="message"]');
+      const text = (textarea?.value || "").trim();
+      if (!text) return;
+
+      const formData = new FormData();
+      formData.append("recipient_id", "{{ profile_user.id }}");
+      formData.append("text", text);
+
+      fetch("{% url 'notifications:send_message' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          textarea.value = "";
+          // close the panel
+          document.getElementById("messagePanel").classList.remove("open");
+          alert("Message sent!");
+        } else {
+          alert("Failed to send message");
+          console.log(data);
+        }
+      });
+    });
+  }
+</script>
+
+{% endblock %}

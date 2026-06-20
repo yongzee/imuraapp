@@ -1,0 +1,138 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<style>
+.order-card {
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+.order-img {
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+.info-box {
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.label {
+  font-weight: 600;
+  color: #333;
+}
+</style>
+
+<div class="container mt-4">
+  <h3 class="fw-bold mb-3">📦 Order Evaluation (Seller)</h3>
+
+  <div class="card order-card p-4">
+    <div class="row g-4">
+
+      <!-- PRODUCT IMAGE -->
+      <div class="col-md-5">
+        {% if order.product_image %}
+          <img src="{{ order.product_image }}" class="img-fluid order-img w-100">
+        {% else %}
+          <div class="bg-light rounded p-5 text-center text-muted">
+            No product image
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- DETAILS -->
+      <div class="col-md-7">
+
+        <h4 class="fw-bold">{{ order.product_title }}</h4>
+        <p class="text-muted">{{ order.description|default:"No description provided" }}</p>
+
+        <!-- ORDER SUMMARY -->
+        <div class="info-box">
+          <p><span class="label">Buyer:</span> {{ order.buyer.username }}</p>
+          <p><span class="label">Quantity:</span> {{ order.quantity }}</p>
+          <p><span class="label">Order Price:</span> ₦{{ order.price_at_order }}</p>
+          <p>
+            <span class="label">Status:</span>
+            <span class="badge bg-info text-dark">{{ order.get_status_display }}</span>
+          </p>
+          {% if order.buyer_notes %}
+            <hr>
+            <p class="mb-1">
+              <span class="label">Buyer Note:</span>
+            </p>
+
+            <div class="alert 
+              {% if order.status == 'not_satisfactory' %}
+                alert-danger
+              {% else %}
+                alert-secondary
+              {% endif %}
+              p-2 mb-0">
+              {{ order.buyer_notes }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- BUYER LOCATION -->
+        <div class="info-box">
+          <h6 class="section-title">📍 Buyer Delivery Location</h6>
+          <p><span class="label">State:</span> {{ order.buyer_state|default:"Not provided" }}</p>
+          <p><span class="label">LGA:</span> {{ order.buyer_lga|default:"Not provided" }}</p>
+          <p><span class="label">Address:</span> {{ order.buyer_address|default:"Not provided" }}</p>
+        </div>
+
+        <!-- SELLER INPUT -->
+        <div class="info-box">
+          <h6 class="section-title">🚚 Delivery & Collection Details</h6>
+
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="label">Transport Cost (₦)</label>
+              {{ form.transport_cost }}
+            </div>
+
+            <div class="mb-3">
+              <label class="label">Days to Deliver</label>
+              {{ form.days_to_deliver }}
+            </div>
+
+            <div class="mb-3">
+              <label class="label">
+                Collection / Pickup Point
+                <small class="text-muted">(Where buyer will collect the goods)</small>
+              </label>
+              {{ form.collection_point }}
+            </div>
+
+            <div class="mb-3">
+              <label class="label">Seller Notes (optional)</label>
+              {{ form.seller_notes }}
+            </div>
+
+            <button
+              name="seller_update"
+              class="btn btn-dark w-100 py-2">
+              💾 Save Delivery Details
+            </button>
+          {% if order.is_paid %}
+            <a href="{% url 'orders:seller_tracking' order.pk %}"
+              class="btn btn-outline-success w-100 mt-2">
+              🚚 Delivery & Tracking
+            </a>
+          {% endif %}
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

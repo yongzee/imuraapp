@@ -1,0 +1,319 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block content %}
+  <title>Measurement Results</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      text-align: center;
+      background-color: #1f1f1f;
+      color: #f1f1f1;
+    }
+
+    h2, h3 {
+      color: #ffffff;
+    }
+
+    img {
+      width: 300px;
+      border-radius: 10px;
+      border: 2px solid #444;
+      margin: 10px;
+      background-color: #333;
+    }
+
+    .result-section {
+      margin-top: 40px;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      font-size: 16px;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    }
+
+    th, td {
+      border: 1px solid #444;
+      padding: 12px 16px;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    td {
+      background-color: #2f2f2f;
+      color: #ddd;
+    }
+
+    .edit-btn {
+      margin-left: 8px;
+      padding: 3px 8px;
+      font-size: 12px;
+      background-color: #ffc107;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #1f1f1f;
+    }
+
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+
+    .download-btn,
+    .retake-btn,
+    .share-btn {
+      margin: 25px 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .download-btn {
+      background-color: #28a745;
+    }
+
+    .retake-btn {
+      background-color: #dc3545;
+    }
+
+    .share-btn {
+      background-color: #007BFF;
+    }
+
+    .download-btn:hover {
+      background-color: #218838;
+    }
+
+    .retake-btn:hover {
+      background-color: #c82333;
+    }
+
+    .share-btn:hover {
+      background-color: #0056b3;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #888;
+      font-size: 14px;
+      background-color: #444;
+      color: #fff;
+    }
+  </style>
+
+  <div id="pdf-content">
+    <h2>Measurement Results</h2>
+
+    {% if annotated_front or annotated_side %}
+      <div>
+        {% if annotated_front %}
+          <img src="/{{ annotated_front }}" alt="Annotated Front Pose" />
+        {% endif %}
+        {% if annotated_side %}
+          <img src="/{{ annotated_side }}" alt="Annotated Side Pose" />
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="result-section">
+      <h3>Estimated Body Measurements</h3>
+
+      {% if results %}
+        <table id="measurement-table">
+          <thead>
+            <tr>
+              <th>Measurement</th>
+              <th>Centimeters</th>
+              <th>Inches</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for key, value in results.items %}
+              {% if key != "annotated_front" and key != "annotated_side" %}
+                <tr>
+                  <td>{{ key }}</td>
+                  <td>
+                    <span class="display">{{ value.0|floatformat:1 }}</span> cm
+                    <input type="number" class="edit" style="display:none;" value="{{ value.0|floatformat:1 }}">
+                    <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
+                  </td>
+                  <td>
+                    <span class="display">{{ value.1|floatformat:1 }}</span> in
+                    <input type="number" class="edit" style="display:none;" value="{{ value.1|floatformat:1 }}">
+                    <button class="edit-btn" onclick="toggleEdit(this)">Edit</button>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No measurement results available. Please try again.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <button class="download-btn" onclick="window.print()">🖨️ Print Page</button>
+  <a href="{% url 'measureApp:manual_capture' %}" class="retake-btn">🔁 Retake Measurements</a>
+  
+  <button type="button" class="share-btn" data-bs-toggle="modal" data-bs-target="#shareModal">
+    📤 Share Measurement
+  </button>
+
+  <div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+      <div class="modal-content bg-dark text-light">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Share Measurement</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <input type="text" id="userSearch" class="form-control" style="background-color: #333; color: white; border: 1px solid #555;" placeholder="Search username...">
+            <button class="btn btn-primary" id="searchBtn" type="button">Search</button>
+          </div>
+
+          <div id="userList" class="text-start" style="max-height: 300px; overflow-y: auto;">
+            {% for u in users %}
+              <label class="d-flex align-items-center mb-2 user-item p-2 rounded" style="cursor:pointer; gap:10px;" data-username="{{ u.username|lower }}">
+                <input type="checkbox" class="form-check-input user-checkbox" value="{{ u.id }}">
+                <img src="{{ u.avatar }}" width="35" height="35" class="rounded-circle m-0" style="border: none;" alt="{{ u.username }}">
+                <span class="username">{{ u.username }}</span>
+              </label>
+            {% empty %}
+              <p class="text-muted text-center">No users found.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-success" id="sendMeasurementBtn" type="button">
+            Send Data
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {# Safe JSON serialization payload generation for script context extraction #}
+  {{ results|json_script:"measurement-data" }}
+
+  <script>
+    function toggleEdit(btn) {
+      const td = btn.parentElement;
+      const span = td.querySelector(".display");
+      const input = td.querySelector(".edit");
+
+      if (span.style.display === "none") {
+        span.style.display = "";
+        input.style.display = "none";
+        span.innerText = parseFloat(input.value).toFixed(1);
+        btn.innerText = "Edit";
+      } else {
+        span.style.display = "none";
+        input.style.display = "";
+        input.focus();
+        btn.innerText = "Save";
+      }
+    }
+
+    // ---------- SEARCH USERS MANAGEMENT ----------
+    function filterUsers() {
+      const value = document.getElementById("userSearch").value.toLowerCase().trim();
+      const users = document.querySelectorAll(".user-item");
+
+      users.forEach(user => {
+        const name = user.querySelector(".username").innerText.toLowerCase();
+        if (name.includes(value)) {
+          user.style.setProperty('display', 'flex', 'important');
+        } else {
+          user.style.setProperty('display', 'none', 'important');
+        }
+      });
+    }
+
+    // Bind search click
+    document.getElementById("searchBtn").addEventListener("click", filterUsers);
+
+    // Bind live search text input smoothly
+    document.getElementById("userSearch").addEventListener("input", filterUsers);
+
+    // Stop enter keys from triggering unwanted page reloads inside the modal
+    document.getElementById("userSearch").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        filterUsers();
+      }
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", filterUsers);
+    document.getElementById("userSearch").addEventListener("keyup", function(e) {
+      e.preventDefault();
+      filterUsers();
+    });
+
+    // ---------- DISPATCH JSON MEASUREMENTS VIA FETCH ----------
+    document.getElementById("sendMeasurementBtn").addEventListener("click", sendMeasurement);
+
+    function sendMeasurement() {
+      const selectedUsers = [];
+      document.querySelectorAll(".user-checkbox:checked").forEach(box => {
+        selectedUsers.push(box.value);
+      });
+
+      if (selectedUsers.length === 0) {
+        alert("Please select at least one user.");
+        return;
+      }
+
+      // Safe DOM state recovery for data dictionary pipeline 
+      const measurements = JSON.parse(
+        document.getElementById("measurement-data").textContent
+      );
+
+      fetch("{% url 'measureApp:share_measurement' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({
+          users: selectedUsers,
+          measurements: measurements
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          alert("Measurement shared successfully!");
+          location.reload();
+        } else {
+          alert(data.error || "Failed to share measurement.");
+        }
+      })
+      .catch(() => alert("Network error while sending."));
+    }
+  </script>
+{% endblock %}

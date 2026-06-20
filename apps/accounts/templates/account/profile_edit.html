@@ -1,0 +1,117 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-dark text-white text-center py-3">
+          <h4 class="mb-0">✨ Edit Your Profile</h4>
+        </div>
+
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- AVATAR -->
+            <div class="text-center mb-4">
+              {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}"
+                     class="rounded-circle shadow mb-2"
+                     width="120" height="120"
+                     style="object-fit:cover;">
+              {% else %}
+                <img src="{% static 'images/default-avatar.png' %}"
+                     class="rounded-circle shadow mb-2"
+                     width="120" height="120">
+              {% endif %}
+              <div class="mt-2">
+                {{ profile_form.avatar.label_tag }}
+                {{ profile_form.avatar }}
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- BASIC INFO -->
+            <h6 class="fw-bold mb-3">👤 Basic Information</h6>
+
+            <div class="mb-3">
+              {{ user_form.username.label_tag }}
+              {{ user_form.username|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ user_form.email.label_tag }}
+              {{ user_form.email|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.bio.label_tag }}
+              {{ profile_form.bio|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.phone.label_tag }}
+              {{ profile_form.phone|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.location.label_tag }}
+              {{ profile_form.location|add_class:"form-control" }}
+            </div>
+
+            <hr>
+
+            <!-- SOCIAL LINKS -->
+            <h6 class="fw-bold mb-3">🌍 Social & Contact</h6>
+
+            <div class="mb-3">
+              {{ profile_form.whatsapp.label_tag }}
+              {{ profile_form.whatsapp|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.instagram.label_tag }}
+              {{ profile_form.instagram|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.facebook.label_tag }}
+              {{ profile_form.facebook|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+              {{ profile_form.twitter.label_tag }}
+              {{ profile_form.twitter|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-4">
+              {{ profile_form.tiktok.label_tag }}
+              {{ profile_form.tiktok|add_class:"form-control" }}
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'accounts:profile' username=request.user.username %}"
+                 class="btn btn-outline-secondary">
+                Cancel
+              </a>
+
+              <button type="submit" class="btn btn-dark px-4">
+                💾 Save Changes
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

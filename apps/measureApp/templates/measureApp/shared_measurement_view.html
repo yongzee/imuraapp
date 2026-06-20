@@ -1,0 +1,176 @@
+{% extends "products/base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+<style>
+
+.measure-card{
+
+background:#2c2c2c;
+
+border:none;
+
+color:#f1f1f1;
+
+border-radius:12px;
+
+}
+
+.measure-row{
+
+padding:12px;
+
+border-bottom:1px solid #444;
+
+transition:.2s;
+
+}
+
+.measure-row:hover{
+
+background:#363636;
+
+}
+
+.measure-label{
+
+font-weight:600;
+
+color:#ddd;
+
+}
+
+.measure-value{
+
+font-size:18px;
+
+font-weight:600;
+
+color:#00bfff;
+
+}
+
+.sender-box{
+
+background:#1f1f1f;
+
+padding:10px;
+
+border-radius:8px;
+
+margin-bottom:15px;
+
+}
+@media print{
+
+body{
+
+background:white;
+
+color:black;
+
+}
+
+.btn{
+
+display:none;
+
+}
+
+.measure-card{
+
+background:white;
+
+color:black;
+
+border:1px solid #ccc;
+
+}
+
+}
+
+
+</style>
+
+
+<div class="container mt-4">
+
+<h3 class="mb-3">
+📏 Shared Measurement
+</h3>
+
+<div class="sender-box">
+
+Shared by:
+
+<b>
+@{{ notif.sender.username }}
+</b>
+
+</div>
+
+
+<div class="card measure-card shadow">
+
+<div class="card-body">
+
+{% for k,v in measurements.items %}
+
+<div class="d-flex justify-content-between measure-row">
+
+<div class="measure-label">
+
+{{ k|title }}
+
+</div>
+
+<div class="measure-value">
+
+{% if v.0 %}
+{{ v.0|floatformat:1 }} cm
+<span class="text-muted small">
+({{ v.1|floatformat:1 }} in)
+</span>
+{% else %}
+{{ v|floatformat:1 }}
+{% endif %}
+
+</div>
+
+</div>
+
+{% empty %}
+
+<p class="text-muted">
+No measurement data available
+</p>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+<div class="text-center mt-4">
+
+<button onclick="window.print()"
+class="btn btn-success me-2">
+
+⬇ Download / Print PDF
+
+</button>
+
+<a href="{% url 'notifications:list' %}"
+class="btn btn-outline-primary">
+
+← Back to notifications
+
+</a>
+
+</div>
+
+
+</div>
+
+{% endblock %}

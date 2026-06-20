@@ -1,0 +1,325 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+  body {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+  }
+
+  .card {
+    background-color: #2c2c2c;
+    border: none;
+    color: #f1f1f1;
+  }
+
+  .card-header {
+    background-color: #444;
+    font-weight: 600;
+  }
+
+  .btn-outline-primary, .btn-success {
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  .btn-outline-primary {
+    color: #00bfff;
+    border-color: #00bfff;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #00bfff;
+    color: #111;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+  }
+
+  .form-control {
+    background-color: #3a3a3a;
+    color: #fff;
+    border: 1px solid #555;
+  }
+
+  .form-control:disabled {
+    background-color: #2a2a2a;
+    color: #ccc;
+  }
+
+  .alert-success {
+    background-color: #1f513f;
+    border-color: #1f513f;
+    color: #d4edda;
+  }
+
+  hr {
+    border-top: 1px solid #555;
+  }
+</style>
+
+<!-- Success Banner -->
+<div class="container mt-4">
+  <div class="alert alert-success text-center" role="alert">
+    ✅ Your measurement was processed successfully!
+  </div>
+</div>
+
+<!-- Header -->
+<header class="container text-center py-4">
+  <h2 class="fw-semibold">Your Measurement</h2>
+  <p class="text-muted">Here are your accurate body measurements. You can edit, save, or retake them anytime.</p>
+</header>
+
+<!-- Uploaded Images in Cards -->
+<section class="container mb-5">
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header text-white text-center bg-primary">Front View</div>
+        <div class="card-body text-center">
+          <img src="{{ front_url }}" alt="Front Image" class="img-fluid rounded" style="max-height: 400px;">
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header text-white text-center bg-secondary">Side View</div>
+        <div class="card-body text-center">
+          <img src="{{ side_url }}" alt="Side Image" class="img-fluid rounded" style="max-height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="my-5">
+
+<!-- Editable Measurement Cards -->
+<section class="container mb-5">
+  <h4 class="mb-4 text-center">Measurement Breakdown</h4>
+
+  {% for key, value in measurements.items %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">{{ key|title }}</h5>
+      <div class="row align-items-center">
+        <div class="col-md-4">
+          <label class="form-label">Centimeters (cm)</label>
+          <input type="number" class="form-control cm-input" value="{{ value.0|floatformat:1 }}" step="0.1" disabled>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Inches (in)</label>
+          <input type="number" class="form-control inch-input" value="{{ value.1|floatformat:1 }}" step="0.1" disabled>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+          <button class="btn btn-outline-primary edit-btn" onclick="toggleEdit(this)">✏️ Edit</button>
+          <button class="btn btn-success save-btn d-none" onclick="saveEdit(this)">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+
+<hr class="my-5">
+
+<!-- CTA Buttons -->
+<section class="text-center mb-5">
+  <h5 class="mb-3">What would you like to do next?</h5>
+  <a href="{% url 'measureApp:upload_image'  %}" class="btn btn-outline-primary me-3">🔁 Retake Measurement</a>
+  <a href="#" onclick="window.print();" class="btn btn-success">🖨️ Print as PDF</a>
+  <a href="#" class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#shareModal">
+📤 Share Measurement
+  </a>
+</section>
+
+<!-- SHARE MODAL -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content bg-dark text-light">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Share Measurement</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Search Users -->
+        <div class="input-group mb-3">
+          <input type="text" id="userSearch" class="form-control"
+                 placeholder="Search username...">
+          <button class="btn btn-primary" id="searchBtn" type="button">Search</button>
+        </div>
+
+        <!-- Users List -->
+        <div id="userList">
+          {% for u in users %}
+            <label class="d-flex align-items-center mb-2 user-item p-2 rounded"
+            style="cursor:pointer; gap:10px;"
+            data-username="{{ u.username|lower }}">
+
+              <input type="checkbox"
+                    class="form-check-input user-checkbox"
+                    value="{{ u.id }}">
+
+              <img src="{{ u.avatar }}"
+                  width="35" height="35"
+                  class="rounded-circle"
+                  alt="{{ u.username }}">
+
+              <span class="username">{{ u.username }}</span>
+            </label>
+          {% empty %}
+            <p class="text-muted">No users found.</p>
+          {% endfor %}
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success" id="sendMeasurementBtn" type="button">
+          Send
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{# ✅ Safe JSON payload available to JS #}
+{{ measurements|json_script:"measurement-data" }}
+
+<!-- JavaScript to handle edit & auto conversion -->
+<script>
+  function toggleEdit(button) {
+    const card = button.closest('.card-body');
+    const cmInput = card.querySelector('.cm-input');
+    const inchInput = card.querySelector('.inch-input');
+    const saveBtn = card.querySelector('.save-btn');
+
+    cmInput.disabled = false;
+    inchInput.disabled = false;
+    button.classList.add('d-none');
+    saveBtn.classList.remove('d-none');
+
+    cmInput.addEventListener('input', () => {
+      const cmVal = parseFloat(cmInput.value);
+      if (!isNaN(cmVal)) inchInput.value = (cmVal / 2.54).toFixed(2);
+    });
+
+    inchInput.addEventListener('input', () => {
+      const inchVal = parseFloat(inchInput.value);
+      if (!isNaN(inchVal)) cmInput.value = (inchVal * 2.54).toFixed(2);
+    });
+  }
+
+  function saveEdit(button) {
+    const card = button.closest('.card-body');
+    const cmInput = card.querySelector('.cm-input');
+    const inchInput = card.querySelector('.inch-input');
+    const editBtn = card.querySelector('.edit-btn');
+
+    cmInput.disabled = true;
+    inchInput.disabled = true;
+    button.classList.add('d-none');
+    editBtn.classList.remove('d-none');
+  }
+
+
+  // ---------- SEARCH ----------
+  function filterUsers(){
+
+    const value =
+    document.getElementById("userSearch")
+    .value
+    .toLowerCase()
+    .trim()
+
+    const users =
+    document.querySelectorAll(".user-item")
+
+    users.forEach(user=>{
+
+        const name =
+        user.querySelector(".username")
+        .innerText
+        .toLowerCase()
+
+        if(name.includes(value))
+            user.style.display="flex"
+        else
+            user.style.display="none"
+
+    })
+
+}
+
+
+  document.getElementById("searchBtn").addEventListener("click", filterUsers);
+
+  document.getElementById("userSearch").addEventListener("keyup", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      filterUsers();
+    } else {
+      // live filtering while typing (optional, you can remove if you only want button search)
+      filterUsers();
+    }
+  });
+
+  // ---------- SEND ----------
+  document.getElementById("sendMeasurementBtn").addEventListener("click", sendMeasurement);
+
+  function sendMeasurement() {
+    const selectedUsers = [];
+    document.querySelectorAll(".user-checkbox:checked").forEach(box => {
+      selectedUsers.push(box.value);
+    });
+
+    if (selectedUsers.length === 0) {
+      alert("Please select at least one user.");
+      return;
+    }
+
+    // ✅ Pull measurements JSON from the json_script tag
+    const measurements = JSON.parse(
+      document.getElementById("measurement-data").textContent
+    );
+
+    fetch("{% url 'measureApp:share_measurement' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify({
+        users: selectedUsers,
+        measurements: measurements
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        alert("Measurement shared successfully!");
+        // optional: close modal
+        // bootstrap.Modal.getInstance(document.getElementById("shareModal")).hide();
+        location.reload();
+      } else {
+        alert(data.error || "Failed to share measurement.");
+      }
+    })
+    .catch(() => alert("Network error while sending."));
+  }
+</script>
+
+{% endblock %}

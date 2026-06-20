@@ -1,0 +1,72 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<style>
+.order-item {
+  border-radius: 14px;
+}
+.delete-btn {
+  color: #dc3545;
+  border: none;
+  background: transparent;
+}
+.delete-btn:hover {
+  color: #a71d2a;
+}
+</style>
+
+<div class="container mt-4">
+  <h3 class="fw-bold mb-3">📥 Orders From Buyers</h3>
+
+  {% if orders %}
+    <div class="list-group">
+      {% for order in orders %}
+      <div class="list-group-item order-item shadow-sm mb-2">
+        <div class="d-flex justify-content-between align-items-start">
+
+          <div>
+            <strong>{{ order.product_title }}</strong><br>
+            Buyer: {{ order.buyer.username }}<br>
+
+            <small class="text-muted">
+              Buyer Location:
+              {{ order.buyer_state }},
+              {{ order.buyer_lga }}
+            </small><br>
+
+            <small>
+              Status:
+              <span class="badge bg-warning text-dark">
+                {{ order.status }}
+              </span>
+            </small>
+          </div>
+
+          <div class="d-flex gap-2">
+            <a href="{% url 'orders:detail' order.pk %}"
+               class="btn btn-outline-primary btn-sm">
+              Open
+            </a>
+
+            {% if not order.is_paid %}
+            <form method="post"
+                  action="{% url 'orders:delete' order.pk %}"
+                  onsubmit="return confirm('Cancel and delete this order?');">
+              {% csrf_token %}
+              <button type="submit" class="delete-btn" title="Cancel Order">
+                🗑
+              </button>
+            </form>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No orders yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

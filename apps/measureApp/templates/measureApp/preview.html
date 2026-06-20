@@ -1,0 +1,515 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block title %}IMURA - Preview Captures{% endblock %}
+{% block content %}
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Override base body for this page ===== */
+    body {
+      font-family: 'Poppins', sans-serif !important;
+      background-color: #2e2e2e !important;
+      color: #f0f0f0;
+    }
+
+    /* ===== Hide navbar/footer on this page ===== */
+    .navbar, footer {
+      display: none !important;
+    }
+
+    /* ===== Main container override ===== */
+    .container.my-4 {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* ===== Background fill ===== */
+    .bg-fill {
+      position: fixed;
+      inset: 0;
+      background-color: #2e2e2e;
+      z-index: -1;
+    }
+
+    h2 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .img-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .img-card {
+      background-color: #3b3b3b;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      min-width: 260px;
+      max-width: 320px;
+      flex: 1;
+    }
+
+    .img-card img {
+      border-radius: 8px;
+      width: 100%;
+      height: auto;
+      border: 2px solid #444;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Placeholder when no image */
+    .img-placeholder {
+      width: 100%;
+      height: 350px;
+      border-radius: 8px;
+      border: 2px dashed #555;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 14px;
+      gap: 10px;
+      background-color: #333;
+    }
+
+    .img-placeholder i {
+      font-size: 40px;
+    }
+
+    /* Badge */
+    .img-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    .img-badge.success {
+      background-color: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .img-badge.error {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    /* ===== Form Section ===== */
+    .form-section {
+      margin-top: 20px;
+      background-color: #3b3b3b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .form-section label {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      padding: 12px;
+      font-size: 16px;
+      width: 200px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      background-color: #4a4a4a;
+      color: white;
+      text-align: center;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    input[type="number"]:focus {
+      border: 2px solid #28a745;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #218838;
+    }
+
+    .btn-secondary {
+      background-color: #555;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #666;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+
+    .btn:disabled {
+      background-color: #444;
+      color: #777;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    /* ===== Retake Modal ===== */
+    #retakeOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #retakeOverlay.show {
+      display: flex;
+    }
+
+    .retake-box {
+      background: #3b3b3b;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .retake-box h3 {
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .retake-box p {
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .retake-box .btn-group {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ===== Loading spinner ===== */
+    .spinner-sm {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .img-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .img-card {
+        width: 90%;
+        max-width: 100%;
+      }
+
+      .container.my-4 {
+        padding: 20px 15px;
+      }
+    }
+  </style>
+
+  <!-- Background fill -->
+  <div class="bg-fill"></div>
+
+  <h2>📸 Preview Your Captures</h2>
+  <p class="subtitle">Review your photos before submitting for measurement</p>
+
+  <div class="img-container">
+    <div class="img-card">
+      <p><strong>Front View</strong></p>
+      <div id="frontWrapper">
+        <div class="img-placeholder" id="frontPlaceholder">
+          <i class="bi bi-person"></i>
+          <span>Loading...</span>
+        </div>
+      </div>
+      <div id="frontBadge"></div>
+    </div>
+    <div class="img-card">
+      <p><strong>Side View</strong></p>
+      <div id="sideWrapper">
+        <div class="img-placeholder" id="sidePlaceholder">
+          <i class="bi bi-person"></i>
+          <span>Loading...</span>
+        </div>
+      </div>
+      <div id="sideBadge"></div>
+    </div>
+  </div>
+
+  <!-- Retake Modal -->
+  <div id="retakeOverlay">
+    <div class="retake-box">
+      <h3>🔄 Retake Photos?</h3>
+      <p>This will go back to the camera. Your current photos will be replaced.</p>
+      <div class="btn-group">
+        <button class="btn btn-danger" onclick="confirmRetake()">Yes, Retake</button>
+        <button class="btn btn-secondary" onclick="closeRetakeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-section">
+    <label for="userHeight"><strong>Enter Your Real Height (cm):</strong></label><br/>
+    <input type="number" id="userHeight" required placeholder="e.g. 170" min="50" max="250" />
+    <br/>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitForProcessing()">
+      ✅ Submit for Measurement
+    </button>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="openRetakeModal()">🔄 Retake Photos</button>
+    </div>
+  </div>
+
+  <script>
+    /* ========== DOM ========== */
+    const frontWrapper = document.getElementById("frontWrapper");
+    const sideWrapper = document.getElementById("sideWrapper");
+    const frontPlaceholder = document.getElementById("frontPlaceholder");
+    const sidePlaceholder = document.getElementById("sidePlaceholder");
+    const frontBadge = document.getElementById("frontBadge");
+    const sideBadge = document.getElementById("sideBadge");
+    const submitBtn = document.getElementById("submitBtn");
+    const heightInput = document.getElementById("userHeight");
+    const retakeOverlay = document.getElementById("retakeOverlay");
+
+    /* ========== CSRF TOKEN ========== */
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrfToken = getCookie("csrftoken");
+    const capturePageUrl = "{% url 'measureApp:manual_capture' %}";
+
+    /* ========== LOAD IMAGES ========== */
+    function loadImages() {
+      const frontData = sessionStorage.getItem("front_pose");
+      const sideData = sessionStorage.getItem("side_pose");
+
+      console.log("[Preview] Front:", frontData ? (frontData.length / 1024).toFixed(1) + " KB" : "MISSING");
+      console.log("[Preview] Side:", sideData ? (sideData.length / 1024).toFixed(1) + " KB" : "MISSING");
+
+      let hasFront = false;
+      let hasSide = false;
+
+      if (frontData && frontData.startsWith("data:image")) {
+        hasFront = true;
+        loadImageInto(frontWrapper, frontPlaceholder, frontBadge, frontData, "Front");
+      } else {
+        frontPlaceholder.innerHTML =
+          '<i class="bi bi-exclamation-triangle" style="color:#dc3545"></i>' +
+          '<span>No front image found</span>';
+        frontBadge.innerHTML = '<span class="img-badge error">❌ Missing</span>';
+      }
+
+      if (sideData && sideData.startsWith("data:image")) {
+        hasSide = true;
+        loadImageInto(sideWrapper, sidePlaceholder, sideBadge, sideData, "Side");
+      } else {
+        sidePlaceholder.innerHTML =
+          '<i class="bi bi-exclamation-triangle" style="color:#dc3545"></i>' +
+          '<span>No side image found</span>';
+        sideBadge.innerHTML = '<span class="img-badge error">❌ Missing</span>';
+      }
+
+      if (!hasFront || !hasSide) {
+        submitBtn.disabled = true;
+      }
+    }
+
+    function loadImageInto(wrapper, placeholder, badge, dataUrl, label) {
+      const img = new Image();
+
+      img.onload = function() {
+        wrapper.innerHTML = "";
+        wrapper.appendChild(img);
+        badge.innerHTML = '<span class="img-badge success">✅ ' + label + ' captured (' + img.width + '×' + img.height + ')</span>';
+      };
+
+      img.onerror = function() {
+        placeholder.innerHTML =
+          '<i class="bi bi-exclamation-triangle" style="color:#dc3545"></i>' +
+          '<span>Failed to load ' + label + '</span>';
+        badge.innerHTML = '<span class="img-badge error">❌ Corrupted</span>';
+        submitBtn.disabled = true;
+      };
+
+      img.alt = label + " Pose";
+      img.style.cssText = "border-radius:8px; width:100%; height:auto; border:2px solid #444; display:block;";
+      img.src = dataUrl;
+    }
+
+    /* ========== RETAKE ========== */
+    function openRetakeModal() {
+      retakeOverlay.classList.add("show");
+    }
+
+    function closeRetakeModal() {
+      retakeOverlay.classList.remove("show");
+    }
+
+    function confirmRetake() {
+      sessionStorage.removeItem("front_pose");
+      sessionStorage.removeItem("side_pose");
+      window.location.href = capturePageUrl;
+    }
+
+    /* ========== SUBMIT ========== */
+    async function submitForProcessing() {
+      const height = heightInput.value;
+
+      if (!height || isNaN(height) || height < 50 || height > 250) {
+        alert("Please enter a valid height between 50–250 cm.");
+        return;
+      }
+
+      const frontData = sessionStorage.getItem("front_pose");
+      const sideData = sessionStorage.getItem("side_pose");
+
+      if (!frontData || !sideData) {
+        alert("Both front and side images are required.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+
+      try {
+        const response = await fetch("{% url 'measureApp:submit_capture' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrfToken
+          },
+          body: new URLSearchParams({
+            front_img: frontData,
+            side_img: sideData,
+            height: height
+          })
+        });
+
+        const result = await response.json();
+        console.log("[Preview] Server response:", result);
+
+        if (response.ok && result.status === "ok") {
+          // Success — navigate to results
+          sessionStorage.removeItem("front_pose");
+          sessionStorage.removeItem("side_pose");
+          window.location.href = result.redirect || "{% url 'measureApp:processed_capture' %}";
+        } else {
+          // Server returned an error
+          const errorMsg = result.error || result.detail || "Unknown error";
+          console.error("[Preview] Server error:", errorMsg);
+          alert("Processing failed: " + errorMsg);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "✅ Submit for Measurement";
+        }
+
+      } catch (error) {
+        console.error("[Preview] Network error:", error);
+        alert("Network error: " + error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "✅ Submit for Measurement";
+      }
+    }
+
+    /* ========== INIT ========== */
+    loadImages();
+  </script>
+
+{% endblock %}

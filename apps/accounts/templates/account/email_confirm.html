@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h3 class="mb-4">Email Confirmation</h3>
+          {% if confirmation %}
+            <p>Hi {{ confirmation.email_address.user }}, please confirm your email address:</p>
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success">Confirm Email</button>
+            </form>
+          {% else %}
+            <p class="text-danger">This confirmation link is invalid or has expired.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

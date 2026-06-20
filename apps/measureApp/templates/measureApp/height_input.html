@@ -1,0 +1,65 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #2e2e2e;
+    color: #f0f0f0;
+  }
+  .instruction-card {
+    background-color: #3b3b3b;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    animation: fadeInUp 0.5s ease-in-out;
+  }
+  .list-group-item {
+    background-color: #4a4a4a;
+    color: #fff;
+    border: none;
+    border-bottom: 1px solid #555;
+  }
+  .alert-info {
+    background-color: #17a2b880;
+    color: #fff;
+    border: none;
+  }
+  .btn-start {
+    background-color: #28a745;
+    border: none;
+  }
+  .btn-start:hover {
+    background-color: #218838;
+  }
+
+  @keyframes fadeInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+  <div class="instruction-card w-100" style="max-width: 600px;">
+    <h3 class="text-center mb-4">📸 Before You Take Your Pictures</h3>
+
+    <div class="alert alert-info" role="alert">
+      Please follow these steps to ensure accurate body measurements:
+    </div>
+
+    <ul class="list-group list-group-flush mb-4">
+      <li class="list-group-item">✅ Ensure you're standing in a well-lit area.</li>
+      <li class="list-group-item">✅ Stand straight with arms relaxed by your side.</li>
+      <li class="list-group-item">✅ Use tight-fitting clothes or minimal clothing.</li>
+      <li class="list-group-item">✅ Remove shoes and accessories (e.g. hats, watches).</li>
+      <li class="list-group-item">✅ Make sure your entire body is visible in the frame.</li>
+      <li class="list-group-item">✅ First you will be asked to take a <strong>Front View</strong> picture.</li>
+      <li class="list-group-item">✅ Then a <strong>Side View</strong> picture will be requested.</li>
+    </ul>
+
+    <div class="d-grid">
+      <a href="{% url 'measureApp:manual_capture' %}" class="btn btn-success btn-lg btn-start">I'm Ready – Proceed to Camera</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

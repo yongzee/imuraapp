@@ -1,0 +1,105 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+          <h3 class="mb-4 text-center fw-bold text-primary">
+            Welcome Back 👋
+          </h3>
+
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+              <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                
+                {% if 'password' in field.id_for_label or 'password' in field.name %}
+                  <div class="input-group">
+                    {{ field|add_class:"form-control password-field" }}
+                    <button class="btn btn-outline-secondary toggle-password-btn" type="button" style="display: flex; align-items: center; justify-content: center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-v" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                      </svg>
+                    </button>
+                  </div>
+                {% else %}
+                  {{ field|add_class:"form-control" }}
+                {% endif %}
+
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ field.errors|join:", " }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-2">
+              Login
+            </button>
+          </form>
+
+          <div class="mt-3 text-center">
+            <a href="{% url 'account_reset_password' %}" class="text-decoration-none">
+              Forgot your password?
+            </a>
+          </div>
+          <div class="mt-2 text-center">
+            <span>Don’t have an account? </span>
+            <a href="{% url 'account_signup' %}" class="fw-bold text-success text-decoration-none">
+              Sign up
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+  
+  // Clean raw SVG paths for swapping on the fly
+  const eyePath = `<path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>`;
+  const eyeSlashPath = `<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a12 12 0 0 0-2.778.32l1.938 1.938A7 7 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.181.26-.41.586-.683.925zM10.03 5.01l1.532 1.532A2.5 2.5 0 0 0 9.5 5.01c-.13.003-.257.017-.378.04L8.252 4.183a5 5 0 0 1 1.778-.173M12.19 12.19a18 18 0 0 1-1.325 1.241C9.58 14.332 7.82 15.5 6 15.5c-5 0-8-5.5-8-5.5a12 12 0 0 1 2.138-2.61L3.393 6.137A13 13 0 0 0 1.172 8q.086.13.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.813 0 1.569-.175 2.254-.486zM6 8.02a2.5 2.5 0 0 0 3.48 3.48zm-.372 1.94L3.65 7.982A3.5 3.5 0 0 0 5.628 9.96z"/><path d="M13.646 14.354l-12-12 .708-.708 12 12z"/>`;
+
+  toggleButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const inputGroup = this.closest('.input-group');
+      const passwordInput = inputGroup.querySelector('.password-field');
+      const svgElement = this.querySelector('svg');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        svgElement.innerHTML = eyeSlashPath; // Switch path to slashed eye
+      } else {
+        passwordInput.type = 'password';
+        svgElement.innerHTML = eyePath;      // Switch path back to normal eye
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

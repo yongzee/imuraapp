@@ -1,0 +1,212 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="fw-bold">🚚 Deliver Order</h3>
+
+  {% if order.is_paid %}
+    <div class="alert alert-danger text-center fw-bold" id="timer">
+      ⏳ Delivery deadline counting...
+    </div>
+  {% endif %}
+
+  <div class="card p-4 shadow-sm mt-3">
+    <p><strong>Product:</strong> {{ order.product_title }}</p>
+    <p><strong>Buyer:</strong> {{ order.buyer.username }}</p>
+    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+
+    <hr>
+
+    <!-- ================= PAID ================= -->
+    {% if order.status == "paid" %}
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-2">
+          <label class="fw-bold">Delivery Instructions</label>
+          <textarea name="delivery_note" class="form-control" required></textarea>
+        </div>
+
+        <div class="mb-2">
+          <label class="fw-bold">Delivery Contact</label>
+          <input name="delivery_contact" class="form-control" required>
+        </div>
+
+        <button name="mark_in_transit" class="btn btn-primary w-100">
+          🚚 Mark as In Transit
+        </button>
+      </form>
+    {% endif %}
+
+    <!-- ================= IN TRANSIT ================= -->
+    {% if order.status == "in_transit" %}
+      <div class="alert alert-warning">
+        🚚 Order currently in transit
+      </div>
+
+      <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-2">
+          <label>Request Extra Days</label>
+          <input type="number" name="extra_days" min="1" class="form-control" required>
+        </div>
+        <button name="request_extension" class="btn btn-warning w-100">
+          ⏳ Request Time Extension
+        </button>
+      </form>
+    {% endif %}
+    
+    {% if order.extension_status == "pending" %}
+      <div class="alert alert-info mt-3">
+        ⏳ Extension request pending buyer approval.
+      </div>
+      {% elif order.extension_status == "approved" %}
+      <div class="alert alert-success mt-3">
+        ✅ Buyer approved delivery extension.
+      </div>
+      {% elif order.extension_status == "rejected" %}
+      <div class="alert alert-danger mt-3">
+        ❌ Buyer rejected delivery extension.
+      </div>
+    {% endif %}
+
+
+    <!-- ================= DELIVERED ================= -->
+    {% if order.status == "delivered" %}
+      <div class="alert alert-success">
+        ✅ Buyer confirmed delivery
+      </div>
+
+      <!-- ADMIN RECEIPT -->
+      {% if order.payout_receipt %}
+        <div class="alert alert-success mt-3">
+          📄 Admin uploaded payout receipt:
+          <a href="{{ order.payout_receipt.url }}" target="_blank">
+            View Receipt (PDF)
+          </a>
+        </div>
+      {% endif %}
+
+      <!-- CONFIRM PAYOUT -->
+      {% if order.payment_verified_by_admin and not order.seller_confirmed_payout %}
+        <form method="post" class="mt-2">
+          {% csrf_token %}
+          <button name="confirm_payout" class="btn btn-success w-100">
+            ✅ Payment Received
+          </button>
+        </form>
+      {% elif order.seller_confirmed_payout %}
+        <div class="alert alert-success mt-2">
+          💰 Payout confirmed. Order completed.
+        </div>
+      {% endif %}
+
+      <!-- BANK DETAILS -->
+      {% if order.status == "delivered" and not order.seller_bank_name %}
+        <hr>
+        <h6 class="fw-bold">🏦 Enter Bank Details for Payout</h6>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-2">
+            <label>Bank Name</label>
+            <input name="bank_name" class="form-control" required>
+          </div>
+
+          <div class="mb-2">
+            <label>Account Name</label>
+            <input name="account_name" class="form-control" required>
+          </div>
+
+          <div class="mb-2">
+            <label>Account Number</label>
+            <input name="account_number" class="form-control" required>
+          </div>
+
+          <button name="submit_bank_details" class="btn btn-success w-100 mt-2">
+            Submit Bank Details
+          </button>
+        </form>
+        {% elif order.seller_bank_name %}
+        <div class="alert alert-info mt-3">
+          🏦 Bank details submitted. Awaiting admin payout.
+        </div>
+      {% endif %}
+      {% if order.status == "delivered" %}
+
+        <div class="alert alert-success">
+          ✅ Buyer confirmed delivery
+        </div>
+
+        {% if order.payout_receipt %}
+          <div class="alert alert-info mt-3">
+            📄 <strong>Payout Receipt Uploaded by Admin</strong><br>
+            <a href="{{ order.payout_receipt.url }}" target="_blank">
+              View Receipt (PDF)
+            </a>
+          </div>
+        {% endif %}
+        {% if order.payout_receipt %}
+          <div class="alert alert-info mt-3">
+            📄 <strong>Payment Receipt</strong><br>
+            <a href="{{ order.payout_receipt.url }}" download>
+              Download Receipt (PDF)
+            </a>
+          </div>
+        {% endif %}
+
+
+
+        {% if order.payment_verified_by_admin and not order.seller_confirmed_payout %}
+          <form method="post" class="mt-2">
+            {% csrf_token %}
+            <button name="confirm_payout" class="btn btn-success w-100">
+              ✅ Payment Received
+            </button>
+          </form>
+        {% elif order.seller_confirmed_payout %}
+          <div class="alert alert-success mt-2">
+            💰 Payout confirmed. Order completed.
+          </div>
+        {% endif %}
+
+      {% endif %}
+
+
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= COUNTDOWN TIMER ================= -->
+{% if order.is_paid and order.paid_at and order.days_to_deliver %}
+<script>
+  const paidAt = new Date("{{ order.paid_at|date:'c' }}").getTime();
+  const allowedDays = Number("{{ order.days_to_deliver }}");
+  const timerEl = document.getElementById("timer");
+
+  const deadline = paidAt + (allowedDays * 24 * 60 * 60 * 1000);
+
+  function updateTimer() {
+    const diff = deadline - Date.now();
+
+    if (diff <= 0) {
+      timerEl.innerHTML = "⏰ Delivery deadline exceeded!";
+      timerEl.classList.replace("alert-danger", "alert-warning");
+      return;
+    }
+
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff / (1000*60*60)) % 24);
+    const m = Math.floor((diff / (1000*60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    timerEl.innerHTML = `⏳ ${d}d ${h}h ${m}m ${s}s remaining`;
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+</script>
+{% endif %}
+
+{% endblock %}

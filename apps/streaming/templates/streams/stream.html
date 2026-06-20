@@ -1,0 +1,1124 @@
+{% extends "streams/base.html" %}
+{% block body_class %}fullstream{% endblock %}
+{% block content %}
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+}
+
+:root {
+  --nav-height: 60px;
+  --sidebar-width: 50px;
+  --video-controls-height: 70px; /* 👈 space for controls */
+}
+
+
+/* ========== MAIN LAYOUT ========== */
+.stream-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* full visible height (handles mobile address bar too) */
+  background: #000;
+  overflow: visible;
+}
+/* ========== TOP OVERLAY ========== */
+.top-overlay {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 80;
+  pointer-events: auto;
+}
+
+.stream-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+.stream-search {
+  font-size: 22px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.stream-search:hover {
+  color: #ff3b5c;
+}
+
+/* ========== VIDEO SECTION ========== */
+.video-section {
+  position: relative;
+  flex: 1;
+  overflow: visible;
+  height: calc(100dvh - var(--nav-height));
+}
+video {
+  z-index: 1;
+  pointer-events: auto;
+}
+video::-webkit-media-controls-panel {
+  z-index: 5;
+}
+
+
+/* Swiper container */
+.swiper {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Make wrapper exactly fit container */
+.swiper-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* Ensure each slide takes full height and hides overflow */
+.swiper-slide {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  z-index: 0;
+}
+
+
+.swiper-slide.playing .overlay {
+  opacity: 0.85;
+}
+
+
+/* ========== NORMAL BOTTOM BAR (MOBILE) ========== */
+.bottom-bar {
+  height: var(--nav-height);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+}
+
+.bottom-bar button {
+  background: none;
+  border: none;
+  color: brown;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* Hide bottom bar on desktop */
+@media (min-width: 769px) {
+  .bottom-bar {
+    display: none;
+  }
+}
+
+/* ========== SIDEBAR NAV (DESKTOP ONLY) ========== */
+.nav-sidebar {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .nav-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    z-index: 100;
+  }
+
+  .nav-sidebar i {
+    font-size: 26px;
+    color: brown;
+    margin: 18px 0;
+    transition: 0.3s;
+  }
+
+  .nav-sidebar i:hover {
+    transform: scale(1.2);
+  }
+
+  .video-section {
+    margin-left: var(--sidebar-width);
+    height: 100vh;
+  }
+}
+/* Remove background from native controls (WebKit browsers) */
+video::-webkit-media-controls-panel {
+  background-color: rgba(0, 0, 0, 0) !important;
+  backdrop-filter: none !important;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Allow swipe gestures even when touching video */
+.swiper-slide video {
+  pointer-events: auto;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Disables accidental “stealing” of scroll by controls overlay if added back later */
+.swiper {
+  touch-action: pan-y !important;
+}
+
+/* ========== OVERLAY INFO ========== */
+.overlay {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  bottom: var(--video-controls-height); /* 👈 FIXED */
+  z-index: 40;
+  pointer-events: none; /* 👈 IMPORTANT */
+}
+.overlay a,
+.overlay button,
+.buy-btn {
+  pointer-events: auto;
+}
+
+.overlay,
+.side-actions {
+  pointer-events: auto;
+}
+
+video::-webkit-media-controls {
+  z-index: 10;
+}
+
+
+.overlay h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.overlay .username {
+  color: #ff3b5c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.overlay p {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.overlay .price {
+  color: #ff3b5c;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.buy-btn {
+  background: #ff3b5c;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+}
+
+.buy-btn:hover {
+  background: #ff708f;
+}
+
+/* ========== SIDE ACTIONS ========== */
+.side-actions {
+  position: absolute;
+  right: 15px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 60;
+}
+.side-actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.side-actions button:hover {
+  transform: scale(1.15);
+  color: #ff3b5c;
+}
+.side-actions button.active {
+  color: #ff3b5c;
+}
+.side-actions span {
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+/* ========== COMMENT PANEL ========== */
+.comment-panel {
+  position: fixed;
+  background: rgba(0,0,0,0.95);
+  color: #fff;
+  transition: transform 0.4s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width:769px) {
+  .comment-panel {
+    top: 0;
+    right: 0;
+    width: 40%;
+    height: 100%;
+    transform: translateX(100%);
+  }
+  .comment-panel.open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width:768px) {
+  .comment-panel {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    transform: translateY(100%);
+  }
+  .comment-panel.open {
+    transform: translateY(0);
+  }
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 1rem;
+}
+.comments-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+.comment-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+.comment-form input {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.comment-form button {
+  background: none;
+  border: none;
+  color: #ff3b5c;
+  font-size: 1.5rem;
+}
+.category-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  padding: 6px 14px;
+  border-radius: 30px;
+  z-index: 60;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-bar button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.category-bar button.active,
+.category-bar button:hover {
+  background: #ff3b5c;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .category-bar {
+    top: 8px;
+    gap: 0.5rem;
+    padding: 5px 10px;
+  }
+
+  .category-bar button {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+  }
+}
+
+.stream-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+
+
+.stream-search:hover {
+  color: #555;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 61;
+  border-radius: 10px;
+  pointer-events: auto; /* ✅ allow button interactivity */
+  transition: opacity 0.4s ease;
+}
+
+.video-wrapper:hover .video-controls,
+.video-wrapper.show-controls .video-controls {
+  opacity: 1;
+}
+
+.video-controls button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.video-controls button:hover {
+  color: #ff3b5c;
+  transform: scale(1.15);
+}
+
+.progress-container {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #ff3b5c;
+  border-radius: 3px;
+}
+
+.time-display {
+  font-size: 0.75rem;
+  color: #fff;
+  min-width: 70px;
+  text-align: right;
+}
+
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mobile scaling */
+@media (max-width: 768px) {
+  .video-controls {
+    bottom: 6px;
+    padding: 6px 10px;
+  }
+  .video-controls button {
+    font-size: 1.2rem;
+  }
+  .time-display {
+    display: none;
+  }
+}
+
+/* ==== SHARE PANEL ==== */
+.share-panel {
+  position: fixed;
+  background: rgba(0,0,0,0.95);
+  color: #fff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+
+/* Desktop slide-in from right */
+@media (min-width:769px) {
+  .share-panel {
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100%;
+    transform: translateX(100%);
+  }
+  .share-panel.open {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile slide-up */
+@media (max-width:768px) {
+  .share-panel {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 35%;
+    transform: translateY(100%);
+  }
+  .share-panel.open {
+    transform: translateY(0);
+  }
+}
+
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 1rem;
+}
+
+.share-options {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.share-options button {
+  background: #ff3b5c;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.share-options button:hover {
+  background: #ff708f;
+}
+.share-panel { z-index: 4000; }
+
+/* Let Swiper receive touch events; controls/buttons still clickable */
+.swiper-slide video {
+  pointer-events: none;
+}
+.video-controls,
+.side-actions {
+  pointer-events: auto;
+}
+
+.showmore-btn{
+  background: none;
+  border: none;
+  color: #ce98a1;
+  font-weight: 300;
+  padding: 0;
+  margin-top: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: left;
+}
+.showmore-btn:hover{ text-decoration: underline; }
+</style>
+
+<div class="stream-container">
+  <!-- Desktop Sidebar -->
+  <div class="nav-sidebar">
+    <a href="{% url 'products:product_list' %}">
+      <i class="bx bxs-home"></i>
+    </a>
+    <a href="{% url 'accounts:user_list' %}">
+      <i class="bx bxs-user"></i>
+    </a>
+
+    <a href="{% url 'products:product_post' %}">
+      <i class="bx bx-upload"></i>
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'accounts:profile' user.username %}">
+      <i class="bx bxs-user-circle"></i>
+    </a>
+    {% else %}
+    <a href="{% url 'account_login' %}">
+      <i class="bx bxs-user-circle"></i>
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Video Section -->
+  <div class="video-section">
+
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        {% for item in video_data %}
+        <div class="swiper-slide" data-id="{{ item.video.id }}" data-gender="{{ item.product.category.name|lower }}">
+          <div class="video-wrapper">
+            <video preload="metadata" playsinline >
+              <source src="{{ item.video.video.url }}" type="video/mp4">
+            </video>
+
+            <!-- Custom controls -->
+            <div class="video-controls no-swiping">
+              <button class="playpause"><i class="bx bx-play"></i></button>
+
+              <div class="progress-container">
+                <div class="progress-bar"></div>
+              </div>
+
+              <span class="time-display">0:00 / 0:00</span>
+
+              <div class="right-controls">
+                <button class="mute"><i class="bx bx-volume-full"></i></button>
+                <button class="fullscreen"><i class="bx bx-fullscreen"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="top-overlay">
+            <span class="stream-title">Stream</span>
+
+            <a href="{% url 'streaming:trending' %}" class="stream-search" title="Search streams">
+              <i class="bi bi-search"></i>
+            </a>
+          </div>
+
+          <div class="overlay">
+
+            <h3><a href="#" class="username">@{{ item.product.seller.username }}</a> • {{ item.product.title }}</h3>
+            <p class="desc" data-full="{{ item.product.description|escape }}">
+              {{ item.product.description|truncatewords:15 }}
+            </p>
+
+            {% if item.product.description|wordcount > 15 %}
+              <button type="button" class="showmore-btn">Show more</button>
+            {% endif %}
+            <p class="price">₦{{ item.product.price }}</p>
+            <a href="{% url 'products:product_detail' item.product.id %}" class="buy-btn">🛒 Buy Now</a>
+          </div>
+
+          <div class="side-actions no-swiping">
+            <button class="like-btn {% if item.liked %}active{% endif %}">
+              <i class="fa-solid fa-shirt"></i>
+            </button>
+            <span class="like-count">{{ item.total_likes }}</span>
+            
+            <button class="comment-btn">
+              <i class="bx bxs-message-rounded-dots"></i>
+            </button>
+            <span class="comment-count">{{ item.total_comments }}</span>
+            
+            <button class="share-btn">
+              <i class="bx bx-share bx-flip-horizontal"></i>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Normal Bottom Bar (mobile) -->
+  <div class="bottom-bar">
+    <a href="{% url 'products:product_list' %}">
+      <i class="bx bxs-home"></i>
+    </a>
+    <a href="{% url 'accounts:user_list' %}">
+      <i class="bx bxs-user"></i>
+    </a>
+
+    <a href="{% url 'products:product_post' %}">
+      <i class="bx bx-upload"></i>
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'accounts:profile' user.username %}">
+      <i class="bx bxs-user-circle"></i>
+    </a>
+    {% else %}
+    <a href="{% url 'account_login' %}">
+      <i class="bx bxs-user-circle"></i>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- COMMENT PANEL -->
+<div class="comment-panel" id="commentPanel">
+  <div class="comment-header">
+    <h4>Comments</h4>
+    <button id="closeComments" style="background:none;border:none;color:#fff;font-size:1.5rem;">×</button>
+  </div>
+  <div class="comments-list" id="commentsList"></div>
+  <form class="comment-form" id="commentForm">
+    <input type="text" id="commentText" placeholder="Add a comment..." required>
+    <button type="submit"><i class="bx bxs-send"></i></button>
+  </form>
+</div>
+<!-- SHARE PANEL -->
+<div class="share-panel" id="sharePanel">
+  <div class="share-header">
+    <h4>Share or Save</h4>
+    <button id="closeShare" style="background:none;border:none;color:#fff;font-size:1.5rem;">×</button>
+  </div>
+  <div class="share-options">
+    <button id="saveBtn">💾 Save</button>
+    <button id="shareBtn">📤 Share</button>
+  </div>
+</div>
+
+<!-- JS LIBRARIES -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const csrftoken = "{{ csrf_token }}";
+  let swiperInstance = null;
+
+  // =========================================================
+  // GLOBAL AUDIO STATE (UNMUTED BY DEFAULT)
+  // =========================================================
+  let globalMuted = false;
+
+  function updateMuteIcons() {
+    document.querySelectorAll(".swiper-slide").forEach(slide => {
+      const btn = slide.querySelector(".mute");
+      if (!btn) return;
+
+      btn.innerHTML = globalMuted
+        ? '<i class="bx bx-volume-mute"></i>'
+        : '<i class="bx bx-volume-full"></i>';
+    });
+  }
+  
+  function applyMutedToAllVideos() {
+    document.querySelectorAll(".swiper-slide video").forEach(v => {
+      v.muted = globalMuted;
+      if (globalMuted) v.setAttribute("muted", "");
+      else v.removeAttribute("muted");
+    });
+  }
+
+  function setMutedState(muted) {
+    globalMuted = muted;
+    applyMutedToAllVideos();
+    updateMuteIcons();
+  }
+
+  // Initialize icon displays correctly on load
+  updateMuteIcons();
+
+  // =========================================================
+  // DESCRIPTION EXPANSION (SHOW MORE / SHOW LESS)
+  // =========================================================
+  document.querySelectorAll(".showmore-btn").forEach(btn => {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const overlay = this.closest(".overlay");
+      const p = overlay.querySelector(".desc");
+      const full = p.dataset.full;
+      const isExpanded = this.dataset.expanded === "1";
+
+      if (isExpanded) {
+        p.textContent = p.dataset.trunc;
+        this.textContent = "Show more";
+        this.dataset.expanded = "0";
+      } else {
+        if (!p.dataset.trunc) p.dataset.trunc = p.textContent;
+        p.textContent = full;
+        this.textContent = "Show less";
+        this.dataset.expanded = "1";
+      }
+    });
+  });
+
+  // =========================================================
+  // CUSTOM VIDEO CONTROLS & AUTO-RESTART
+  // =========================================================
+  document.querySelectorAll(".video-wrapper").forEach(wrapper => {
+    const video = wrapper.querySelector("video");
+    const playPauseBtn = wrapper.querySelector(".playpause");
+    const muteBtn = wrapper.querySelector(".mute");
+    const fullscreenBtn = wrapper.querySelector(".fullscreen");
+    const progressContainer = wrapper.querySelector(".progress-container");
+    const progressBar = wrapper.querySelector(".progress-bar");
+    const timeDisplay = wrapper.querySelector(".time-display");
+
+    // Initialize with global sound settings
+    video.muted = globalMuted;
+
+    // RESTART VIDEO WHEN FINISHED (LOOP FIX)
+    video.addEventListener("ended", () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    });
+
+    // Play / Pause
+    playPauseBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (video.paused) {
+        document.querySelectorAll(".swiper-slide video").forEach(v => v.pause());
+        video.play().catch(() => {
+          // Fallback if browser flags unmuted autoplay constraints before interaction
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+      } else {
+        video.pause();
+      }
+    }, { passive: false });
+
+    video.addEventListener("play", () => {
+      playPauseBtn.innerHTML = '<i class="bx bx-pause"></i>';
+    });
+
+    video.addEventListener("pause", () => {
+      playPauseBtn.innerHTML = '<i class="bx bx-play"></i>';
+    });
+
+    // Mute toggle
+    muteBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setMutedState(!globalMuted);
+    }, { passive: false });
+
+    // Fullscreen
+    fullscreenBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!document.fullscreenElement) wrapper.requestFullscreen();
+      else document.exitFullscreen();
+    }, { passive: false });
+
+    // Progress / time
+    video.addEventListener("timeupdate", () => {
+      if (!video.duration) return;
+      const percent = (video.currentTime / video.duration) * 100;
+      progressBar.style.width = `${percent}%`;
+
+      const fmt = (t) => {
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+      };
+      timeDisplay.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+    });
+
+    // Scrub
+    progressContainer.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!video.duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      video.currentTime = pos * video.duration;
+    }, { passive: false });
+  });
+
+  // =========================================================
+  // SWIPER INIT + AUTOPLAY CURRENT SLIDE
+  // =========================================================
+  function playVisibleVideo() {
+    document.querySelectorAll(".swiper-slide video").forEach((video, index) => {
+      if (!swiperInstance) return;
+
+      if (swiperInstance.activeIndex === index) {
+        video.currentTime = 0;
+        video.muted = globalMuted;
+
+        const p = video.play();
+        if (p !== undefined) {
+          p.catch(() => {
+            // Browser autoplay safeguard: if unmuted change gets blocked,
+            // fall back silently to muted to ensure presentation continues.
+            setMutedState(true);
+            video.muted = true;
+            video.play().catch(() => {});
+          });
+        }
+      } else {
+        video.pause();
+      }
+    });
+  }
+
+  function initSwiper() {
+    if (!swiperInstance) {
+      swiperInstance = new Swiper(".mySwiper", {
+        direction: window.innerWidth < 768 ? "vertical" : "horizontal",
+        slidesPerView: 1,
+        allowTouchMove: true,
+        simulateTouch: true,
+        touchStartPreventDefault: false,
+        passiveListeners: false,
+        preventClicks: false,
+        preventClicksPropagation: false,
+        noSwiping: true,
+        noSwipingClass: "no-swiping",
+        resistanceRatio: 0.6,
+        watchSlidesProgress: true,
+      });
+
+      swiperInstance.on("slideChange", playVisibleVideo);
+    } else {
+      swiperInstance.changeDirection(window.innerWidth < 768 ? "vertical" : "horizontal");
+      swiperInstance.update();
+    }
+  }
+
+  initSwiper();
+  playVisibleVideo();
+  window.addEventListener("resize", initSwiper);
+
+  // =========================================================
+  // AJAX LIKE SYSTEM
+  // =========================================================
+  document.querySelectorAll(".like-btn").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const slide = this.closest(".swiper-slide");
+      const videoId = slide.dataset.id;
+      const countSpan = this.nextElementSibling;
+
+      fetch(`/streaming/like/${videoId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+      })
+      .then(res => res.json())
+      .then(data => {
+        this.classList.toggle("active", data.liked);
+        countSpan.textContent = data.likes_count;
+      });
+    }, { passive: false });
+  });
+
+  // =========================================================
+  // COMMENTS PANEL ENGINE
+  // =========================================================
+  const commentPanel = document.getElementById("commentPanel");
+  const commentsList = document.getElementById("commentsList");
+  const commentForm = document.getElementById("commentForm");
+  const commentText = document.getElementById("commentText");
+
+  let activeVideoId = null;
+  let activeCommentSpan = null;
+
+  document.querySelectorAll(".comment-btn").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const slide = this.closest(".swiper-slide");
+      activeVideoId = slide.dataset.id;
+      activeCommentSpan = this.nextElementSibling;
+
+      fetch(`/streaming/get_comments/${activeVideoId}/`)
+        .then(res => res.json())
+        .then(data => {
+          commentsList.innerHTML = data.comments
+            .map(c => `<div class="comment"><strong>@${c.user}</strong>: ${c.text}</div>`)
+            .join("");
+          commentPanel.classList.add("open");
+        });
+    }, { passive: false });
+  });
+
+  document.getElementById("closeComments").addEventListener("click", () => {
+    commentPanel.classList.remove("open");
+  });
+
+  commentForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!activeVideoId) return;
+
+    const text = commentText.value.trim();
+    if (!text) return;
+
+    fetch(`/streaming/comment/${activeVideoId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ text }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      commentsList.innerHTML = data.comments
+        .map(c => `<div class="comment"><strong>@${c.user}</strong>: ${c.text}</div>`)
+        .join("");
+      commentText.value = "";
+      if (activeCommentSpan) activeCommentSpan.textContent = data.comments.length;
+    });
+  });
+
+  // =========================================================
+  // SHARE PANEL ENGINE
+  // =========================================================
+  const sharePanel = document.getElementById("sharePanel");
+  const closeShare = document.getElementById("closeShare");
+  const saveBtn = document.getElementById("saveBtn");
+  const shareBtn = document.getElementById("shareBtn");
+
+  function getActiveSlideEl() {
+    return swiperInstance?.slides?.[swiperInstance.activeIndex] || null;
+  }
+  
+  function getActiveVideoSrc(slideEl) {
+    const v = slideEl?.querySelector("video");
+    return v?.currentSrc || v?.querySelector("source")?.src || null;
+  }
+
+  document.querySelectorAll(".share-btn").forEach(btn => {
+    const open = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      sharePanel.classList.add("open");
+    };
+    btn.addEventListener("click", open, { passive: false });
+    btn.addEventListener("touchend", open, { passive: false });
+  });
+
+  closeShare.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sharePanel.classList.remove("open");
+  }, { passive: false });
+
+  saveBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sharePanel.classList.remove("open");
+
+    const slideEl = getActiveSlideEl();
+    const src = getActiveVideoSrc(slideEl);
+    if (!src) return alert("No video source to download.");
+
+    const seller = slideEl.querySelector(".username")?.textContent?.replace(/[@\W]+/g, "_") || "stream";
+    const filename = `${seller}_video.mp4`;
+
+    try {
+      const res = await fetch(src, { mode: "cors" });
+      if (!res.ok) throw new Error("Fetch failed");
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(src, "_blank");
+    }
+  }, { passive: false });
+
+  shareBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sharePanel.classList.remove("open");
+
+    const slideEl = getActiveSlideEl();
+    const src = getActiveVideoSrc(slideEl);
+    const text = slideEl?.querySelector(".overlay h3")?.textContent?.trim() || "Check this video!";
+    const url = src || window.location.href;
+
+    if (navigator.share) {
+      try { await navigator.share({ title: document.title, text, url }); } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("Link copied to clipboard.");
+      } catch {
+        alert("Copy this link:\n" + url);
+      }
+    }
+  }, { passive: false });
+});
+
+</script>
+{% endblock %}

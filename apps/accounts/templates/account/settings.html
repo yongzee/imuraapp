@@ -1,0 +1,18 @@
+{% extends "products/base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Account Settings</h3>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <a href="{% url 'password_change' %}">Change Password</a>
+    </li>
+    <li class="list-group-item">
+      <a href="#">Notification Preferences (coming soon)</a>
+    </li>
+    <li class="list-group-item text-danger">
+      <a href="{% url 'accounts:delete_account' %}">Delete Account</a>
+    </li>
+
+  </ul>
+</div>
+{% endblock %}

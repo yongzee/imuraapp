@@ -1,0 +1,158 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<style>
+.checkout-card {
+  border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+}
+.summary-box {
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 16px;
+}
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.price-row.total {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.section-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.paystack-box {
+  border: 1px dashed #ddd;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+</style>
+
+<div class="container mt-4 mb-5">
+  <h3 class="fw-bold mb-3">💳 Checkout</h3>
+
+  <div class="card checkout-card p-4">
+    <div class="row g-4">
+
+      <!-- LEFT: ORDER INFO -->
+      <div class="col-md-7">
+
+        <h5 class="fw-bold mb-2">{{ order.product_title }}</h5>
+
+        <p class="text-muted mb-2">
+          Sold by <strong>{{ order.seller.username }}</strong>
+        </p>
+
+        <div class="summary-box mb-3">
+          <div class="price-row">
+            <span>Product price (×{{ order.quantity }})</span>
+            <strong>₦{{ product_cost }}</strong>
+          </div>
+
+          <div class="price-row">
+            <span>Delivery / Transport</span>
+            <strong>₦{{ transport }}</strong>
+          </div>
+
+          <div class="price-row">
+            <span>Platform service fee (3%)</span>
+            <strong>₦{{ platform_fee }}</strong>
+          </div>
+
+          <hr>
+
+          <div class="price-row total">
+            <span>Total to Pay</span>
+            <span>₦{{ total }}</span>
+          </div>
+        </div>
+
+        <!-- BUYER LOCATION -->
+        <div class="summary-box mb-3">
+          <h6 class="section-title">📍 Delivery Location</h6>
+          <p class="mb-1"><strong>State:</strong> {{ order.buyer_state }}</p>
+          <p class="mb-1"><strong>LGA:</strong> {{ order.buyer_lga }}</p>
+          <p class="mb-0"><strong>Address:</strong> {{ order.buyer_address }}</p>
+        </div>
+
+        <!-- COLLECTION POINT -->
+        <div class="summary-box">
+          <h6 class="section-title">📦 Collection Point</h6>
+          <p class="mb-0">
+            {{ order.collection_point|default:"Seller will notify after payment" }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: PAYMENT -->
+      <div class="col-md-5">
+        <div class="summary-box h-100 d-flex flex-column justify-content-between">
+
+          <div>
+            <h6 class="section-title">💰 Payment Method</h6>
+
+            <div class="paystack-box mb-3">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Paystack_Logo.svg"
+                   alt="Paystack"
+                   width="40">
+              <div>
+                <strong>Paystack</strong><br>
+                <small class="text-muted">
+                  Secure card & bank payment
+                </small>
+              </div>
+            </div>
+
+            <p class="text-muted small">
+              By proceeding, your payment will be held securely until the seller
+              dispatches the item.
+            </p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <button
+              type="button"
+              onclick="payWithPaystack()"
+              class="btn btn-success btn-lg w-100 mt-3">
+              🚀 Pay ₦{{ total }}
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<script>
+function payWithPaystack() {
+  let handler = PaystackPop.setup({
+    key: "{{ paystack_public_key }}",
+    email: "{{ email }}",
+    amount: "{{ amount_kobo }}",
+    ref: "{{ reference }}",
+    callback: function(response) {
+      // Redirect to verify payment
+      window.location.href = "{% url 'orders:verify_payment' order.pk %}?ref=" + response.reference;
+    },
+    onClose: function() {
+      alert('Payment window closed.');
+    }
+  });
+
+  handler.openIframe();
+}
+</script>
+
+{% endblock %}

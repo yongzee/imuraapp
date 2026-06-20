@@ -1,0 +1,649 @@
+{% extends "products/base.html" %}
+{% load humanize %}
+{% block content %}
+<style>
+  /* ===== Modern Fashion Product Page ===== */
+  body {
+    background-color: #f5f5f7;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .product-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+    margin-bottom: 3rem;
+  }
+
+  /* Media Switcher Utilities */
+  .media-toggle-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .media-toggle-btn {
+    flex: 1;
+    border-radius: 30px;
+    font-weight: 700;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .carousel-item {
+    position: relative;
+  }
+
+  .carousel-item img,
+  .carousel-item video {
+    border-radius: 15px;
+    object-fit: cover;
+    max-height: 500px;
+    width: 100%;
+  }
+
+  .tryon-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(230, 57, 70, 0.85);
+    color: #fff;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    z-index: 10;
+  }
+
+  .carousel-indicators [data-bs-target] {
+    background-color: #e63946;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .product-info h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #222;
+  }
+
+  .product-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #e63946;
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    animation: pulseGrow 1s ease-out forwards;
+  }
+
+  @keyframes pulseGrow {
+    0% { transform: scale(0.8); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .product-original-price {
+    font-size: 1.2rem;
+    text-decoration: line-through;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkout-section {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  }
+
+  .checkout-section label { font-weight: 500; margin-bottom: 0.25rem; }
+  .checkout-section .form-control { border-radius: 12px; padding: 0.75rem 1rem; border: 1px solid #ddd; }
+
+  .buy-btn {
+    background: #e63946;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 0;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .buy-btn:hover {
+    background: #d62839;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(230,57,70,0.3);
+  }
+
+  .price-it-btn {
+    background: #f4a261;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 0;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .price-it-btn:hover {
+    background: #e76f51;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(231,111,81,0.3);
+  }
+
+  /* ===== Section Cards ===== */
+  .detail-card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:16px;
+    margin-top:16px;
+  }
+  .detail-card h5{
+    font-weight:800;
+    margin-bottom:10px;
+    color:#222;
+  }
+  .detail-divider{
+    height:1px;
+    background:#eee;
+    margin:10px 0 14px;
+  }
+
+  /* Information rows */
+  .info-rows{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .info-row{
+    display:grid;
+    grid-template-columns: 160px 1fr;
+    gap:10px;
+    align-items:center;
+  }
+  .info-label{
+    color:#6b6b6b;
+    font-weight:700;
+  }
+  .info-value{
+    color:#222;
+    font-weight:700;
+  }
+  .delivery-badge{
+    display:inline-block;
+    background:#21a652;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:800;
+  }
+
+  /* Seller details */
+  .seller-card{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .seller-avatar{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#eee;
+  }
+  .seller-meta{
+    flex:1;
+  }
+  .seller-meta .name{
+    font-weight:900;
+    color:#222;
+  }
+  .seller-meta .sub{
+    color:#7a7a7a;
+    font-size:0.95rem;
+  }
+  .seller-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+  }
+  .seller-actions a,
+  .seller-actions button{
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:800;
+  }
+
+  /* Sticky bottom buy bar spacer */
+  .page-buybar-spacer{ height:80px; }
+
+  .seller-avatar-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+    font-size: 26px;
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="product-container">
+    <div class="row g-4">
+      
+      <div class="col-md-6">
+        {% if images or videos %}
+          <div class="media-toggle-group">
+            <button type="button" id="showImagesBtn" class="btn btn-primary media-toggle-btn {% if not images %}d-none{% endif %}">
+              📸 Images ({{ images|length }})
+            </button>
+            <button type="button" id="showVideosBtn" class="btn btn-outline-primary media-toggle-btn {% if not videos %}d-none{% if images %}active{% endif %}{% endif %} {% if not images and videos %}btn-primary active{% endif %}">
+              🎥 Videos ({{ videos|length }})
+            </button>
+          </div>
+
+          {% if images %}
+          <div id="productImagesCarousel" class="carousel slide discrete-media-panel">
+            <div class="carousel-inner">
+              {% for image in images %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if product.enable_digital_tryon %}
+                  <div class="tryon-badge">Digital Try-On</div>
+                {% endif %}
+                <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.title }}">
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if images|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#productImagesCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#productImagesCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if videos %}
+          <div id="productVideosCarousel" class="carousel slide discrete-media-panel" style="{% if images %}display: none;{% endif %}">
+            <div class="carousel-inner">
+              {% for stream_item in videos %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if product.enable_digital_tryon %}
+                  <div class="tryon-badge">Digital Try-On</div>
+                {% endif %}
+                <video class="d-block w-100" controls autoplay muted playsinline preload="auto">
+                  <source src="{{ stream_item.video.url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if videos|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#productVideosCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#productVideosCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 product-info">
+        <h2>{{ product.title }}</h2>
+
+        {% if proposed_price %}
+          <p class="product-price">₦{{ proposed_price }} <small>(Proposed Price)</small></p>
+          <p class="product-original-price">₦{{ product.price }}</p>
+        {% else %}
+          <p class="product-price">₦{{ product.price }}</p>
+        {% endif %}
+
+        <div class="detail-card">
+          <h5>Description</h5>
+          <div class="detail-divider"></div>
+          <div style="color:#333; line-height:1.6;">
+            {{ product.description|linebreaks }}
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h5>Information</h5>
+          <div class="detail-divider"></div>
+
+          <div class="info-rows">
+            <div class="info-row">
+              <div class="info-label">Delivery</div>
+              <div class="info-value">
+                <span class="delivery-badge">
+                  {% if product.delivery_zones %}Delivery Available{% else %}Delivery Not Set{% endif %}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Category</div>
+              <div class="info-value">{{ product.category.name }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Condition</div>
+              <div class="info-value">{{ product.condition|default:"Not Applicable" }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Color</div>
+              <div class="info-value">{{ product.color|default:"Not Applicable" }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Brand</div>
+              <div class="info-value">{{ product.brand|default:"Not Applicable" }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Size</div>
+              <div class="info-value">{{ product.size_available|default:"Not Applicable" }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Shipping From</div>
+              <div class="info-value">{{ product.shipping_from|default:"Not Applicable" }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Delivery Zones</div>
+              <div class="info-value">{{ product.delivery_zones|default:"Not Applicable" }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <h5>Security advice for buyers</h5>
+          <div class="detail-divider"></div>
+
+          <ul style="color:#333; line-height:1.7; margin-bottom:0;">
+            <li>
+              <b>Pay online:</b> It’s more secure because the platform can help track your order and support disputes/refunds (where applicable). Keep all communication and payments within IMURA.
+            </li>
+            <li class="mt-2">
+              <b>In person/private payment:</b> Meet in a public and safe place during the day. Inspect the item before paying. Avoid paying deposits to unknown sellers. IMURA is not responsible for losses from off‑platform/private payments.
+            </li>
+            <li class="mt-2">
+              <b>Safety tips:</b> Never share your password/OTP. Beware of “urgent” requests, fake screenshots, and links asking you to login.
+            </li>
+          </ul>
+        </div>
+
+        <div class="detail-card">
+          <h5>Seller Details</h5>
+          <div class="detail-divider"></div>
+
+          <div class="seller-card">
+            {% if product.seller.profile.avatar %}
+              <img class="seller-avatar" src="{{ product.seller.profile.avatar.url }}" alt="{{ product.seller.username }}">
+            {% else %}
+              <div class="seller-avatar seller-avatar-icon" aria-label="{{ product.seller.username }}">
+                <i class="bi bi-person-fill"></i>
+              </div>
+            {% endif %}
+
+            <div class="seller-meta">
+              <div class="name">{{ product.seller.username }}</div>
+              <div class="sub">
+                <i class="bi bi-geo-alt"></i>
+                {{ product.seller.profile.location|default:product.shipping_from|default:"Location not set" }}
+                {% if product.seller.profile.phone %}
+                  · {{ product.seller.profile.phone }}
+                {% endif %}
+              </div>
+              <div class="sub mt-1">
+                Posted {{ product.created_at|naturaltime }}
+              </div>
+
+              <div class="seller-actions">
+                {% if product.seller.profile.phone %}
+                  <a class="btn btn-outline-secondary" href="tel:{{ product.seller.profile.phone }}">
+                    <i class="bi bi-telephone"></i>
+                  </a>
+                {% endif %}
+
+                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('messageText').focus();">
+                  <i class="bi bi-chat-dots"></i>
+                </button>
+
+                <a class="btn btn-outline-secondary flex-grow-1" href="{% url 'accounts:profile' product.seller.username %}">
+                  View Profile
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-buybar-spacer"></div>
+
+        <div class="checkout-section">
+          {% if user.is_authenticated %}
+            {% if product.seller != user %}
+              <a href="{% url 'orders:create' product.id %}{% if proposed_price %}?proposed_price={{ proposed_price }}{% endif %}" class="buy-btn d-block text-center">
+                🛒 Order Now
+              </a>
+            {% else %}
+              <button class="buy-btn d-block text-center btn-secondary" disabled>
+                🚫 You cannot order your own product
+              </button>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'account_login' %}" class="buy-btn d-block text-center">
+              🔐 Login to Order
+            </a>
+          {% endif %}
+        </div>
+
+        <button type="button" class="price-it-btn w-100 mt-2" id="priceItBtn">❓ Price It</button>
+
+        <div class="mt-3" id="priceItInputContainer" style="display:none;">
+          <input type="number" class="form-control mb-2" id="priceItInput" placeholder="Enter your suggested price">
+          <button type="button" class="btn btn-warning w-100" id="submitPriceIt">Submit Price</button>
+        </div>
+
+        <div class="mt-4">
+          <input type="text" class="form-control mb-2" id="messageText" placeholder="Write a short message to the seller...">
+          <button type="button" class="btn btn-primary w-100" id="sendMessageBtn">Send Message</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Basic Form actions
+    const priceItBtn = document.getElementById("priceItBtn");
+    const priceItInputContainer = document.getElementById("priceItInputContainer");
+    const submitPriceIt = document.getElementById("submitPriceIt");
+    const sendMessageBtn = document.getElementById("sendMessageBtn");
+
+    priceItBtn.addEventListener("click", () => {
+        priceItInputContainer.style.display =
+            priceItInputContainer.style.display === "none" ? "block" : "none";
+    });
+
+    submitPriceIt.addEventListener("click", () => {
+        const suggestedPrice = document.getElementById("priceItInput").value;
+        if(!suggestedPrice) { alert("Please enter a price"); return; }
+
+        const formData = new FormData();
+        formData.append("suggested_price", suggestedPrice);
+        formData.append("product_id", "{{ product.id }}");
+        formData.append("message", "");
+
+        fetch("{% url 'notifications:propose_price' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ok){
+                alert("Price suggestion sent!");
+                priceItInputContainer.style.display = "none";
+                document.getElementById("priceItInput").value = "";
+            }
+        });
+    });
+
+    sendMessageBtn.addEventListener("click", () => {
+        const message = document.getElementById("messageText").value;
+        if(!message){ alert("Please enter a message"); return; }
+
+        const formData = new FormData();
+        formData.append("recipient_id", "{{ product.seller.id }}");
+        formData.append("text", message);
+
+        fetch("{% url 'notifications:send_message' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ok){
+                alert("Message sent!");
+                document.getElementById("messageText").value = "";
+            }
+        });
+    });
+
+  // ====== DISCRETE MEDIA PANEL SWITCHER CONTROLS ======
+  const showImagesBtn = document.getElementById("showImagesBtn");
+  const showVideosBtn = document.getElementById("showVideosBtn");
+  const imagesCarousel = document.getElementById("productImagesCarousel");
+  const videosCarousel = document.getElementById("productVideosCarousel");
+  
+  let bsImagesInstance = null;
+  let bsVideosInstance = null;
+
+  // FIX: Added explicit initialization options and forced cycle driver execution
+  if (imagesCarousel) {
+    bsImagesInstance = new bootstrap.Carousel(imagesCarousel, {
+      interval: 5000, 
+      ride: "carousel",
+      wrap: true
+    });
+    
+    // Ensure the engine activates layout cycles if the target container panel element is visible
+    if(imagesCarousel.style.display !== "none") {
+      bsImagesInstance.cycle();
+    }
+  }
+
+  // Initialize Videos Carousel with internal automatic timing entirely disabled
+  if (videosCarousel) {
+    bsVideosInstance = new bootstrap.Carousel(videosCarousel, {
+      interval: false, 
+      wrap: true
+    });
+  }
+  
+  if(imagesCarousel && videosCarousel) {
+    const allVideos = videosCarousel.querySelectorAll("video");
+
+    showImagesBtn.addEventListener("click", () => {
+      showImagesBtn.className = "btn btn-primary media-toggle-btn";
+      showVideosBtn.className = "btn btn-outline-primary media-toggle-btn";
+      
+      imagesCarousel.style.display = "block";
+      videosCarousel.style.display = "none";
+      
+      allVideos.forEach(v => v.pause());
+      if (bsImagesInstance) bsImagesInstance.cycle();
+    });
+
+    showVideosBtn.addEventListener("click", () => {
+      showVideosBtn.className = "btn btn-primary media-toggle-btn active";
+      showImagesBtn.className = "btn btn-outline-primary media-toggle-btn";
+      
+      videosCarousel.style.display = "block";
+      imagesCarousel.style.display = "none";
+      
+      if (bsImagesInstance) bsImagesInstance.pause();
+
+      const currentActiveVid = videosCarousel.querySelector(".carousel-item.active video");
+      if (currentActiveVid) {
+        currentActiveVid.muted = true;
+        currentActiveVid.play().catch(()=>{});
+      }
+    });
+  }
+
+  // ====== EXCLUSIVE AUTOPLAY VIDEO CAROUSEL ENGINE CODE ======
+  if (videosCarousel && bsVideosInstance) {
+    const clips = videosCarousel.querySelectorAll("video");
+
+    // Dynamic Playback Driver: Advance slide layout only when active track completes playing
+    clips.forEach(c => {
+      c.addEventListener("ended", () => {
+        if (clips.length > 1) {
+          bsVideosInstance.next();
+        } else {
+          // If there's only one video total, loop it seamlessly
+          c.currentTime = 0;
+          c.play().catch(()=>{});
+        }
+      });
+    });
+
+    // Handle structural transitions inside the video carousel panels securely
+    videosCarousel.addEventListener("slid.bs.carousel", function (e) {
+      clips.forEach(c => {
+        if (c !== e.relatedTarget.querySelector("video")) {
+          c.pause();
+          c.currentTime = 0;
+        }
+      });
+
+      const nextVideo = e.relatedTarget.querySelector("video");
+      // Fire clip playback only if video wrapper tab view panel option is actively visible
+      if (nextVideo && videosCarousel.style.display !== "none") {
+        nextVideo.muted = true;
+        nextVideo.currentTime = 0;
+        nextVideo.play().catch(()=>{});
+      }
+    });
+
+    // Handle initial state setup for immediate payload execution on page load
+    const initialVideo = videosCarousel.querySelector(".carousel-item.active video");
+    if (initialVideo && videosCarousel.style.display !== "none") {
+      initialVideo.muted = true;
+      initialVideo.play().catch(()=>{});
+    }
+  }
+});
+</script>
+{% endblock %}

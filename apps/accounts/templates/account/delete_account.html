@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-danger">Delete Account</h3>
+  <p>Are you sure you want to delete your account? This action <b>cannot</b> be undone.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete my account</button>
+    <a href="{% url 'settings' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

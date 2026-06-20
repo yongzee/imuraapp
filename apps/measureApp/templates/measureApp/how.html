@@ -1,0 +1,82 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block content %}
+  <style>
+    body {
+      background-color: #2e2e2e;
+      color: #f8f9fa;
+    }
+    .card {
+      background-color: #3a3a3a;
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      color: #f8f9fa;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    .card-img-top {
+      height: 250px;
+      object-fit: cover;
+      border-bottom: 1px solid #444;
+    }
+    h2, .card-title {
+      color: #ffffff;
+    }
+    .text-muted {
+      color: #cccccc !important;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    .btn-secondary {
+      background-color: #6c757d;
+      border: none;
+    }
+    .btn-secondary:hover {
+      background-color: #565e64;
+    }
+  </style>
+
+  <div class="container py-5">
+    <h2 class="text-center mb-4 fw-bold">Choose a Method</h2>
+    <p class="text-center text-muted mb-5">Follow the instructions for best results</p>
+
+    <div class="row g-4">
+
+      <!-- Camera Capture Card -->
+      <div class="col-md-6">
+        <div class="card h-100 shadow">
+          <img src="{% static 'images/pik.png' %}" class="card-img-top" alt="Camera Guide">
+          <div class="card-body">
+            <h5 class="card-title">Use Your Camera</h5>
+            <p class="card-text">Stand upright, face the camera, ensure full-body visibility, and use a plain background.</p>
+            <div class="d-grid">
+              <a href="{% url 'measureApp:height'%}" class="btn btn-primary">Open Camera</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Upload Card -->
+      <div class="col-md-6">
+        <div class="card h-100 shadow">
+          <img src="{% static 'images/pik1.png' %}" class="card-img-top" alt="Upload Guide">
+          <div class="card-body">
+            <h5 class="card-title">Upload an Image</h5>
+            <p class="card-text">Choose a clear, well-lit, full-body photo taken from the front with no obstructions.</p>
+            <div class="d-grid">
+              <a href="{% url 'measureApp:upload_image' %}" class="btn btn-secondary">Upload Image</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock content %}

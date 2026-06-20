@@ -1,0 +1,125 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="fw-bold">📦 Track Your Order</h3>
+
+  {% if order.is_paid %}
+  <div class="alert alert-danger text-center fw-bold" id="timer">
+    ⏳ Waiting for seller delivery timeline...
+  </div>
+  {% endif %}
+
+  <div class="card p-4 shadow-sm mt-3">
+    <p><strong>Product:</strong> {{ order.product_title }}</p>
+    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+
+    <hr>
+
+    {% if order.status == "paid" %}
+      <div class="alert alert-info">
+        💳 Payment confirmed. Seller is preparing your order.
+      </div>
+
+    {% elif order.status == "in_transit" %}
+      <div class="alert alert-warning">
+        🚚 Your order is on the way
+      </div>
+
+      <p><strong>Delivery Instructions:</strong></p>
+      <p>{{ order.delivery_note }}</p>
+
+      <p><strong>Delivery Contact:</strong></p>
+      <p>{{ order.delivery_contact }}</p>
+
+      <form method="post" class="mt-3">
+        {% csrf_token %}
+
+        <button name="confirm_delivery" class="btn btn-success w-100 mb-2">
+          ✅ I Have Received My Order
+        </button>
+
+        <button name="order_not_received" class="btn btn-outline-danger w-100">
+          ❌ I Have NOT Received This Order
+        </button>
+      </form>
+
+    {% elif order.status == "delivered" %}
+      <div class="alert alert-success">
+        ✅ Order delivered successfully
+      </div>
+    {% endif %}
+
+    {% if order.extension_status == "pending" %}
+      <div class="alert alert-warning mt-3">
+        ⏳ Seller requested <b>{{ order.extension_requested_days }} extra day(s)</b> to deliver.
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <button name="approve_extension" class="btn btn-success w-100 mb-2">
+          ✅ Approve Extension
+        </button>
+        <button name="reject_extension" class="btn btn-danger w-100">
+          ❌ Reject Extension
+        </button>
+      </form>
+    {% endif %}
+
+    <!-- REFUND FORM -->
+    {% if order.status == "cancelled" and order.is_paid %}
+      <hr>
+      <h6 class="fw-bold text-danger">💸 Request Refund</h6>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-2">
+          <label>Bank Name</label>
+          <input name="bank_name" class="form-control" required>
+        </div>
+
+        <div class="mb-2">
+          <label>Account Number</label>
+          <input name="account_number" class="form-control" required>
+        </div>
+
+        <button name="request_refund" class="btn btn-danger w-100 mt-2">
+          Request Refund
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if order.is_paid and order.paid_at and order.days_to_deliver %}
+<script>
+  const paidAt = new Date("{{ order.paid_at|date:'c' }}").getTime();
+  const allowedDays = Number("{{ order.days_to_deliver }}");
+  const timerEl = document.getElementById("timer");
+
+  const deadline = paidAt + (allowedDays * 24 * 60 * 60 * 1000);
+
+  function updateTimer() {
+    const diff = deadline - Date.now();
+
+    if (diff <= 0) {
+      timerEl.innerHTML = "⏰ Delivery deadline exceeded!";
+      timerEl.classList.replace("alert-danger", "alert-warning");
+      return;
+    }
+
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff / (1000*60*60)) % 24);
+    const m = Math.floor((diff / (1000*60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    timerEl.innerHTML = `⏳ ${d}d ${h}h ${m}m ${s}s remaining`;
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "account/base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+          
+          <h2 class="text-center mb-4 fw-bold text-primary">
+            Join Imura FashionHub
+          </h2>
+          <p class="text-center text-muted mb-4">
+            Create your account to explore the marketplace, measurement tools, and try-on features.
+          </p>
+
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <!-- Signup Form -->
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+              <div class="mb-3">
+                <label class="form-label fw-semibold">{{ field.label }}</label>
+                {{ field|add_class:"form-control form-control-lg" }}
+                
+                {% if field.help_text %}
+                  <div class="form-text text-muted small">
+                    {{ field.help_text }}
+                  </div>
+                {% endif %}
+
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ field.errors|join:", " }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">
+              <i class="bi bi-person-plus"></i> Sign Up
+            </button>
+          </form>
+
+          <div class="mt-4 text-center">
+            <small class="text-muted">Already have an account?</small>
+            <a href="{% url 'account_login' %}" class="fw-semibold text-decoration-none">
+              Login here
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

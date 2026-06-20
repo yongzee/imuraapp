@@ -1,0 +1,423 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+{% load static %}
+<style>
+/* ===== Layout ===== */
+.market-container {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Desktop sidebar */
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar items */
+.sidebar .list-group-item {
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .list-group-item.active,
+.sidebar .list-group-item:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Card styling */
+.card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+.card-img-top {
+  height: 160px;
+  object-fit: cover;
+}
+
+/* Buttons */
+.icon-btn {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 50%;
+  font-size: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+.icon-btn:hover {
+  background: #0b5ed7;
+  color: #fff;
+}
+
+/* Search Bar */
+#searchBar {
+  width: 300px;
+  transition: all 0.3s ease;
+}
+#searchBar input {
+  border-radius: 50px;
+  padding: 5px 15px;
+  width: 100%;
+}
+
+/* Collapsed search icon for mobile */
+#searchToggle {
+  display: none;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+/* Sidebar toggle button (mobile only) */
+#sidebarToggle {
+  display: none;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+/* Sidebar overlay for mobile */
+@media (max-width: 768px) {
+  .market-container {
+    flex-direction: column;
+  }
+
+  #sidebarToggle,
+  #searchToggle {
+    display: inline-flex;
+    margin-left: 4px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 220px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    padding: 1rem;
+    display: none;
+    z-index: 1050;
+  }
+  .sidebar.show {
+    display: block;
+  }
+
+  #searchBar {
+    display: none;
+    width: 150px;
+  }
+
+  /* Icons container on mobile: single line */
+  .header-icons {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .header-icons .icon-btn {
+    padding: 6px 8px;
+    font-size: 16px;
+  }
+}
+
+/* Floating Stream Button */
+.floating-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #0d6efd;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 50px;
+  font-weight: bold;
+  box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+  text-decoration: none;
+  transition: background 0.3s ease;
+  z-index: 1050;
+}
+.floating-btn:hover {
+  background: #0b5ed7;
+  color: #fff;
+}
+
+/* TRY-ON BUTTON OVERLAY */
+.tryon-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255, 193, 7, 0.85);
+  color: #000;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 10;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+.tryon-btn:hover {
+  background: rgba(255, 193, 7, 1);
+  color: #000;
+}
+
+{% if not request.user.is_authenticated %}
+.product-grid {
+  opacity: 0.7;
+}
+{% endif %}
+
+/* ===== Splash Screen ===== */
+#splashScreen{
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  opacity: 1;
+  transition: opacity .45s ease;
+}
+
+#splashScreen img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* ✅ fills entire screen */
+  border-radius: 0;    /* ✅ no rounded corners */
+}
+
+#splashScreen.hide{
+  opacity: 0;
+  pointer-events: none;
+}
+
+</style>
+
+<div class="container mt-4">
+
+ 
+
+<div id="splashScreen" aria-hidden="true">
+  <img src="{% static 'img/imura_front.png' %}" alt="IMURA Fashion Hub">
+</div>
+  <!-- ===== HEADER ===== -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+  <button id="sidebarToggle"><i class="bi bi-filter"></i></button>
+
+  <!-- Centered title -->
+  <h3 class="fw-bold text-center flex-grow-1 mb-0">🛍 Marketplace</h3>
+
+  <!-- Desktop centered search -->
+  <div id="searchBar" class="mx-auto">
+    <form method="GET" class="d-flex align-items-center">
+      <input type="text" name="q" class="form-control form-control-sm me-2"
+             placeholder="Search products...">
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-search"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- Mobile icon -->
+  <button id="searchToggle"><i class="bi bi-search"></i></button>
+</div>
+
+  <div class="market-container">
+    <!-- Sidebar -->
+    <div class="sidebar shadow-sm" id="sidebar">
+      <div class="list-group">
+        <a href="{% url 'products:product_list' %}" 
+           class="list-group-item {% if not request.GET.category %}active{% endif %}">All</a>
+        <a href="?category=male"
+           class="list-group-item {% if request.GET.category == 'male' %}active{% endif %}">Male</a>
+        <a href="?category=female"
+           class="list-group-item {% if request.GET.category == 'female' %}active{% endif %}">Female</a>
+      </div>
+
+      <!-- Filters -->
+      <div class="mt-4 p-3 bg-light rounded shadow-sm">
+        <h6 class="fw-bold mb-2">Filters</h6>
+        <form method="GET">
+          <div class="mb-2">
+            <input type="number" name="min_price" placeholder="Min ₦" class="form-control form-control-sm">
+          </div>
+          <div class="mb-2">
+            <input type="number" name="max_price" placeholder="Max ₦" class="form-control form-control-sm">
+          </div>
+          <button class="btn btn-primary btn-sm w-100">Apply</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main Product Grid -->
+    <div class="flex-grow-1">
+      <div class="product-grid">
+        {% for product in products %}
+          <div class="card shadow-sm">
+            {% if product.images.all %}
+            <div id="carousel{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
+              
+              <!-- TRY-ON BUTTON -->
+              {% if product.enable_digital_tryon %}
+                {% if request.user.is_authenticated %}
+                <a href="#" class="tryon-btn" onclick="handleTryonClick(event)">Try-On</a>
+                {% else %}
+                <a href="#" class="tryon-btn" onclick="requireLogin(event)">Try-On</a>
+                {% endif %}
+
+              {% else %}
+                <a href="#" class="tryon-btn disabled" onclick="handleUnavailableTryon(event)">Try‑On</a>
+              {% endif %}
+              <div class="carousel-inner">
+                {% for img in product.images.all %}
+                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'products:product_detail' product.pk %}">
+                    {% else %}
+                    <a href="#" onclick="requireLogin(event)">
+                    {% endif %}
+
+                      <img src="{{ img.image.url }}" class="d-block w-100 card-img-top" alt="{{ product.title }}">
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="carousel-indicators">
+                {% for img in product.images.all %}
+                  <button type="button" data-bs-target="#carousel{{ product.id }}" data-bs-slide-to="{{ forloop.counter0 }}"
+                          {% if forloop.first %}class="active"{% endif %}></button>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <h6 class="fw-semibold text-truncate">{{ product.title }}</h6>
+              <p class="text-success fw-bold mb-1">₦{{ product.price }}</p>
+              <small class="text-muted">By {{ product.seller.username }}</small>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-muted">No products yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Stream Button -->
+{% if request.user.is_authenticated %}
+<a href="{% url 'streaming:product_stream' %}" class="floating-btn">Stream</a>
+{% else %}
+<a href="#" class="floating-btn" onclick="requireLogin(event)">Stream</a>
+{% endif %}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-cycle all carousels
+  document.querySelectorAll('.carousel').forEach(function(carousel){
+    new bootstrap.Carousel(carousel, { interval: 3000, ride: 'carousel' });
+  });
+
+  // Sidebar toggle for mobile
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  toggleBtn.addEventListener('click', function() {
+    sidebar.classList.toggle('show');
+  });
+
+  // Search toggle for mobile
+  const searchToggle = document.getElementById('searchToggle');
+  const searchBar = document.getElementById('searchBar');
+  searchToggle.addEventListener('click', function() {
+    searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
+  });
+});
+
+
+  function handleTryonClick(event) {
+    event.preventDefault();
+    // Right now, maybe it's still in test mode
+    alert('Digital Try‑On is available for this product!');
+  }
+
+  function handleUnavailableTryon(event) {
+    event.preventDefault();
+    alert('Digital Try‑On is not available for this product yet.');
+  }
+
+function requireLogin(event) {
+  event.preventDefault();
+
+  if(confirm("Please login to access products and streaming.")) {
+    window.location.href = "{% url 'account_login' %}";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const splash = document.getElementById("splashScreen");
+  if (!splash) return;
+
+  // Show only once per tab session (optional)
+  const key = "imuraSplashShown";
+  if (sessionStorage.getItem(key) === "1") {
+    splash.remove();
+    return;
+  }
+  sessionStorage.setItem(key, "1");
+
+  // Prevent scrolling while splash is visible
+  const prevOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+
+  setTimeout(() => {
+    splash.classList.add("hide");
+
+    // Remove node after fade
+    setTimeout(() => {
+      splash.remove();
+      document.body.style.overflow = prevOverflow || "";
+    }, 500);
+  }, 5000);
+});
+</script>
+{% endblock %}

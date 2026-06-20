@@ -1,0 +1,45 @@
+{% extends "products/base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="col-md-8 mx-auto">
+
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-header bg-dark text-white text-center">
+        <h4>✏️ Edit Product</h4>
+      </div>
+
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="mb-3">
+              {{ field.label_tag }}
+              {{ field|add_class:"form-control" }}
+              {% if field.errors %}
+                <small class="text-danger">{{ field.errors }}</small>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ product.get_absolute_url }}"
+               class="btn btn-outline-secondary">
+              Cancel
+            </a>
+
+            <button class="btn btn-dark px-4">
+              💾 Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

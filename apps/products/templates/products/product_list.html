@@ -1,0 +1,375 @@
+{% extends "products/base.html" %}
+{% block content %}
+<style>
+/* ===== Layout ===== */
+.market-container {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Desktop sidebar */
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar items */
+.sidebar .list-group-item {
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .list-group-item.active,
+.sidebar .list-group-item:hover {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Card styling */
+.card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+.card-img-top {
+  height: 160px;
+  object-fit: cover;
+}
+
+/* Buttons */
+.icon-btn {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 50%;
+  font-size: 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+.icon-btn:hover {
+  background: #0b5ed7;
+  color: #fff;
+}
+
+/* Search Bar */
+#searchBar {
+  width: 300px;
+  transition: all 0.3s ease;
+}
+#searchBar input {
+  border-radius: 50px;
+  padding: 5px 15px;
+  width: 100%;
+}
+
+/* Collapsed search icon for mobile */
+#searchToggle {
+  display: none;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+/* Sidebar toggle button (mobile only) */
+#sidebarToggle {
+  display: none;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+/* Sidebar overlay for mobile */
+@media (max-width: 768px) {
+  .market-container {
+    flex-direction: column;
+  }
+
+  #sidebarToggle,
+  #searchToggle {
+    display: inline-flex;
+    margin-left: 4px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 220px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    padding: 1rem;
+    display: none;
+    z-index: 1050;
+  }
+  .sidebar.show {
+    display: block;
+  }
+
+  #searchBar {
+    display: none;
+    width: 150px;
+  }
+
+  /* Icons container on mobile: single line */
+  .header-icons {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .header-icons .icon-btn {
+    padding: 6px 8px;
+    font-size: 16px;
+  }
+}
+
+/* ===== FLOATING ACTION BUTTONS ===== */
+
+/* Base Floating Style */
+.floating-btn-group {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Spaces them apart vertically */
+  z-index: 1050;
+}
+
+.floating-action-btn {
+  padding: 14px 20px;
+  border-radius: 50px;
+  font-weight: bold;
+  box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.3s ease;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.floating-action-btn:hover {
+  transform: translateY(-3px);
+}
+
+/* Stream Button Specifics */
+.stream-btn {
+  background: #0d6efd;
+  color: #fff;
+}
+.stream-btn:hover {
+  background: #0b5ed7;
+  color: #fff;
+}
+
+/* WhatsApp Help Button Specifics */
+.whatsapp-help-btn {
+  background: #25D366;
+  color: #fff;
+}
+.whatsapp-help-btn:hover {
+  background: #20ba56;
+  color: #fff;
+}
+
+/* TRY-ON BUTTON OVERLAY */
+.tryon-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255, 193, 7, 0.85);
+  color: #000;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 10;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+.tryon-btn:hover {
+  background: rgba(255, 193, 7, 1);
+  color: #000;
+}
+</style>
+
+<div class="container mt-4">
+  <!-- ===== HEADER ===== -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+  <button id="sidebarToggle"><i class="bi bi-filter"></i></button>
+
+  <!-- Centered title -->
+  <h3 class="fw-bold text-center flex-grow-1 mb-0">🛍 Marketplace</h3>
+
+  <!-- Desktop centered search -->
+  <div id="searchBar" class="mx-auto">
+    <form method="GET" class="d-flex align-items-center">
+      <input type="text" name="q" class="form-control form-control-sm me-2"
+             placeholder="Search products...">
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-search"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- Mobile icon -->
+  <button id="searchToggle"><i class="bi bi-search"></i></button>
+</div>
+
+  <div class="market-container">
+    <!-- Sidebar -->
+    <div class="sidebar shadow-sm" id="sidebar">
+      <div class="list-group">
+        <a href="{% url 'products:product_list' %}" 
+           class="list-group-item {% if not request.GET.category %}active{% endif %}">All</a>
+        <a href="?category=male"
+           class="list-group-item {% if request.GET.category == 'male' %}active{% endif %}">Male</a>
+        <a href="?category=female"
+           class="list-group-item {% if request.GET.category == 'female' %}active{% endif %}">Female</a>
+      </div>
+
+      <!-- Filters -->
+      <div class="mt-4 p-3 bg-light rounded shadow-sm">
+        <h6 class="fw-bold mb-2">Filters</h6>
+        <form method="GET">
+          <div class="mb-2">
+            <input type="number" name="min_price" placeholder="Min ₦" class="form-control form-control-sm">
+          </div>
+          <div class="mb-2">
+            <input type="number" name="max_price" placeholder="Max ₦" class="form-control form-control-sm">
+          </div>
+          <button class="btn btn-primary btn-sm w-100">Apply</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main Product Grid -->
+    <div class="flex-grow-1">
+      <div class="product-grid">
+        {% for product in products %}
+          <div class="card shadow-sm">
+            {% if product.images.all %}
+            <div id="carousel{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
+              
+              <!-- TRY-ON BUTTON -->
+              {% if product.enable_digital_tryon %}
+                <a href="#" class="tryon-btn" onclick="handleTryonClick(event)">Try‑On</a>
+              {% else %}
+                <a href="#" class="tryon-btn disabled" onclick="handleUnavailableTryon(event)">Try‑On</a>
+              {% endif %}
+              <div class="carousel-inner">
+                {% for img in product.images.all %}
+                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="{% url 'products:product_detail' product.pk %}">
+                      <img src="{{ img.image.url }}" class="d-block w-100 card-img-top" alt="{{ product.title }}">
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="carousel-indicators">
+                {% for img in product.images.all %}
+                  <button type="button" data-bs-target="#carousel{{ product.id }}" data-bs-slide-to="{{ forloop.counter0 }}"
+                          {% if forloop.first %}class="active"{% endif %}></button>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <h6 class="fw-semibold text-truncate">{{ product.title }}</h6>
+              <p class="text-success fw-bold mb-1">₦{{ product.price }}</p>
+              <small class="text-muted">By {{ product.seller.username }}</small>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-muted">No products yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Button Stack -->
+<div class="floating-btn-group">
+  <!-- WhatsApp Help & Enquiries Button -->
+  <a href="https://chat.whatsapp.com/JEPZ167WXa37GQUwkkAvip" 
+     target="_blank" 
+     class="floating-action-btn whatsapp-help-btn">
+    <i class="bi bi-whatsapp"></i>
+  </a>
+
+  <!-- Stream Button -->
+  <a href="{% url 'streaming:product_stream' %}" class="floating-action-btn stream-btn">Stream</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-cycle all carousels
+  document.querySelectorAll('.carousel').forEach(function(carousel){
+    new bootstrap.Carousel(carousel, { interval: 3000, ride: 'carousel' });
+  });
+
+  // Sidebar toggle for mobile
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  if(toggleBtn && sidebar) {
+    toggleBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('show');
+    });
+  }
+
+  // Search toggle for mobile
+  const searchToggle = document.getElementById('searchToggle');
+  const searchBar = document.getElementById('searchBar');
+  if(searchToggle && searchBar) {
+    searchToggle.addEventListener('click', function() {
+      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
+    });
+  }
+});
+
+
+  function handleTryonClick(event) {
+    event.preventDefault();
+    alert('Digital Try‑On is available for this product!');
+  }
+
+  function handleUnavailableTryon(event) {
+    event.preventDefault();
+    alert('Digital Try‑On is not available for this product yet.');
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "products/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+  body {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+  }
+
+  .card {
+    background-color: #2a2a2a;
+    color: #f1f1f1;
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .video-placeholder {
+    height: 300px;
+    background-color: #3a3a3a !important;
+    color: #ccc;
+  }
+
+  .btn-dark, .btn-light {
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .btn-dark a, .btn-light a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .btn-dark:hover, .btn-light:hover {
+    opacity: 0.9;
+  }
+
+  .section-title {
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .lead {
+    color: #cccccc;
+  }
+
+  .fa-solid {
+    color: #ffc107;
+  }
+
+  .bg-dark {
+    background-color: #111 !important;
+  }
+</style>
+
+<!-- Hero Section -->
+<section class="text-center py-5">
+  <div class="container">
+    <h1 class="display-5 fw-semibold section-title">Measure your body in seconds.</h1>
+    <p class="lead">Use your camera. Simple, fast.</p>
+    <a href="{% url 'measureApp:howitworks' %}"  class="btn btn-dark mt-3">Start Measurement</a>
+  </div>
+</section>
+
+<!-- Camera Video Section -->
+<section class="container mb-5 text-center">
+  <video class="border border-secondary rounded w-100" autoplay muted loop playsinline>
+    <source src="{% static 'video/vid1.mp4' %}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</section>
+
+
+<!-- Feature Cards -->
+<section class="container mb-5">
+  <div class="row text-center g-4">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fa-solid fa-camera fa-2x mb-3"></i>
+          <h5 class="card-title">No special equipment</h5>
+          <p class="card-text">All you need is your device’s camera.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fa-solid fa-ruler-combined fa-2x mb-3"></i>
+          <h5 class="card-title">Precise & Smart</h5>
+          <p class="card-text">AI measures your body accurately in seconds.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <i class="fa-solid fa-bolt fa-2x mb-3"></i>
+          <h5 class="card-title">Instant results</h5>
+          <p class="card-text">Measurements appear instantly after capture.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-dark text-white text-center py-5">
+  <div class="container">
+    <p class="lead mb-3">Ready to measure?</p>
+    <a href="{% url 'measureApp:howitworks' %}" class="btn btn-light">Start Now</a>
+  </div>
+</section>
+
+{% endblock content %}
