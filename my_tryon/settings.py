@@ -151,7 +151,7 @@ WSGI_APPLICATION = "my_tryon.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="postgresql://postgres:Labrosky123@@db.zwoospuoqaimysbvbmvv.supabase.co:5432/postgres",
+        default="postgresql://postgres.zwoospuoqaimysbvbmvv:Labrosky123@@aws-1-eu-west-1.pooler.supabase.com:5432/postgres",
         ssl_require=True
     )
 }
