@@ -74,9 +74,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware"
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -153,7 +152,6 @@ WSGI_APPLICATION = "my_tryon.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default="postgresql://postgres:Labrosky123@@db.zwoospuoqaimysbvbmvv.supabase.co:5432/postgres",
-        conn_max_age=600,
         ssl_require=True
     )
 }
@@ -213,8 +211,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 #MEDIA_URL = "/media/"
