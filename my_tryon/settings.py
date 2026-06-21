@@ -107,7 +107,8 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_ON_GET = True  # logout immediately without confirmation
 
 # Zoho SMTP settings
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Temporary toggle to see if SMTP is the bottleneck
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = "smtp.zoho.com"
 
 # 👇 Using Port 465 with SSL is significantly more stable in production environments
