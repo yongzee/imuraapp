@@ -41,10 +41,6 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     
-    # add this
-    "cloudinary",
-    "cloudinary_storage",
-    
     
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -52,6 +48,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
 
+    # add this
+    "cloudinary",
+    "cloudinary_storage",
+    
     
      # Local apps
     "apps.core",
