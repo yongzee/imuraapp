@@ -237,3 +237,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
+
+# 👇 Allow your production domain to securely submit POST forms
+CSRF_TRUSTED_ORIGINS = [
+    "https://imurafh.onrender.com",
+]
