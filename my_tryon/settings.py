@@ -109,18 +109,18 @@ ACCOUNT_LOGOUT_ON_GET = True  # logout immediately without confirmation
 # Zoho SMTP settings
 # Temporary toggle to see if SMTP is the bottleneck
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = "smtp.zoho.com"
+#EMAIL_HOST = "smtp.zoho.com"
 
 # 👇 Using Port 465 with SSL is significantly more stable in production environments
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
+#EMAIL_PORT = 465
+#EMAIL_USE_SSL = True
+#EMAIL_USE_TLS = False
 
-EMAIL_HOST_USER = "679store@zohomail.com"
-DEFAULT_FROM_EMAIL = "679store@zohomail.com"
+#EMAIL_HOST_USER = "679store@zohomail.com"
+#DEFAULT_FROM_EMAIL = "679store@zohomail.com"
 
 # 👇 Fetch the password securely from Render's configuration dashboard
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+#EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
 
