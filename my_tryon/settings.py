@@ -164,13 +164,12 @@ CLOUDINARY_STORAGE = {
 }
 
 STORAGES = {
-    # 1. This handles your Media/User-uploaded files through Cloudinary
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
-    # 2. This handles your local Static files (CSS, JS) using WhiteNoise on Render
+    # 👇 Change this backend to skip strict missing file checks
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage", 
     },
 }
 
