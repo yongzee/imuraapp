@@ -163,7 +163,16 @@ CLOUDINARY_STORAGE = {
     "RESOURCE_TYPE": "auto",
 }
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+STORAGES = {
+    # 1. This handles your Media/User-uploaded files through Cloudinary
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    # 2. This handles your local Static files (CSS, JS) using WhiteNoise on Render
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
 
@@ -212,11 +221,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 #MEDIA_URL = "/media/"
