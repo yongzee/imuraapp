@@ -30,7 +30,7 @@ PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 SECRET_KEY = "django-insecure-!#b@-1x5o*qw-v3yi_mstr4$$flpe$p(rwpi=%4n5z!oki-jld"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
