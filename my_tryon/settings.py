@@ -106,21 +106,22 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_ON_GET = True  # logout immediately without confirmation
 
-
 # Zoho SMTP settings
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#ACCOUNT_EMAIL_VERIFICATION = "optional"
-#ACCOUNT_EMAIL_REQUIRED = True
-#ACCOUNT_AUTHENTICATION_METHOD = "username_email"
-#ACCOUNT_USERNAME_REQUIRED = True
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.zoho.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+
+# 👇 Using Port 465 with SSL is significantly more stable in production environments
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False
+
 EMAIL_HOST_USER = "679store@zohomail.com"
-EMAIL_HOST_PASSWORD = "g3t0N6KH1i0A"   # your Zoho App Password
 DEFAULT_FROM_EMAIL = "679store@zohomail.com"
+
+# 👇 Fetch the password securely from Render's configuration dashboard
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+
 
 ROOT_URLCONF = "my_tryon.urls"
 
