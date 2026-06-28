@@ -37,41 +37,37 @@
       background: #000;
     }
 
-    /* ===== VIEWFINDER ===== */
     #viewfinder {
       position: absolute;
       inset: 0;
       overflow: hidden;
     }
 
-    /* ===== VIDEO (fills entire screen) ===== */
     #video {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      transform: translate(-50%, -50%) scaleX(-1);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
     }
 
-    /* ===== VIGNETTE (dark border around silhouette) ===== */
+    /* ===== VIGNETTE ===== */
     #vignette {
       position: absolute;
       inset: 0;
       background: radial-gradient(
-        ellipse 40% 75% at 50% 50%,
+        ellipse 50% 80% at 50% 50%,
         transparent 0%,
-        transparent 55%,
-        rgba(0, 0, 0, 0.45) 75%,
-        rgba(0, 0, 0, 0.7) 100%
+        transparent 70%,
+        rgba(0, 0, 0, 0.2) 90%,
+        rgba(0, 0, 0, 0.4) 100%
       );
       z-index: 2;
       pointer-events: none;
     }
 
-    /* ===== SILHOUETTE CONTAINER (centered frame) ===== */
+    /* ===== SILHOUETTE CONTAINER ===== */
     #silhouette-container {
       position: absolute;
       inset: 0;
@@ -82,7 +78,6 @@
       pointer-events: none;
     }
 
-    /* ===== SILHOUETTE IMAGE ===== */
     #overlay {
       max-height: 72vh;
       max-width: 40vw;
@@ -97,12 +92,20 @@
       transition: opacity 0.4s ease;
     }
 
-    /* When silhouette is active, make it glow */
     #overlay.active {
       opacity: 0.8;
       filter:
         drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))
         drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+    }
+
+    @keyframes silhouettePulse {
+      0%, 100% { opacity: 0.65; }
+      50% { opacity: 0.85; }
+    }
+
+    #overlay.pulsing {
+      animation: silhouettePulse 2s ease-in-out infinite;
     }
 
     /* ===== GUIDELINE TEXT BUBBLE ===== */
@@ -113,6 +116,7 @@
       transform: translateX(-50%);
       background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
       padding: 8px 20px;
       border-radius: 20px;
@@ -124,7 +128,7 @@
       transition: opacity 0.3s ease;
     }
 
-    /* ===== UI OVERLAY ===== */
+    /* ===== UI OVERLAYS ===== */
     .ui-overlay {
       position: absolute;
       left: 0;
@@ -139,7 +143,7 @@
 
     .ui-top {
       top: 0;
-      padding: 20px 20px 40px;
+      padding: 24px 20px 40px;
       background: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.85) 0%,
@@ -159,33 +163,36 @@
       );
     }
 
-    /* ===== HEADER ===== */
     .header-row {
+      width: 100%;
+      max-width: 600px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
     }
 
-    .back-btn {
+    .back-btn, #switchCameraBtn {
       pointer-events: auto;
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
       border: none;
       color: #fff;
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
       cursor: pointer;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       transition: background 0.2s ease;
     }
 
-    .back-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
+    .back-btn { font-size: 20px; }
+
+    .back-btn:hover, #switchCameraBtn:hover {
+      background: rgba(255, 255, 255, 0.35);
     }
 
     h2 {
@@ -221,12 +228,12 @@
       background: #fff;
     }
 
-    /* ===== STATUS TEXT ===== */
     #status {
       color: #e0e0e0;
       font-size: 15px;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
       padding: 0 15px;
+      margin-top: 8px;
       line-height: 1.4;
     }
 
@@ -401,147 +408,45 @@
       border-radius: 0 0 4px 0;
     }
 
-    /* ===== PULSE ANIMATION ON SILHOUETTE ===== */
-    @keyframes silhouettePulse {
-      0%, 100% { opacity: 0.65; }
-      50% { opacity: 0.85; }
-    }
-
-    #overlay.pulsing {
-      animation: silhouettePulse 2s ease-in-out infinite;
-    }
-
-    /* ===== RESPONSIVE ===== */
+    /* ===== RESPONSIVE MEDIA QUERIES ===== */
     @media (max-width: 768px) {
-      h2 {
-        font-size: 20px;
-      }
-
-      #status {
-        font-size: 14px;
-      }
-
-      #captureBtn {
-        width: 68px;
-        height: 68px;
-      }
-
-      .ui-top {
-        padding: 15px 15px 35px;
-      }
-
-      .ui-bottom {
-        padding: 35px 15px 25px;
-      }
-
-      /* Silhouette bigger on tablets */
-      #overlay {
-        max-height: 70vh;
-        max-width: 50vw;
-      }
-
-      .guide-bubble {
-        font-size: 13px;
-        bottom: 20vh;
-      }
-
-      .corner-guide.top-left,
-      .corner-guide.top-right {
-        top: 10vh;
-      }
-
-      .corner-guide.bottom-left,
-      .corner-guide.bottom-right {
-        bottom: 10vh;
-      }
-
-      .corner-guide.top-left,
-      .corner-guide.bottom-left {
-        left: calc(50% - 25vw);
-      }
-
-      .corner-guide.top-right,
-      .corner-guide.bottom-right {
-        right: calc(50% - 25vw);
-      }
+      h2 { font-size: 20px; }
+      #status { font-size: 14px; }
+      #captureBtn { width: 68px; height: 68px; }
+      #overlay { max-height: 70vh; max-width: 50vw; }
+      .guide-bubble { font-size: 13px; bottom: 20vh; }
+      .corner-guide.top-left, .corner-guide.top-right { top: 10vh; }
+      .corner-guide.bottom-left, .corner-guide.bottom-right { bottom: 10vh; }
+      .corner-guide.top-left, .corner-guide.bottom-left { left: calc(50% - 25vw); }
+      .corner-guide.top-right, .corner-guide.bottom-right { right: calc(50% - 25vw); }
     }
 
     @media (max-width: 480px) {
-      h2 {
-        font-size: 18px;
-      }
-
-      #status {
-        font-size: 13px;
-      }
-
-      #captureBtn {
-        width: 62px;
-        height: 62px;
-      }
-
-      .back-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
-      }
-
-      /* Silhouette fills more of mobile screen */
-      #overlay {
-        max-height: 65vh;
-        max-width: 60vw;
-      }
-
-      .guide-bubble {
-        font-size: 12px;
-        padding: 6px 14px;
-        bottom: 18vh;
-      }
-
-      .corner-guide {
-        width: 24px;
-        height: 24px;
-      }
+      h2 { font-size: 18px; }
+      #status { font-size: 13px; }
+      #captureBtn { width: 62px; height: 62px; }
+      .back-btn, #switchCameraBtn { width: 38px; height: 38px; }
+      #overlay { max-height: 65vh; max-width: 60vw; }
+      .guide-bubble { font-size: 12px; padding: 6px 14px; bottom: 18vh; }
+      .corner-guide { width: 24px; height: 24px; }
     }
 
     @media (max-height: 500px) {
-      .ui-top {
-        padding: 8px 12px 20px;
-      }
-
-      .ui-bottom {
-        padding: 20px 12px 10px;
-      }
-
-      h2 {
-        font-size: 16px;
-      }
-
-      #status {
-        font-size: 12px;
-      }
-
-      #captureBtn {
-        width: 56px;
-        height: 56px;
-      }
-
-      #overlay {
-        max-height: 60vh;
-        max-width: 35vw;
-      }
-
-      .step-indicator {
-        margin-top: 5px;
-      }
-
-      .guide-bubble {
-        display: none;
-      }
+      .ui-top { padding: 8px 12px 20px; }
+      .ui-bottom { padding: 20px 12px 10px; }
+      h2 { font-size: 16px; }
+      #status { font-size: 12px; }
+      #captureBtn { width: 56px; height: 56px; }
+      #overlay { max-height: 60vh; max-width: 35vw; }
+      .guide-bubble { display: none; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Django Static Image Path Safe-Injectors -->
+  <input type="hidden" id="frontPoseSrc" value="{% static 'images/front.png' %}">
+  <input type="hidden" id="sidePoseSrc" value="{% static 'images/side.png' %}">
 
   <!-- Loading Overlay -->
   <div id="loading-overlay">
@@ -560,7 +465,7 @@
       <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <!-- Vignette (dark border for contrast) -->
+    <!-- Vignette -->
     <div id="vignette"></div>
 
     <!-- Silhouette Frame -->
@@ -586,7 +491,12 @@
           <i class="bi bi-arrow-left"></i>
         </button>
         <h2 id="pageTitle">Front Pose</h2>
-        <div style="width: 40px;"></div>
+        <button id="switchCameraBtn" aria-label="Switch Camera" title="Switch Camera">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 7v6h-6M3 17v-6h6"/>
+            <path d="M18.49 13a7 7 0 0 1-13.98 1.5M5.51 11a7 7 0 0 1 13.98-1.5"/>
+          </svg>
+        </button>
       </div>
 
       <div class="step-indicator">
@@ -610,7 +520,6 @@
 
   </div>
 
-  <!-- Hidden Canvas -->
   <canvas id="canvas" style="display:none;"></canvas>
 
   <script>
@@ -620,6 +529,7 @@
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const captureBtn = document.getElementById("captureBtn");
+    const switchCameraBtn = document.getElementById("switchCameraBtn");
     const statusDiv = document.getElementById("status");
     const captureHint = document.getElementById("captureHint");
     const flash = document.getElementById("flash");
@@ -634,21 +544,24 @@
     /* ========== STATE ========== */
     let currentStream = null;
     let currentStage = 0;
+    let currentFacingMode = "user"; // "user" = front camera, "environment" = back camera
 
-    const silhouettes = [
+    const STAGE_CONFIG = [
       {
-        src: "{% static 'images/front.png' %}",
+        storageKey: "front_pose",
         title: "Front Pose",
         bubble: "Stand back and align your body with the outline",
         hint: "Face the camera with arms slightly away from sides",
+        src: document.getElementById("frontPoseSrc").value,
         maxHeight: "72vh",
         maxWidth: "40vw"
       },
       {
-        src: "{% static 'images/side.png' %}",
+        storageKey: "side_pose",
         title: "Side Pose",
         bubble: "Turn sideways and align with the outline",
         hint: "Stand sideways with arms relaxed at your sides",
+        src: document.getElementById("sidePoseSrc").value,
         maxHeight: "72vh",
         maxWidth: "40vw"
       }
@@ -660,53 +573,64 @@
       window.history.back();
     }
 
-    /* ========== CAMERA ========== */
-    function startCamera() {
+    /* ========== CAMERA OPERATION ========== */
+    async function startCamera() {
+      // Shutdown active streams prior to switching devices
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+
+      loadingOverlay.classList.remove("hidden");
+      captureBtn.disabled = true;
+
       const constraints = {
         video: {
           width: { ideal: 1920 },
           height: { ideal: 1080 },
-          facingMode: "user"
+          facingMode: currentFacingMode
         },
         audio: false
       };
 
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-          currentStream = stream;
-          video.srcObject = stream;
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
 
-          video.onloadedmetadata = () => {
-            video.play()
-              .then(() => {
-                loadingOverlay.classList.add("hidden");
-                setTimeout(() => {
-                  loadStage(0);
-                }, 300);
-              })
-              .catch(err => {
-                console.error("Play error:", err);
-                statusDiv.innerText = "Could not start video playback.";
-                loadingOverlay.classList.add("hidden");
-              });
-          };
-        })
-        .catch(err => {
-          console.error("Camera error:", err);
-          loadingOverlay.classList.add("hidden");
+        video.onloadedmetadata = () => {
+          video.play()
+            .then(() => {
+              loadingOverlay.classList.add("hidden");
+              
+              // Apply screen mirroring dynamically depending on chosen lens
+              if (currentFacingMode === "user") {
+                video.style.transform = "scaleX(-1)";
+              } else {
+                video.style.transform = "scaleX(1)";
+              }
 
-          if (err.name === "NotAllowedError") {
-            statusDiv.innerText = "Camera access denied. Please allow camera permissions.";
-          } else if (err.name === "NotFoundError") {
-            statusDiv.innerText = "No camera found on this device.";
-          } else {
-            statusDiv.innerText = "Camera unavailable. Please try again.";
-          }
+              loadStage(currentStage);
+            })
+            .catch(err => {
+              console.error("Play error:", err);
+              statusDiv.innerText = "Video display failed.";
+              loadingOverlay.classList.add("hidden");
+            });
+        };
+      } catch (err) {
+        console.error("Camera access error:", err);
+        loadingOverlay.classList.add("hidden");
 
-          captureBtn.style.display = "none";
-          captureHint.innerText = "";
-          guideBubble.style.display = "none";
-        });
+        if (err.name === "NotAllowedError") {
+          statusDiv.innerText = "Camera access denied. Check app permissions.";
+        } else if (err.name === "NotFoundError") {
+          statusDiv.innerText = "No camera found on this hardware.";
+        } else {
+          statusDiv.innerText = "Camera unavailable right now.";
+        }
+        captureBtn.style.display = "none";
+        captureHint.innerText = "";
+        guideBubble.style.display = "none";
+      }
     }
 
     function stopCamera() {
@@ -717,7 +641,7 @@
     }
 
     /* ========== FLASH EFFECT ========== */
-    function flashEffect() {
+    function triggerFlash() {
       flash.classList.add("active");
       return new Promise(resolve => {
         setTimeout(() => {
@@ -727,53 +651,54 @@
       });
     }
 
-    /* ========== CAPTURE ========== */
-    function capture() {
+    /* ========== CAPTURE AND STORAGE ========== */
+    function captureFrame() {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
+      
+      // Mirror frame only if working on the user/selfie lens
+      if (currentFacingMode === "user") {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.restore();
 
       return canvas.toDataURL("image/jpeg", 0.92);
     }
 
-    /* ========== LOAD STAGE ========== */
+    /* ========== LIFE CYCLE CONTROLS ========== */
     function loadStage(stageIndex) {
       currentStage = stageIndex;
-      const stage = silhouettes[stageIndex];
+      const stage = STAGE_CONFIG[stageIndex];
 
-      // Update UI text
+      // Setup UI Text Elements
       pageTitle.innerText = stage.title;
       guideBubble.innerText = stage.bubble;
       captureHint.innerText = stage.hint;
       statusDiv.innerText = "Align yourself within the silhouette...";
 
-      // Update silhouette size
+      // Coordinate responsive bounding box scales
       overlay.style.maxHeight = stage.maxHeight;
       overlay.style.maxWidth = stage.maxWidth;
 
-      // Pulse the silhouette to draw attention
+      // Spark user attention via structural glow pulsing
       overlay.classList.add("pulsing");
-
-      // Load the silhouette image
       overlay.src = stage.src;
       overlay.style.display = "block";
 
       captureBtn.disabled = true;
-
       let ready = false;
 
-      function onReady() {
+      function onStageReady() {
         if (ready) return;
         ready = true;
         captureBtn.disabled = false;
 
-        // Stop pulsing after user has had time to see it
         setTimeout(() => {
           overlay.classList.remove("pulsing");
         }, 4000);
@@ -781,38 +706,33 @@
         captureBtn.onclick = async () => {
           captureBtn.disabled = true;
           captureBtn.onclick = null;
-          await flashEffect();
+          
+          await triggerFlash();
+          const imageData = captureFrame();
+          sessionStorage.setItem(stage.storageKey, imageData);
 
-          if (stageIndex === 0) {
-            handleFrontCapture();
+          if (currentStage === 0) {
+            handleTransitionToSide();
           } else {
-            handleSideCapture();
+            handleFinalProcessing();
           }
         };
       }
 
-      // Wait for image to load
-      overlay.onload = () => onReady();
+      overlay.onload = () => onStageReady();
       if (overlay.complete && overlay.naturalWidth > 0) {
-        onReady();
+        onStageReady();
       }
-
-      // Safety timeout
-      setTimeout(() => onReady(), 3000);
+      setTimeout(() => onStageReady(), 2500); // Fail-safe fallback engagement
     }
 
-    /* ========== STAGE: FRONT ========== */
-    function handleFrontCapture() {
-      const data = capture();
-      sessionStorage.setItem("front_pose", data);
-
+    function handleTransitionToSide() {
       dot1.classList.remove("active");
       dot1.classList.add("completed");
       dot2.classList.add("active");
 
       statusDiv.innerText = "Front captured! Now turn sideways.";
       guideBubble.innerText = "Great! Now turn to your side";
-
       overlay.classList.remove("pulsing");
 
       setTimeout(() => {
@@ -820,15 +740,11 @@
       }, 1000);
     }
 
-    /* ========== STAGE: SIDE ========== */
-    function handleSideCapture() {
-      const data = capture();
-      sessionStorage.setItem("side_pose", data);
-
+    function handleFinalProcessing() {
       dot2.classList.remove("active");
       dot2.classList.add("completed");
 
-      statusDiv.innerText = "Processing...";
+      statusDiv.innerText = "Processing properties...";
       captureBtn.style.display = "none";
       captureHint.innerText = "";
       guideBubble.style.display = "none";
@@ -836,22 +752,30 @@
 
       progressBar.classList.add("visible");
       let progress = 0;
-      const interval = setInterval(() => {
+      const progressInterval = setInterval(() => {
         progress += 15;
         progressFill.style.width = Math.min(progress, 90) + "%";
-        if (progress >= 90) clearInterval(interval);
+        if (progress >= 90) clearInterval(progressInterval);
       }, 150);
 
       setTimeout(() => {
         progressFill.style.width = "100%";
         stopCamera();
-        window.location.href = "{% url 'measureApp:preview_capture' %}";
+        // Dynamic Django url injection framework targeted path
+        window.location.href = "{% url 'measureApp:preview_capture' %}"; 
       }, 1200);
     }
 
-    /* ========== INIT ========== */
-    startCamera();
-  </script>
+    /* ========== HARDWARE INTERACTION TRIPPERS ========== */
+    switchCameraBtn.onclick = () => {
+      currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+      startCamera();
+    };
 
+    // Initialize execution once parsing finishes natively
+    window.addEventListener("DOMContentLoaded", () => {
+      startCamera();
+    });
+  </script>
 </body>
 </html>
