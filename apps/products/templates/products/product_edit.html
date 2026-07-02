@@ -2,35 +2,227 @@
 {% load widget_tweaks %}
 {% block content %}
 
-<div class="container mt-5">
-  <div class="col-md-8 mx-auto">
+<style>
+  /* ===== Modern Minimalist Form Theme ===== */
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    color: #212529;
+  }
 
-    <div class="card shadow border-0 rounded-4">
-      <div class="card-header bg-dark text-white text-center">
-        <h4>✏️ Edit Product</h4>
-      </div>
+  .form-container-wrapper {
+    margin-top: 3rem;
+    margin-bottom: 4rem;
+  }
 
-      <div class="card-body p-4">
+  .product-edit-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.02);
+  }
+
+  .page-main-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+  }
+
+  .field-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #343a40;
+    display: block;
+  }
+
+  /* Form Elements Restyling */
+  .form-input-field {
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border: 1px solid #dee2e6;
+    background-color: #fdfdfd;
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+  }
+
+  .form-input-field:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    outline: none;
+  }
+
+  /* Toggle Switch Framework for Boolean/Checkbox fields */
+  .feature-toggle-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+  }
+
+  .switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ced4da;
+    transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #000000;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+
+  .toggle-instruction-text {
+    display: block;
+    font-size: 0.82rem;
+    color: #6c757d;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* Button Actions Styling */
+  .btn-action-save {
+    background: #000000;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action-save:hover {
+    background: #212529;
+    transform: translateY(-1px);
+  }
+
+  .btn-action-cancel {
+    border: 1px solid #dee2e6;
+    background: transparent;
+    border-radius: 14px;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #495057;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .btn-action-cancel:hover {
+    background: #f1f3f5;
+    color: #212529;
+  }
+</style>
+
+<div class="container form-container-wrapper">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="product-edit-card">
+        <div class="mb-4">
+          <h3 class="page-main-title">✏️ Edit Product</h3>
+          <p class="text-muted small">Update your product's specifications, details, or operational feature toggles below.</p>
+        </div>
+
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
           {% for field in form %}
-            <div class="mb-3">
-              {{ field.label_tag }}
-              {{ field|add_class:"form-control" }}
-              {% if field.errors %}
-                <small class="text-danger">{{ field.errors }}</small>
+            <div class="mb-4">
+              
+              <!-- Check if the field is a toggle/checkbox to render unique container styling -->
+              {% if field.field.widget.input_type == "checkbox" %}
+                <div class="feature-toggle-box">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <label class="field-label mb-0" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <label class="switch">
+                      {{ field }}
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <!-- Match instructions specifically by field names -->
+                  {% if field.name == "enable_digital_tryon" %}
+                    <span class="toggle-instruction-text">
+                      If you want buyers to try on your dress virtually, click this option to enable AR viewports.
+                    </span>
+                  {% elif field.name == "enable_product_pricing" %}
+                    <span class="toggle-instruction-text">
+                      Turn this option on if you are willing to accept counter-offers and negotiate pricing with buyers.
+                    </span>
+                  {% else %}
+                    {% if field.help_text %}
+                      <span class="toggle-instruction-text">{{ field.help_text }}</span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+
+              {% else %}
+                <!-- Standard Field Rendering -->
+                <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field|add_class:"form-input-field" }}
+                
+                {% if field.help_text and not field.field.widget.input_type == "checkbox" %}
+                  <small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>
+                {% endif %}
               {% endif %}
+
+              <!-- Error Reporting Feedback standard -->
+              {% if field.errors %}
+                <div class="mt-1">
+                  {% for error in field.errors %}
+                    <small class="text-danger d-block"><i class="bi bi-x-circle-fill"></i> {{ error }}</small>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              
             </div>
           {% endfor %}
 
-          <div class="d-flex justify-content-between mt-4">
-            <a href="{{ product.get_absolute_url }}"
-               class="btn btn-outline-secondary">
+          <!-- Form Control Actions Wrapper -->
+          <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+            <a href="{{ product.get_absolute_url }}" class="btn-action-cancel">
               Cancel
             </a>
 
-            <button class="btn btn-dark px-4">
+            <button type="submit" class="btn-action-save">
               💾 Save Changes
             </button>
           </div>
@@ -38,7 +230,6 @@
       </div>
 
     </div>
-
   </div>
 </div>
 

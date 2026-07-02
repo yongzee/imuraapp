@@ -4,18 +4,98 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-          <h3 class="mb-4 text-center fw-bold text-primary">
-            Welcome Back 👋
-          </h3>
+<style>
+  /* Modern High-End Styling Variables */
+  .auth-wrapper {
+    min-height: calc(100vh - 120px); /* Better dynamic sizing than static 85vh */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-card {
+    background: #ffffff;
+    border: 1px solid #eef1f6;
+    border-radius: 20px; /* Slightly tighter radius looks cleaner on mobile */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    width: 100%;
+  }
+  .brand-badge {
+    background: rgba(13, 110, 253, 0.06);
+    color: #0d6efd;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .form-control-custom {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.65rem 0.9rem; /* Tightened up padding */
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  .form-control-custom:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+    outline: 0;
+  }
+  /* Fix layout group curves for password button combo */
+  .input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+  .input-group-custom .form-control-custom {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    flex: 1 1 auto;
+  }
+  .toggle-password-btn-custom {
+    border: 1.5px solid #e2e8f0;
+    border-left: none;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    background-color: #ffffff;
+    color: #64748b;
+    padding: 0 0.9rem;
+    transition: all 0.2s ease;
+  }
+  .form-control-custom:focus + .toggle-password-btn-custom {
+    border-color: #0d6efd;
+  }
+  .custom-btn-primary {
+    background: #0d6efd;
+    border: none;
+    border-radius: 12px;
+    padding: 10px; /* Tightened up button padding */
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  .custom-btn-primary:hover {
+    background: #0b5ed7;
+    transform: translateY(-1px);
+  }
+</style>
+
+<div class="container auth-wrapper my-4">
+  <div class="row justify-content-center w-100 m-0"> <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 px-1"> <div class="card auth-card border-0 p-3 p-sm-4"> <div class="card-body p-1"> 
+          
+          <div class="text-center mb-3">
+            <span class="brand-badge mb-2"><i class="bi bi-shield-check me-1"></i> Secure Gateway</span>
+            <h3 class="fw-bold tracking-tight text-dark m-0 fs-4 fs-sm-3">Welcome Back 👋</h3>
+            <p class="text-muted small mt-2 mb-0 px-1">
+              Log into your portal to handle styling pipelines, orders, metrics updates, and brand activity.
+            </p>
+          </div>
 
           {% if form.errors %}
-            <div class="alert alert-danger">
-              <ul class="mb-0">
+            <div class="alert alert-danger border-0 rounded-3 mb-3 p-2 small">
+              <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please adjust your entries:</div>
+              <ul class="mb-0 ps-3">
                 {% for field, errors in form.errors.items %}
                   {% for error in errors %}
                     <li>{{ error }}</li>
@@ -25,78 +105,79 @@
             </div>
           {% endif %}
 
-          <form method="post">
+          <form method="post" class="d-flex flex-column gap-2.5">
             {% csrf_token %}
-            
+
             {% for field in form %}
-              <div class="mb-3">
-                <label class="form-label">{{ field.label }}</label>
+              <div class="form-group mb-2">
+                <label class="form-label fw-semibold text-secondary small mb-1">{{ field.label }}</label>
                 
                 {% if 'password' in field.id_for_label or 'password' in field.name %}
-                  <div class="input-group">
-                    {{ field|add_class:"form-control password-field" }}
-                    <button class="btn btn-outline-secondary toggle-password-btn" type="button" style="display: flex; align-items: center; justify-content: center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-v" viewBox="0 0 16 16">
+                  <div class="input-group-custom">
+                    {{ field|add_class:"form-control form-control-custom password-field" }}
+                    <button class="btn toggle-password-btn-custom" type="button" style="display: flex; align-items: center; justify-content: center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
                         <path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
                         <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
                       </svg>
                     </button>
                   </div>
                 {% else %}
-                  {{ field|add_class:"form-control" }}
+                  {{ field|add_class:"form-control form-control-custom" }}
                 {% endif %}
 
                 {% if field.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ field.errors|join:", " }}
+                  <div class="text-danger small mt-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-info-circle me-1"></i>{{ field.errors|join:", " }}
                   </div>
                 {% endif %}
               </div>
             {% endfor %}
+
+            <div class="d-flex justify-content-end align-items-center mb-2">
+              <a href="{% url 'account_reset_password' %}" class="text-decoration-none small text-secondary fw-medium">
+                Forgot your password?
+              </a>
+            </div>
             
-            <button type="submit" class="btn btn-primary w-100 py-2 mt-2">
-              Login
+            <button type="submit" class="btn btn-primary custom-btn-primary w-100 shadow-sm">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Login to Account
             </button>
           </form>
 
           <div class="mt-3 text-center">
-            <a href="{% url 'account_reset_password' %}" class="text-decoration-none">
-              Forgot your password?
-            </a>
-          </div>
-          <div class="mt-2 text-center">
-            <span>Don’t have an account? </span>
-            <a href="{% url 'account_signup' %}" class="fw-bold text-success text-decoration-none">
-              Sign up
+            <span class="text-muted small">Don’t have an account?</span>
+            <a href="{% url 'account_signup' %}" class="fw-semibold text-success text-decoration-none small d-block d-sm-inline ms-sm-1 mt-1 mt-sm-0">
+              Sign up here <i class="bi bi-arrow-right small"></i>
             </a>
           </div>
 
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+  const toggleButtons = document.querySelectorAll('.toggle-password-btn-custom');
   
-  // Clean raw SVG paths for swapping on the fly
   const eyePath = `<path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>`;
   const eyeSlashPath = `<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a12 12 0 0 0-2.778.32l1.938 1.938A7 7 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.181.26-.41.586-.683.925zM10.03 5.01l1.532 1.532A2.5 2.5 0 0 0 9.5 5.01c-.13.003-.257.017-.378.04L8.252 4.183a5 5 0 0 1 1.778-.173M12.19 12.19a18 18 0 0 1-1.325 1.241C9.58 14.332 7.82 15.5 6 15.5c-5 0-8-5.5-8-5.5a12 12 0 0 1 2.138-2.61L3.393 6.137A13 13 0 0 0 1.172 8q.086.13.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.813 0 1.569-.175 2.254-.486zM6 8.02a2.5 2.5 0 0 0 3.48 3.48zm-.372 1.94L3.65 7.982A3.5 3.5 0 0 0 5.628 9.96z"/><path d="M13.646 14.354l-12-12 .708-.708 12 12z"/>`;
 
   toggleButtons.forEach(button => {
     button.addEventListener('click', function () {
-      const inputGroup = this.closest('.input-group');
+      const inputGroup = this.closest('.input-group-custom');
       const passwordInput = inputGroup.querySelector('.password-field');
       const svgElement = this.querySelector('svg');
       
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
-        svgElement.innerHTML = eyeSlashPath; // Switch path to slashed eye
+        svgElement.innerHTML = eyeSlashPath;
       } else {
         passwordInput.type = 'password';
-        svgElement.innerHTML = eyePath;      // Switch path back to normal eye
+        svgElement.innerHTML = eyePath;
       }
     });
   });

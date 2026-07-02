@@ -4,34 +4,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMURA</title>
-    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" type="text/css">
+    <title>IMURA | Fashion Hub</title>
+    
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #0d6efd;
+            --surface-bg: #f8f9fa;
+        }
+        body {
+            background-color: var(--surface-bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-column: unset;
+            flex-direction: column;
+        }
+        
+        /* Modern Top Bar Layout Formatting */
+        .custom-navbar {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #eef1f6;
+            padding: 0.85rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
+        }
+        .navbar-brand {
+            letter-spacing: -0.5px;
+            font-size: 1.35rem;
+        }
+        .nav-link-custom {
+            color: #495057 !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-link-custom:hover {
+            color: var(--brand-primary) !important;
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+        .nav-link-danger {
+            color: #dc3545 !important;
+        }
+        .nav-link-danger:hover {
+            background-color: rgba(220, 53, 69, 0.04);
+        }
+
+        /* Fluid Structural Padding Containment Wrapper */
+        .main-wrapper {
+            flex: 1 0 auto;
+            padding-top: 2.5rem;
+            padding-bottom: 5rem;
+        }
+
+        /* Clean Modern Minimalistic Footer */
+        .custom-footer {
+            background-color: #ffffff !important;
+            border-top: 1px solid #eef1f6;
+            color: #6c757d !important;
+            font-size: 0.9rem;
+            padding: 1.5rem 0;
+        }
+
+        /* Seamless Mobile Bottom Utility Nav Bar */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid #eef1f6;
+            display: none;
+            z-index: 1030;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
+        }
+        .mobile-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 0.6rem 0;
+            transition: color 0.2s ease;
+        }
+        .mobile-nav-link i {
+            font-size: 1.25rem;
+            margin-bottom: 2px;
+        }
+        .mobile-nav-link:hover, .mobile-nav-link.active {
+            color: var(--brand-primary);
+        }
+
+        @media (max-width: 991.98s) {
+            .mobile-bottom-nav {
+                display: block;
+            }
+            body {
+                padding-bottom: 60px; /* Offset spacing for the sticky bar */
+            }
+            .custom-footer {
+                margin-bottom: 60px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white custom-navbar sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'core:dashboard' %}">IMURA</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="{% url 'core:dashboard' %}">
+                <i class="bi bi-layers-half text-primary"></i>IMURA
+            </a>
+            
+            <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <i class="bi bi-list fs-3"></i>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto gap-1 mt-2 mt-lg-0">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'products:product_list' %}">products</a>
+                            <a class="nav-link nav-link-custom" href="{% url 'products:product_list' %}">
+                                <i class="bi bi-grid me-1"></i>Products
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-danger" href="{% url 'account_logout' %}">Logout</a>
+                            <a class="nav-link nav-link-custom nav-link-danger" href="{% url 'account_logout' %}">
+                                <i class="bi bi-box-arrow-right me-1"></i>Logout
+                            </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                            <a class="nav-link nav-link-custom" href="{% url 'account_login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-primary rounded-pill px-4 btn-sm py-2 text-white fw-medium" href="{% url 'account_signup' %}">
+                                Register
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -39,19 +160,51 @@
         </div>
     </nav>
 
-    <!-- Main content -->
-    <main class="container my-4">
+    <main class="container main-wrapper">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light text-center py-3 mt-5">
-        <p class="mb-0">&copy; {{ year|default:2025 }} IMURA fashion hub. All rights reserved.</p>
+    <footer class="bg-white text-center custom-footer">
+        <div class="container">
+            <p class="mb-0 fw-medium">&copy; 2026 IMURA FashionHub. All rights reserved.</p>
+        </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}  "></script>
-    <script src="{% static 'js/bootstrap.min.js' %}  "></script>
+    {% if user.is_authenticated %}
+    <div class="mobile-bottom-nav">
+        <div class="container-fluid">
+            <div class="row text-center">
+                <div class="col p-0">
+                    <a href="{% url 'core:dashboard' %}" class="mobile-nav-link">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <div class="col p-0">
+                    <a href="{% url 'streaming:product_stream' %}" class="mobile-nav-link">
+                        <i class="bi bi-play-video"></i>
+                        <span>Videos</span>
+                    </a>
+                </div>
+                <div class="col p-0">
+                    <a href="{% url 'measureApp:index' %}" class="mobile-nav-link">
+                        <i class="bi bi-ruler"></i>
+                        <span>Measure</span>
+                    </a>
+                </div>
+                <div class="col p-0">
+                    <a href="{% url 'products:product_list' %}" class="mobile-nav-link">
+                        <i class="bi bi-shop"></i>
+                        <span>Products</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>
 </html>

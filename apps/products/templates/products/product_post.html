@@ -2,84 +2,88 @@
 {% block content %}
 
 <style>
-body {
-    background: linear-gradient(135deg, #f7f7f7, #f0f0ff);
-}
-.product-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-    animation: fadeSlide 0.6s ease;
-}
-@keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(25px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.field-label {
+  /* ===== Modern Minimalist Form Theme ===== */
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    color: #212529;
+  }
+
+  .form-container-wrapper {
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .product-creation-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.02);
+  }
+
+  .page-main-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+  }
+
+  .field-label {
     font-weight: 600;
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-.form-control, .form-select {
-    border-radius: 14px;
-    padding: 12px 15px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    transition: 0.3s;
-}
-.form-control:focus, .form-select:focus {
-    border-color: #7b4bff;
-    box-shadow: 0 0 8px rgba(123, 75, 255, 0.4);
-}
-.tooltip-icon {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #7b4bff;
-    color: #fff;
-    font-size: 11px;
-    cursor: pointer;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 8px;
-}
-.upload-zone {
-    border: 2px dashed #c5baff;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #343a40;
+  }
+
+  /* Form Elements Restyling */
+  .form-control, .form-select {
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border: 1px solid #dee2e6;
+    background-color: #fdfdfd;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+  }
+
+  /* Advanced Settings Switch / Toggle Framework */
+  .feature-toggle-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
     border-radius: 16px;
-    padding: 18px;
-    text-align: center;
-    background: #faf8ff;
-}
-.upload-zone:hover {
-    border-color: #7b4bff;
-    background: #f3ecff;
-}
-.add-more-btn {
-    border-radius: 30px;
-    padding: 7px 18px;
-    font-size: 13px;
-}
-.switch {
+    padding: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .switch {
     position: relative;
     display: inline-block;
-    width: 48px;
+    width: 46px;
     height: 24px;
-    margin-left: 10px;
-}
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider {
+  }
+
+  .switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+  }
+
+  .slider {
     position: absolute;
     cursor: pointer;
-    top: 0; left: 0;
-    right: 0; bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ced4da;
+    transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 34px;
-}
-.slider:before {
+  }
+
+  .slider:before {
     position: absolute;
     content: "";
     height: 18px;
@@ -87,167 +91,264 @@ body {
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: .4s;
+    transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 50%;
-}
-input:checked + .slider {
-    background-color: #7b4bff;
-}
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-.submit-btn {
-    background: #7b4bff;
-    border: none;
-    border-radius: 20px;
-    padding: 12px 25px;
-    font-size: 16px;
-    color: white;
-}
-/* Notifications */
-#messages .alert {
+  }
+
+  input:checked + .slider {
+    background-color: #000000;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+
+  .toggle-instruction-text {
+    display: block;
+    font-size: 0.82rem;
+    color: #6c757d;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* Enhanced Upload Zones */
+  .upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 16px;
+    padding: 1.25rem;
+    background: #fdfdfd;
+    transition: all 0.2s ease;
+  }
+
+  .upload-zone:hover {
+    border-color: #000000;
+    background: #f8f9fa;
+  }
+
+  .upload-limit-badge {
+    display: block;
+    font-size: 0.78rem;
+    color: #868e96;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .add-more-btn {
     border-radius: 12px;
-    padding: 10px 15px;
-}
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
 
+  .submit-btn {
+    background: #000000;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 30px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
 
+  .submit-btn:hover {
+    background: #212529;
+    transform: translateY(-1px);
+  }
 </style>
 
-
-<!-- Form errors -->
-{% if form.errors %}
-<div class="alert alert-danger mb-3">
-  <ul class="mb-0">
-    {% for field in form %}
-      {% for error in field.errors %}
-        <li>{{ field.label }}: {{ error }}</li>
-      {% endfor %}
-    {% endfor %}
-    {% for error in form.non_field_errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-  </ul>
-</div>
-{% endif %}
-
-<div class="container mt-5 mb-5">
-  <div class="product-card">
-    <h3 class="mb-4">Post a Product</h3>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.title.label }}</label>
-          {{ form.title }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.brand.label }}</label>
-          {{ form.brand }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.condition.label }}</label>
-          {{ form.condition }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.size_available.label }}</label>
-          {{ form.size_available }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.color.label }}</label>
-          {{ form.color }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.shipping_from.label }}</label>
-          {{ form.shipping_from }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.delivery_zones.label }}</label>
-          {{ form.delivery_zones }}
-        </div>
-
-        <!-- Images -->
-        <div class="col-md-6 mb-3">
-          <label class="field-label">Product Images</label>
-          <div id="image-wrapper">
-            <div class="upload-zone">
-              <input type="file" name="images" class="form-control" multiple>
-            </div>
-          </div>
-          <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2"
-                  onclick="addImageField()">+ Add More Images</button>
-
-          <div class="mt-3">
-            <label class="field-label">Enable Digital Try-On</label>
-            <label class="switch">
-              {{ form.enable_digital_tryon }}
-              <span class="slider"></span>
-            </label>
-            <span class="tooltip-icon" data-bs-toggle="tooltip"
-                  title="Allows users to digitally try the outfit using AR.">?</span>
-          </div>
-        </div>
-
-        <!-- Videos -->
-        <div class="col-md-6 mb-3">
-          <label class="field-label">Product Videos</label>
-          <div id="video-wrapper">
-            <div class="upload-zone">
-              <input type="file" name="videos" class="form-control" multiple accept="video/*">
-            </div>
-          </div>
-          <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2"
-                  onclick="addVideoField()">+ Add More Videos</button>
-        </div>
-
-        <div class="col-12 mb-3">
-          <label class="field-label">{{ form.description.label }}</label>
-          {{ form.description }}
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.price.label }}</label>
-          {{ form.price }}
-          <div class="mt-2">
-            <label class="field-label">Enable Product Pricing</label>
-            <label class="switch">
-              {{ form.enable_product_pricing }}
-              <span class="slider"></span>
-            </label>
-            <span class="tooltip-icon" data-bs-toggle="tooltip"
-                  title="Disable to hide price on product display.">?</span>
-          </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="field-label">{{ form.category.label }}</label>
-          {{ form.category }}
-        </div>
-
+<div class="container form-container-wrapper">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
+      <!-- Django Native Form Error Alerts Container -->
+      {% if form.errors %}
+      <div class="alert alert-danger p-3 mb-4 rounded-4 shadow-sm">
+        <h6 class="font-weight-bold mb-2"><i class="bi bi-exclamation-triangle-fill"></i> Please resolve the following errors:</h6>
+        <ul class="mb-0 small ps-3">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
       </div>
+      {% endif %}
 
-      <button type="submit" class="submit-btn mt-4">Post Product</button>
-    </form>
+      <div class="product-creation-card">
+        <div class="mb-4">
+          <h3 class="page-main-title">Post a Product</h3>
+          <p class="text-muted small">Fill in the item details below to publish your listing to the marketplace.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row g-4">
+            
+            <!-- Core Title Field -->
+            <div class="col-md-6">
+              <label class="field-label">{{ form.title.label }}</label>
+              {{ form.title }}
+            </div>
+
+            <!-- Brand Field -->
+            <div class="col-md-6">
+              <label class="field-label">{{ form.brand.label }}</label>
+              {{ form.brand }}
+            </div>
+
+            <!-- Category Assignment Selection -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.category.label }}</label>
+              {{ form.category }}
+            </div>
+
+            <!-- Structural Condition Assessment -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.condition.label }}</label>
+              {{ form.condition }}
+            </div>
+
+            <!-- Size Options Assignment -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.size_available.label }}</label>
+              {{ form.size_available }}
+            </div>
+
+            <!-- Color Palette Variant Field -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.color.label }}</label>
+              {{ form.color }}
+            </div>
+
+            <!-- Origin Shipping Location -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.shipping_from.label }}</label>
+              {{ form.shipping_from }}
+            </div>
+
+            <!-- Regional Delivery Allocation Zones -->
+            <div class="col-md-4">
+              <label class="field-label">{{ form.delivery_zones.label }}</label>
+              {{ form.delivery_zones }}
+            </div>
+
+            <!-- Images Upload Management Column -->
+            <div class="col-md-6">
+              <label class="field-label">Product Images</label>
+              <div id="image-wrapper">
+                <div class="upload-zone">
+                  <input type="file" name="images" class="form-control" multiple accept="image/*">
+                  <span class="upload-limit-badge">
+                    <i class="bi bi-info-circle"></i> Max 5MB per image. Square (1:1) or Portrait (4:5) recommended.
+                  </span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2" onclick="addImageField()">
+                <i class="bi bi-plus-lg"></i> Add More Images
+              </button>
+
+              <!-- Integrated Digital Try-On Toggle Section -->
+              <div class="feature-toggle-box">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="field-label mb-0">Enable Digital Try-On</span>
+                  <label class="switch">
+                    {{ form.enable_digital_tryon }}
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-instruction-text">
+                  If you want buyers to try on your dress virtually, click this option to enable AR viewports.
+                </span>
+              </div>
+            </div>
+
+            <!-- Videos Upload Management Column -->
+            <div class="col-md-6">
+              <label class="field-label">Product Videos</label>
+              <div id="video-wrapper">
+                <div class="upload-zone">
+                  <input type="file" name="videos" class="form-control" multiple accept="video/*">
+                  <span class="upload-limit-badge">
+                    <i class="bi bi-info-circle"></i> Max 30MB file size limits. Maximum duration: 30 seconds.
+                  </span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-dark btn-sm add-more-btn mt-2" onclick="addVideoField()">
+                <i class="bi bi-plus-lg"></i> Add More Videos
+              </button>
+            </div>
+
+            <!-- Base Form Markdown Text Area Field -->
+            <div class="col-12">
+              <label class="field-label">{{ form.description.label }}</label>
+              {{ form.description }}
+            </div>
+
+            <!-- Financial Pricing Config Block -->
+            <div class="col-md-6">
+              <label class="field-label">{{ form.price.label }}</label>
+              {{ form.price }}
+              
+              <!-- Price Bargaining Engagement Toggle Section -->
+              <div class="feature-toggle-box">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="field-label mb-0">Enable Price Negotiations</span>
+                  <label class="switch">
+                    {{ form.enable_product_pricing }}
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-instruction-text">
+                  Turn this option on if you are willing to accept counter-offers and negotiate pricing with buyers.
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Submission CTA Row Link -->
+          <div class="row mt-4">
+            <div class="col-12 text-end">
+              <button type="submit" class="submit-btn">Post Product Listing</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+    </div>
   </div>
 </div>
 
 <script>
-// Re‑usable helper for adding new inputs
-function addImageField() {
-  const wrapper = document.getElementById("image-wrapper");
-  const div = document.createElement("div");
-  div.className = "upload-zone mt-2";
-  div.innerHTML = `<input type="file" name="images" class="form-control" multiple>`;
-  wrapper.appendChild(div);
-}
-function addVideoField() {
-  const wrapper = document.getElementById("video-wrapper");
-  const div = document.createElement("div");
-  div.className = "upload-zone mt-2";
-  div.innerHTML = `<input type="file" name="videos" class="form-control" multiple>`;
-  wrapper.appendChild(div);
-}
+  // Re‑usable helper routines for handling multiple file fields injections
+  function addImageField() {
+    const wrapper = document.getElementById("image-wrapper");
+    const div = document.createElement("div");
+    div.className = "upload-zone mt-2";
+    div.innerHTML = `
+      <input type="file" name="images" class="form-control" multiple accept="image/*">
+      <span class="upload-limit-badge"><i class="bi bi-info-circle"></i> Max file size: 5MB per upload element.</span>
+    `;
+    wrapper.appendChild(div);
+  }
 
-
+  function addVideoField() {
+    const wrapper = document.getElementById("video-wrapper");
+    const div = document.createElement("div");
+    div.className = "upload-zone mt-2";
+    div.innerHTML = `
+      <input type="file" name="videos" class="form-control" multiple accept="video/*">
+      <span class="upload-limit-badge"><i class="bi bi-info-circle"></i> Max file size: 30MB limits.</span>
+    `;
+    wrapper.appendChild(div);
+  }
 </script>
 
 {% endblock %}

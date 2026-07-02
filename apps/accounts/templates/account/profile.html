@@ -3,824 +3,623 @@
 {% block content %}
 
 <style>
-/* ---------- HEADER ---------- */
-.profile-header {
-  background: linear-gradient(135deg, #111, #2b2b2b);
-  color: #fff;
-  border-radius: 18px;
-  padding: 30px;
-}
-/* ---------- PROFILE HEADER ---------- */
-.profile-header {
-  position: relative;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  border-radius: 22px;
-  padding: 30px;
-  overflow: hidden;
-}
-
-.profile-header-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at top right,
-    rgba(255, 255, 255, 0.12),
-    transparent 60%
-  );
-}
-
-.profile-header-content {
-  position: relative;
-  z-index: 2;
-}
-
-/* ---------- AVATAR ---------- */
-.profile-avatar-wrap {
-  padding: 4px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ffcc70, #ff6f91, #845ec2);
-}
-
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid #111;
-  background: #000;
-}
-
-/* ---------- INFO ---------- */
-.profile-meta span {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.profile-meta i {
-  margin-right: 6px;
-}
-
-/* ---------- SOCIAL ICONS ---------- */
-.profile-socials a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  font-size: 17px;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.profile-socials a:hover {
-  background: #fff;
-  color: #111;
-  transform: translateY(-3px);
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 768px) {
-  .profile-header-content {
-    flex-direction: column;
-    text-align: center;
+  /* ---------- COLOR VARIABLES & BASE ---------- */
+  :root {
+    --bg-dark: #0a0a0c;
+    --card-dark: #121216;
+    --accent-gradient: linear-gradient(135deg, #ffd700, #ff3b5c, #845ec2);
+    --text-muted: rgba(255, 255, 255, 0.7);
   }
 
-  .profile-avatar-wrap {
-    margin-bottom: 15px;
+  body {
+    background-color: #f8f9fa;
   }
 
-  .profile-meta span {
-    display: block;
-    margin-bottom: 6px;
-  }
-}
-
-
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid #fff;
-}
-
-/* ---------- MEDIA TABS ---------- */
-.media-tabs-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 25px;
-  overflow-x: auto;
-}
-
-.media-tabs {
-  display: flex;
-  gap: 12px;
-}
-
-.media-tabs button {
-  border-radius: 30px;
-  padding: 8px 22px;
-  transition: 0.3s ease;
-}
-
-.media-tabs button.active {
-  background: #111;
-  color: #fff;
-  transform: scale(1.05);
-}
-
-/* ---------- MEDIA GRID ---------- */
-.media-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.media-grid img,
-.media-grid video {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-/* MODAL OVERLAY */
-.media-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 10px;
-}
-/* ---------- MODAL CONTAINER ---------- */
-.media-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-/* ---------- MODAL CONTENT ---------- */
-.modal-content {
-  background: #fff;
-  border-radius: 16px;
-  width: 95%;
-  max-width: 900px;
-  max-height: 90vh;              /* 🔥 NEVER exceed screen */
-  overflow: hidden;              /* 🔥 Prevent body overlap */
-  display: flex;
-  flex-direction: column;
-}
-
-/* ---------- MODAL BODY ---------- */
-.modal-body {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  overflow-y: auto;              /* 🔥 Enables scrolling */
-  flex: 1;                       /* 🔥 Fill available height */
-}
-
-/* ---------- MEDIA AREA ---------- */
-.modal-media {
-  flex: 1;
-  min-height: 260px;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.modal-media img,
-.modal-media video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ---------- DETAILS AREA ---------- */
-.modal-details {
-  flex: 1;
-  overflow-y: auto;              /* 🔥 Independent scroll */
-}
-
-/* ---------- MOBILE FIX ---------- */
-@media (max-width: 768px) {
-  .modal-body {
-    flex-direction: column;      /* 🔥 Stack vertically */
-    padding: 12px;
+  /* ---------- PREMIUM HERO HEADER ---------- */
+  .fashion-profile-hero {
+    position: relative;
+    background: linear-gradient(145deg, #0f1015, #1e2029);
+    border-radius: 24px;
+    padding: 40px 30px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
   }
 
-  .modal-media {
-    height: 240px;               /* 🔥 Controlled height */
-    min-height: unset;
+  .hero-glow-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(255, 59, 92, 0.15), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.08), transparent 50%);
+    pointer-events: none;
   }
 
-  .modal-details {
-    max-height: calc(90vh - 260px);
-    overflow-y: auto;
-  }
-}
-
-/* MODAL CONTAINER */
-.modal-content {
-  background: #fff;
-  width: 100%;
-  max-width: 900px;
-  max-height: 95vh;              /* 🔥 KEY FIX */
-  border-radius: 16px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-/* CLOSE BUTTON */
-.modal-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  background: #000;
-  color: #fff;
-  border: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  font-size: 18px;
-  z-index: 20;
-}
-
-/* OWNER ACTIONS */
-.modal-actions {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 20;
-}
-
-.hamburger-btn {
-  background: #fff;
-  border: none;
-  font-size: 20px;
-  padding: 6px 10px;
-  border-radius: 8px;
-}
-
-/* OWNER MENU */
-.owner-menu {
-  margin-top: 6px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  overflow: hidden;
-}
-
-.owner-menu-item {
-  display: block;
-  padding: 10px 14px;
-  text-decoration: none;
-  color: #000;
-  border-bottom: 1px solid #eee;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-}
-
-/* BODY (SCROLLABLE AREA) */
-.modal-body {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
-  overflow-y: auto;              /* 🔥 KEY FIX */
-}
-
-/* MEDIA */
-.modal-media {
-  flex: 1;
-  max-height: 60vh;
-}
-
-.modal-media img,
-.modal-media video {
-  width: 100%;
-  max-height: 60vh;
-  object-fit: contain;
-  border-radius: 12px;
-}
-
-/* DETAILS */
-.modal-details {
-  flex: 1;
-}
-
-/* MOBILE FIX */
-@media (max-width: 768px) {
-  .modal-body {
-    flex-direction: column;
+  /* ---------- RADIANTA AVATAR RING ---------- */
+  .avatar-container {
+    position: relative;
+    padding: 5px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    box-shadow: 0 8px 24px rgba(255, 59, 92, 0.25);
+    display: inline-block;
   }
 
-  .modal-media {
-    max-height: 40vh;
+  .profile-avatar {
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #121216;
+    background: #000;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-}
-/* ---------- TABLET & DESKTOP ---------- */
-@media (min-width: 992px) {
+
+  .avatar-container:hover .profile-avatar {
+    transform: scale(1.03);
+  }
+
+  /* ---------- MODERN SOCIAL CAPSULES ---------- */
+  .fashion-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-right: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 18px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-decoration: none;
+  }
+
+  .fashion-socials a:hover {
+    background: #fff;
+    color: #0a0a0c;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(255,255,255,0.15);
+  }
+
+  /* ---------- LUXURY MEDIA SELECTION TABS ---------- */
+  .media-tabs-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 35px 0 25px;
+  }
+
+  .luxury-tabs {
+    background: #e9ecef;
+    padding: 6px;
+    border-radius: 40px;
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .luxury-tabs .btn {
+    border: none;
+    border-radius: 35px;
+    padding: 10px 28px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    color: #495057;
+    background: transparent;
+  }
+
+  .luxury-tabs .btn.active {
+    background: #0a0a0c;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* ---------- CREATIVE MEDIA GRID ---------- */
   .media-grid {
-    grid-template-columns: repeat(5, 1fr); /* 💻 Desktop */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .grid-card-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    background: #fff;
+    aspect-ratio: 4 / 5;
   }
 
   .media-grid img,
   .media-grid video {
-    height: 220px;
-  }
-}
-
-.profile-actions .btn {
-  border-radius: 30px;
-  padding: 6px 16px;
-  font-weight: 500;
-}
-
-/* ===== MESSAGE PANEL (slide in like comment window) ===== */
-.message-panel{
-  position: fixed;
-  background: rgba(0,0,0,0.95);
-  color: #fff;
-  z-index: 12000; /* above everything */
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.35s ease;
-  border-left: 1px solid rgba(255,255,255,0.15);
-}
-
-/* Desktop: slide from right */
-@media (min-width: 769px){
-  .message-panel{
-    top: 0;
-    right: 0;
-    width: 380px;
-    height: 100vh;
-    transform: translateX(100%);
-  }
-  .message-panel.open{
-    transform: translateX(0);
-  }
-}
-
-/* Mobile: slide from bottom */
-@media (max-width: 768px){
-  .message-panel{
-    left: 0;
-    bottom: 0;
     width: 100%;
-    height: 45%;
-    transform: translateY(100%);
-    border-left: none;
-    border-top: 1px solid rgba(255,255,255,0.15);
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.5s ease;
   }
-  .message-panel.open{
-    transform: translateY(0);
+
+  .grid-card-wrap:hover img,
+  .grid-card-wrap:hover video {
+    transform: scale(1.06);
   }
-}
 
-.message-header{
-  display:flex;
-  justify-content: space-between;
-  align-items:center;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-}
+  /* ---------- STREAMLINED COMPACT MODALS ---------- */
+  .media-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 12, 0.96);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+  }
 
-.message-form{
-  display:flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 1rem;
-}
+  .modal-content-custom {
+    background: #fff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 1040px;
+    max-height: 85vh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
 
-.message-textarea{
-  width: 100%;
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  outline: none;
-  resize: none;
-}
+  .modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 16px;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+    transition: 0.2s ease;
+  }
+  
+  .modal-close-btn:hover {
+    background: #ff3b5c;
+  }
 
-.message-send-btn{
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  background: #ff3b5c;
-  color: #fff;
-  font-weight: 600;
-}
-.message-send-btn:hover{
-  background: #ff6b85;
-}
+  .modal-body-custom {
+    display: flex;
+    height: 85vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .modal-media-pane {
+    flex: 1.3;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .modal-media-pane img,
+  .modal-media-pane video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .modal-details-pane {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+    background: #fff;
+    border-left: 1px solid #f1f3f5;
+  }
+
+  /* ---------- SLIDEOUT PANEL (TIKTOK TALK) ---------- */
+  .message-panel {
+    position: fixed;
+    background: #0a0a0c;
+    color: #fff;
+    z-index: 12000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ---------- RESPONSIVE SYSTEM MEDIA QUERIES ---------- */
+  @media (min-width: 769px) {
+    .media-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .message-panel {
+      top: 0;
+      right: 0;
+      width: 400px;
+      height: 100vh;
+      transform: translateX(100%);
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+    .message-panel.open {
+      transform: translateX(0);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .media-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    .avatar-container {
+      margin-bottom: 20px;
+      margin-right: 0px !important;
+    }
+    .modal-body-custom {
+      flex-direction: column;
+      height: auto;
+      overflow-y: auto;
+    }
+    .modal-content-custom {
+      max-height: 90vh;
+    }
+    .modal-media-pane {
+      height: 350px;
+      flex: none;
+    }
+    .modal-details-pane {
+      padding: 24px;
+      flex: none;
+    }
+    .message-panel {
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 60%;
+      transform: translateY(100%);
+      border-top: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px 24px 0 0;
+    }
+    .message-panel.open {
+      transform: translateY(0);
+    }
+  }
 </style>
 
-<div class="container mt-4">
+<div class="container mt-5">
 
-  <!-- ================= PROFILE HEADER ================= -->
-  <div class="profile-header mb-4 shadow-lg">
-    <div class="profile-header-overlay"></div>
-
-    <div class="profile-header-content d-flex align-items-center flex-wrap">
-
-      <!-- AVATAR -->
-      <div class="profile-avatar-wrap me-4">
+  <!-- ================= PROFILE HERO BANNER ================= -->
+  <div class="fashion-profile-hero text-white mb-4">
+    <div class="hero-glow-overlay"></div>
+    <div class="profile-header-content d-flex align-items-center position-relative">
+      
+      <!-- RADIANTA PROFILE AVATAR -->
+      <div class="avatar-container me-4">
         {% if profile_user.profile.avatar %}
-          <img src="{{ profile_user.profile.avatar.url }}"
-               class="profile-avatar"
-               alt="Profile Avatar">
+          <img src="{{ profile_user.profile.avatar.url }}" class="profile-avatar" alt="Profile Avatar">
         {% else %}
-          <img src="{% static 'images/default-avatar.png' %}"
-               class="profile-avatar"
-               alt="Default Avatar">
+          <img src="{% static 'images/default-avatar.png' %}" class="profile-avatar" alt="Default Avatar">
         {% endif %}
       </div>
 
-      <!-- USER INFO -->
-      <div class="profile-info text-white">
-
-        <h3 class="fw-bold mb-1">{{ profile_user.username }}</h3>
-
-        <p class="mb-2 opacity-75">
-          {{ profile_user.profile.bio|default:"Fashion creator & stylist" }}
+      <!-- BIO METRICS & TEXT -->
+      <div class="profile-info">
+        <h2 class="fw-bold mb-1 tracking-tight">{{ profile_user.username }}</h2>
+        <p class="mb-3 fs-6 opacity-75 fw-light">
+          {{ profile_user.profile.bio|default:"Fashion creator & structural designer" }}
         </p>
 
-        <!-- META -->
-        <div class="profile-meta mb-3">
+        <!-- CONFIG META -->
+        <div class="d-flex flex-wrap gap-3 mb-3 opacity-75 small">
           {% if profile_user.profile.phone %}
-            <span class="me-3">
-              <i class="bi bi-telephone-fill"></i>
-              {{ profile_user.profile.phone }}
-            </span>
+            <span><i class="bi bi-telephone-fill me-1"></i> {{ profile_user.profile.phone }}</span>
           {% endif %}
-
           {% if profile_user.profile.location %}
-            <span>
-              <i class="bi bi-geo-alt-fill"></i>
-              {{ profile_user.profile.location }}
-            </span>
+            <span><i class="bi bi-geo-alt-fill me-1"></i> {{ profile_user.profile.location }}</span>
           {% endif %}
         </div>
 
-        <!-- SOCIAL LINKS -->
-        <div class="profile-socials mb-3">
+        <!-- SOCIAL LINK CHIPS -->
+        <div class="fashion-socials mb-4">
           {% if profile_user.profile.whatsapp %}
-            <a href="https://wa.me/{{ profile_user.profile.whatsapp|cut:'+' }}"
-               target="_blank">
-              <i class="bi bi-whatsapp"></i>
-            </a>
+            <a href="https://wa.me/{{ profile_user.profile.whatsapp|cut:'+' }}" target="_blank"><i class="bi bi-whatsapp"></i></a>
           {% endif %}
-
           {% if profile_user.profile.instagram %}
-            <a href="{{ profile_user.profile.instagram }}" target="_blank">
-              <i class="bi bi-instagram"></i>
-            </a>
+            <a href="{{ profile_user.profile.instagram }}" target="_blank"><i class="bi bi-instagram"></i></a>
           {% endif %}
-
           {% if profile_user.profile.facebook %}
-            <a href="{{ profile_user.profile.facebook }}" target="_blank">
-              <i class="bi bi-facebook"></i>
-            </a>
+            <a href="{{ profile_user.profile.facebook }}" target="_blank"><i class="bi bi-facebook"></i></a>
           {% endif %}
-
           {% if profile_user.profile.twitter %}
-            <a href="{{ profile_user.profile.twitter }}" target="_blank">
-              <i class="bi bi-twitter-x"></i>
-            </a>
+            <a href="{{ profile_user.profile.twitter }}" target="_blank"><i class="bi bi-twitter-x"></i></a>
           {% endif %}
-
           {% if profile_user.profile.tiktok %}
-            <a href="{{ profile_user.profile.tiktok }}" target="_blank">
-              <i class="bi bi-tiktok"></i>
-            </a>
+            <a href="{{ profile_user.profile.tiktok }}" target="_blank"><i class="bi bi-tiktok"></i></a>
           {% endif %}
         </div>
 
-        <!-- ACTION BUTTONS -->
-        <!-- ACTION BUTTONS -->
-        <div class="profile-actions d-flex gap-2 flex-wrap">
-
-          {# MESSAGE → only when viewing OTHER users #}
+        <!-- INTERACTION CTA ACTION GROUP -->
+        <div class="d-flex flex-wrap gap-2 justify-content-sm-start justify-content-center">
           {% if user.is_authenticated and user != profile_user %}
-            <button type="button"
-                    class="btn btn-outline-light btn-sm"
-                    onclick="openMessageModal()">
-              <i class="bi bi-chat-dots-fill"></i> Message
+            <button type="button" class="btn btn-light rounded-pill px-4 fw-600 btn-sm" onclick="openMessageModal()">
+              <i class="bi bi-chat-dots-fill me-1"></i> Message
             </button>
           {% endif %}
 
-          {# TAKE MEASUREMENT → ONLY own profile #}
           {% if user.is_authenticated and user == profile_user %}
-            <a href="{% url 'measureApp:index' %}"
-              class="btn btn-light btn-sm">
-              <i class="bi bi-rulers"></i> Take Measurement
+            <a href="{% url 'measureApp:index' %}" class="btn btn-outline-light rounded-pill px-4 btn-sm">
+              <i class="bi bi-rulers me-1"></i> Take Measurement
             </a>
           {% endif %}
-
         </div>
-
 
       </div>
     </div>
   </div>
 
-
-
-  <!-- MEDIA TABS -->
+  <!-- INTERACTIVE DISCOVERY SEGMENT TABS -->
   <div class="media-tabs-wrapper">
-    <div class="media-tabs">
-      <button id="photosBtn" class="btn btn-dark active" onclick="showPhotos()">📸 Photos</button>
-      <button id="videosBtn" class="btn btn-outline-dark" onclick="showVideos()">🎥 Videos</button>
+    <div class="luxury-tabs">
+      <button id="photosBtn" class="btn active" onclick="showPhotos()">📸 Photos</button>
+      <button id="videosBtn" class="btn" onclick="showVideos()">🎥 Videos</button>
     </div>
   </div>
 
-  <!-- PHOTOS -->
+  <!-- GALLERY FEED SECTIONS -->
   <div id="photos-section">
     <div class="media-grid">
       {% for img in images %}
-        <img
-          src="{{ img.image.url }}"
-          data-src="{{ img.image.url }}"
-          data-type="image"
-          data-seller="{{ img.product.seller.id }}"
-          data-title="{{ img.product.title }}"
-          data-desc="{{ img.product.description }}"
-          data-size="{{ img.product.size }}"
-          data-area="{{ img.product.delivery_area }}"
-          data-price="{{ img.product.price }}"
-          data-url="{% url 'orders:create' img.product.id %}"
-          data-edit-url="{% url 'products:product_edit' img.product.id %}"
-          data-delete-url="{% url 'products:product_delete' img.product.id %}"
-          onclick="openModal(this)"
-        >
-
-
+        <div class="grid-card-wrap">
+          <img
+            src="{{ img.image.url }}"
+            data-src="{{ img.image.url }}"
+            data-type="image"
+            data-seller="{{ img.product.seller.id }}"
+            data-title="{{ img.product.title }}"
+            data-desc="{{ img.product.description }}"
+            data-size="{{ img.product.size }}"
+            data-area="{{ img.product.delivery_area }}"
+            data-price="{{ img.product.price }}"
+            data-url="{% url 'orders:create' img.product.id %}"
+            data-edit-url="{% url 'products:product_edit' img.product.id %}"
+            data-delete-url="{% url 'products:product_delete' img.product.id %}"
+            onclick="openModal(this)"
+            alt="Fashion visual asset"
+          >
+        </div>
       {% endfor %}
     </div>
   </div>
 
-  <!-- VIDEOS -->
   <div id="videos-section" style="display:none;">
     <div class="media-grid">
       {% for vid in videos %}
-        <video
-          src="{{ vid.video.url }}"
-          muted loop autoplay
-          data-src="{{ vid.video.url }}"
-          data-seller="{{ vid.product.seller.id }}"
-          data-title="{{ vid.product.title }}"
-          data-desc="{{ vid.product.description }}"
-          data-size="{{ vid.product.size }}"
-          data-area="{{ vid.product.delivery_area }}"
-          data-price="{{ vid.product.price }}"
-          data-url="{% url 'orders:create' vid.product.id %}"
-          data-edit-url="{% url 'products:product_edit' vid.product.id %}"
-          data-delete-url="{% url 'products:product_delete' vid.product.id %}"
-          data-owner="{% if vid.product.seller == user %}true{% else %}false{% endif %}"
-          data-type="video"
-          onclick="openModal(this)"
-        ></video>
-
+        <div class="grid-card-wrap">
+          <video
+            src="{{ vid.video.url }}"
+            muted loop autoplay
+            data-src="{{ vid.video.url }}"
+            data-seller="{{ vid.product.seller.id }}"
+            data-title="{{ vid.product.title }}"
+            data-desc="{{ vid.product.description }}"
+            data-size="{{ vid.product.size }}"
+            data-area="{{ vid.product.delivery_area }}"
+            data-price="{{ vid.product.price }}"
+            data-url="{% url 'orders:create' vid.product.id %}"
+            data-edit-url="{% url 'products:product_edit' vid.product.id %}"
+            data-delete-url="{% url 'products:product_delete' vid.product.id %}"
+            data-owner="{% if vid.product.seller == user %}true{% else %}false{% endif %}"
+            data-type="video"
+            onclick="openModal(this)"
+          ></video>
+        </div>
       {% endfor %}
     </div>
   </div>
 </div>
 
-<!-- MESSAGE PANEL (like comment window) -->
+<!-- SLIDEOUT CONNECT COMMUNICATOR PANEL -->
 <div class="message-panel" id="messagePanel">
   <div class="message-header">
-    <h4>Message {{ profile_user.username }}</h4>
-    <button id="closeMessagePanel" type="button"
-            style="background:none;border:none;color:#fff;font-size:1.5rem;">×</button>
+    <h5 class="m-0 fw-bold">Message {{ profile_user.username }}</h5>
+    <button id="closeMessagePanel" type="button" style="background:none;border:none;color:#fff;font-size:1.8rem; line-height:1;">&times;</button>
   </div>
 
-  <form class="message-form"
-        method="post"
-        action="{% url 'accounts:send_message' profile_user.username %}">
+  <form class="message-form" method="post" action="{% url 'accounts:send_message' profile_user.username %}">
     {% csrf_token %}
-
-    <textarea name="message"
-              class="message-textarea"
-              rows="4"
-              placeholder="Write your message..."
-              required></textarea>
-
-    <button type="submit" class="message-send-btn">Send</button>
+    <textarea name="message" class="message-textarea" rows="5" placeholder="Inquire about custom sizing, styling options or orders..." required></textarea>
+    <button type="submit" class="message-send-btn mt-2">Send Message</button>
   </form>
 </div>
 
-
-<!-- MEDIA MODAL -->
+<!-- ================= FASHION PORTFOLIO LIGHTBOX MODAL ================= -->
 <div class="media-modal" id="mediaModal" onclick="closeModal(event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
+  <div class="modal-content-custom" onclick="event.stopPropagation()">
 
-    <!-- CLOSE BUTTON -->
-    <button class="modal-close-btn" type="button" onclick="closeModal(event)">
-      ✕
-    </button>
+    <button class="modal-close-btn" type="button" onclick="closeModal(event)">&times;</button>
 
-    <!-- OWNER ACTIONS (HAMBURGER) -->
-    <div id="ownerActions"
-         class="modal-actions d-none"
-         onclick="event.stopPropagation()">
-
-      <button class="hamburger-btn" type="button" onclick="toggleOwnerMenu()">
-        ☰
+    <!-- ADMIN CONTEXT MENU CONTROLS -->
+    <div id="ownerActions" class="modal-actions d-none" style="position:absolute; top:16px; left:16px; z-index:100;">
+      <button class="hamburger-btn btn btn-light rounded-circle" type="button" onclick="toggleOwnerMenu()" style="width:38px; height:38px; padding:0; display:flex; align-items:center; justify-content:center;">
+        <i class="bi bi-three-dots-vertical"></i>
       </button>
-
-      <div id="ownerMenu" class="owner-menu d-none">
-        <a id="editPostBtn" class="owner-menu-item">✏️ Edit Post</a>
-
-        <form id="deletePostForm" method="post">
+      <div id="ownerMenu" class="owner-menu d-none" style="position:absolute; top:44px; left:0; background:#fff; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.15); overflow:hidden; width:160px;">
+        <a id="editPostBtn" class="owner-menu-item py-2 px-3 d-block text-dark text-decoration-none" style="font-size:14px; transition:0.2s;"><i class="bi bi-pencil me-2"></i> Edit Post</a>
+        <form id="deletePostForm" method="post" class="m-0">
           {% csrf_token %}
-          <button type="submit"
-                  class="owner-menu-item text-danger"
-                  onclick="return confirm('Delete this post?');">
-            🗑️ Delete Post
+          <button type="submit" class="owner-menu-item py-2 px-3 text-danger border-0 w-100 text-start" style="font-size:14px; background:none; transition:0.2s;" onclick="return confirm('Permanently remove this collection image?');">
+            <i class="bi bi-trash me-2"></i> Delete Post
           </button>
         </form>
       </div>
     </div>
 
-  <!-- MODAL BODY (SCROLLABLE) -->
-  <div class="modal-body">
+    <!-- PRESENTATION PANE CONTENT -->
+    <div class="modal-body-custom">
+      <div class="modal-media-pane" id="modalMedia"></div>
 
-    <div class="modal-media" id="modalMedia"></div>
+      <div class="modal-details-pane">
+        <div>
+          <h4 id="modalTitle" class="fw-bold mb-2 text-dark"></h4>
+          <p id="modalDesc" class="text-secondary small mb-4" style="line-height:1.6;"></p>
+          
+          <hr class="text-muted opacity-25">
+          
+          <div class="mb-3 d-flex justify-content-between text-secondary small">
+            <span><b>Size Matrix:</b></span>
+            <span id="modalSize" class="text-dark fw-500"></span>
+          </div>
+          <div class="mb-4 d-flex justify-content-between text-secondary small">
+            <span><b>Distribution Area:</b></span>
+            <span id="modalArea" class="text-dark fw-500"></span>
+          </div>
+        </div>
 
-    <div class="modal-details">
-      <h5 id="modalTitle"></h5>
-      <p id="modalDesc"></p>
+        <div>
+          <div class="d-flex align-items-baseline gap-2 mb-3">
+            <span class="small text-secondary">Price:</span>
+            <h3 class="text-dark fw-bold m-0">₦<span id="modalPrice"></span></h3>
+          </div>
 
-      <p><b>Size:</b> <span id="modalSize"></span></p>
-      <p><b>Delivery Area:</b> <span id="modalArea"></span></p>
-
-      <h4 class="text-success mb-3">
-        ₦<span id="modalPrice"></span>
-      </h4>
-
-      {% if user.is_authenticated %}
-        <a id="orderBtn" class="btn btn-dark w-100">🛒 Order Now</a>
-      {% else %}
-        <a href="{% url 'account_login' %}" class="btn btn-dark w-100">
-          🔐 Login to Order
-        </a>
-      {% endif %}
+          {% if user.is_authenticated %}
+            <a id="orderBtn" class="btn btn-dark w-100 rounded-pill py-2 fw-600">🛒 Order Workpiece</a>
+          {% else %}
+            <a href="{% url 'account_login' %}" class="btn btn-dark w-100 rounded-pill py-2 fw-600">
+              🔐 Login to Purchase
+            </a>
+          {% endif %}
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
-
-
 <script>
-/* ---------------- MEDIA TABS ---------------- */
-const photosSection = document.getElementById("photos-section");
-const videosSection = document.getElementById("videos-section");
-const photosBtn = document.getElementById("photosBtn");
-const videosBtn = document.getElementById("videosBtn");
+  /* ---------------- INTERACTIVE TAB CONTROLS ---------------- */
+  const photosSection = document.getElementById("photos-section");
+  const videosSection = document.getElementById("videos-section");
+  const photosBtn = document.getElementById("photosBtn");
+  const videosBtn = document.getElementById("videosBtn");
 
-function showPhotos() {
-  photosSection.style.display = "block";
-  videosSection.style.display = "none";
-  photosBtn.classList.add("active");
-  videosBtn.classList.remove("active");
-}
-
-function showVideos() {
-  photosSection.style.display = "none";
-  videosSection.style.display = "block";
-  videosBtn.classList.add("active");
-  photosBtn.classList.remove("active");
-}
-
-/* ---------------- MODAL ELEMENTS ---------------- */
-const modal = document.getElementById("mediaModal");
-const mediaBox = document.getElementById("modalMedia");
-const orderBtn = document.getElementById("orderBtn");
-
-const ownerActions = document.getElementById("ownerActions");
-const ownerMenu = document.getElementById("ownerMenu");
-const editPostBtn = document.getElementById("editPostBtn");
-const deletePostForm = document.getElementById("deletePostForm");
-
-const modalTitle = document.getElementById("modalTitle");
-const modalDesc = document.getElementById("modalDesc");
-const modalSize = document.getElementById("modalSize");
-const modalArea = document.getElementById("modalArea");
-const modalPrice = document.getElementById("modalPrice");
-
-/* ---------------- OWNER MENU ---------------- */
-function toggleOwnerMenu() {
-  ownerMenu.classList.toggle("d-none");
-}
-
-/* ---------------- OPEN MODAL ---------------- */
-function openModal(el) {
-  const sellerId = String(el.dataset.seller || "");
-  const userId = String("{{ user.id|default:'' }}");
-  const isOwner = sellerId && sellerId === userId;
-
-  /* MEDIA */
-  if (el.dataset.type === "video") {
-    mediaBox.innerHTML = `
-      <video src="${el.dataset.src}"
-             controls autoplay playsinline
-             style="width:100%;height:100%;object-fit:cover"></video>`;
-  } else {
-    mediaBox.innerHTML = `
-      <img src="${el.dataset.src}"
-           style="width:100%;height:100%;object-fit:cover">`;
+  function showPhotos() {
+    photosSection.style.display = "block";
+    videosSection.style.display = "none";
+    photosBtn.classList.add("active");
+    videosBtn.classList.remove("active");
   }
 
-  /* DETAILS */
-  modalTitle.textContent = el.dataset.title || "";
-  modalDesc.textContent = el.dataset.desc || "";
-  modalSize.textContent = el.dataset.size || "—";
-  modalArea.textContent = el.dataset.area || "—";
-  modalPrice.textContent = el.dataset.price || "";
-
-  /* OWNER VS BUYER */
-  if (isOwner) {
-    ownerActions.classList.remove("d-none");
-    ownerMenu.classList.add("d-none");
-
-    editPostBtn.href = el.dataset.editUrl || "#";
-    deletePostForm.action = el.dataset.deleteUrl || "#";
-
-    orderBtn.classList.add("disabled");
-    orderBtn.style.pointerEvents = "none";
-    orderBtn.textContent = "🚫 You cannot order your own product";
-    orderBtn.removeAttribute("href");
-  } else {
-    ownerActions.classList.add("d-none");
-
-    orderBtn.classList.remove("disabled");
-    orderBtn.style.pointerEvents = "auto";
-    orderBtn.textContent = "🛒 Order Now";
-    orderBtn.href = el.dataset.url || "#";
+  function showVideos() {
+    photosSection.style.display = "none";
+    videosSection.style.display = "block";
+    videosBtn.classList.add("active");
+    photosBtn.classList.remove("active");
   }
 
-  modal.style.display = "flex";
-}
+  /* ---------------- PRESENTATION MODAL ---------------- */
+  const modal = document.getElementById("mediaModal");
+  const mediaBox = document.getElementById("modalMedia");
+  const orderBtn = document.getElementById("orderBtn");
+  const ownerActions = document.getElementById("ownerActions");
+  const ownerMenu = document.getElementById("ownerMenu");
+  const editPostBtn = document.getElementById("editPostBtn");
+  const deletePostForm = document.getElementById("deletePostForm");
 
-function toggleOwnerMenu() {
-  document.getElementById("ownerMenu").classList.toggle("d-none");
-}
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+  const modalSize = document.getElementById("modalSize");
+  const modalArea = document.getElementById("modalArea");
+  const modalPrice = document.getElementById("modalPrice");
 
-function closeModal(e) {
-  if (
-    e.target.id === "mediaModal" ||
-    e.target.classList.contains("modal-close-btn")
-  ) {
-    const media = document.querySelector("#modalMedia video");
-    if (media) {
-      media.pause();
-      media.currentTime = 0;
+  function toggleOwnerMenu() {
+    ownerMenu.classList.toggle("d-none");
+  }
+
+  function openModal(el) {
+    const sellerId = String(el.dataset.seller || "");
+    const userId = String("{{ user.id|default:'' }}");
+    const isOwner = sellerId && sellerId === userId;
+
+    if (el.dataset.type === "video") {
+      mediaBox.innerHTML = `<video src="${el.dataset.src}" controls autoplay playsinline style="width:100%; height:100%; object-fit:contain;"></video>`;
+    } else {
+      mediaBox.innerHTML = `<img src="${el.dataset.src}" style="width:100%; height:100%; object-fit:contain;">`;
     }
-    document.getElementById("mediaModal").style.display = "none";
-    document.getElementById("modalMedia").innerHTML = "";
-    document.getElementById("ownerMenu")?.classList.add("d-none");
+
+    modalTitle.textContent = el.dataset.title || "";
+    modalDesc.textContent = el.dataset.desc || "";
+    modalSize.textContent = el.dataset.size || "Standard";
+    modalArea.textContent = el.dataset.area || "Global Delivery";
+    modalPrice.textContent = parseFloat(el.dataset.price || 0).toLocaleString();
+
+    if (isOwner) {
+      ownerActions.classList.remove("d-none");
+      ownerMenu.classList.add("d-none");
+      editPostBtn.href = el.dataset.editUrl || "#";
+      deletePostForm.action = el.dataset.deleteUrl || "#";
+
+      if (orderBtn) {
+        orderBtn.classList.add("disabled", "btn-secondary");
+        orderBtn.style.pointerEvents = "none";
+        orderBtn.textContent = "Your Wardrobe Item";
+        orderBtn.removeAttribute("href");
+      }
+    } else {
+      ownerActions.classList.add("d-none");
+      if (orderBtn) {
+        orderBtn.classList.remove("disabled", "btn-secondary");
+        orderBtn.classList.add("btn-dark");
+        orderBtn.style.pointerEvents = "auto";
+        orderBtn.textContent = "🛒 Order Workpiece";
+        orderBtn.href = el.dataset.url || "#";
+      }
+    }
+    modal.style.display = "flex";
   }
-}
 
-function openMessageModal() {
-  // Optional: close media modal if it’s open so they don’t overlap
-  const mediaModal = document.getElementById("mediaModal");
-  if (mediaModal && mediaModal.style.display === "flex") {
-    closeModal({ target: mediaModal }); // uses your existing closeModal
+  function closeModal(e) {
+    if (e.target.id === "mediaModal" || e.target.classList.contains("modal-close-btn") || e.target.closest('.modal-close-btn')) {
+      const media = document.querySelector("#modalMedia video");
+      if (media) {
+        media.pause();
+        media.currentTime = 0;
+      }
+      modal.style.display = "none";
+      mediaBox.innerHTML = "";
+      ownerMenu?.classList.add("d-none");
+    }
   }
 
-  document.getElementById("messagePanel").classList.add("open");
-}
+  /* ---------------- CONNECT FEED SLIDEOUT PANEL ---------------- */
+  function openMessageModal() {
+    const mediaModal = document.getElementById("mediaModal");
+    if (mediaModal && mediaModal.style.display === "flex") {
+      closeModal({ target: mediaModal });
+    }
+    document.getElementById("messagePanel").classList.add("open");
+  }
 
-document.getElementById("closeMessagePanel")?.addEventListener("click", () => {
-  document.getElementById("messagePanel").classList.remove("open");
-});
+  document.getElementById("closeMessagePanel")?.addEventListener("click", () => {
+    document.getElementById("messagePanel").classList.remove("open");
+  });
 
-
-  // Send profile message using notifications:send_message (so it appears in Notifications)
   const msgForm = document.querySelector("#messagePanel .message-form");
   if (msgForm) {
     msgForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
       const textarea = msgForm.querySelector('textarea[name="message"]');
       const text = (textarea?.value || "").trim();
       if (!text) return;
@@ -838,12 +637,10 @@ document.getElementById("closeMessagePanel")?.addEventListener("click", () => {
       .then(data => {
         if (data.ok) {
           textarea.value = "";
-          // close the panel
           document.getElementById("messagePanel").classList.remove("open");
-          alert("Message sent!");
+          alert("Message forwarded to designer!");
         } else {
-          alert("Failed to send message");
-          console.log(data);
+          alert("Could not process transmission.");
         }
       });
     });

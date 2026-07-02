@@ -1,0 +1,1610 @@
+{% load static %}
+{% block content %}
+
+<style>
+/* ==========================================================
+   IMURA ONBOARDING
+   ========================================================== */
+
+:root{
+    --primary:#111827;
+    --secondary:#4b5563;
+    --accent:#2563eb;
+    --light:#f8fafc;
+    --border:#e5e7eb;
+    --radius:22px;
+    --shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+html,
+body{
+    overflow-x:hidden;
+}
+
+/* Prevent page scrolling while onboarding is open */
+body.onboarding-open{
+    overflow:hidden;
+}
+
+
+/* ==========================================================
+   SPLASH SCREEN
+   ========================================================== */
+
+#splashScreen{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+    transition:opacity .6s ease;
+}
+
+#splashScreen img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+#splashScreen.hide{
+    opacity:0;
+    pointer-events:none;
+}
+
+
+/* ==========================================================
+   OVERLAY
+   ========================================================== */
+
+.onboarding-overlay{
+
+    position:fixed;
+    inset:0;
+
+    display:none;
+
+    background:#fff;
+
+    z-index:999999;
+
+    overflow:hidden;
+
+}
+
+.onboarding-overlay.show{
+
+    display:flex;
+
+}
+
+
+/* ==========================================================
+   CONTAINER
+   ========================================================== */
+
+.onboarding-container{
+
+    width:100%;
+    height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.onboarding-header{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+
+    padding:22px 26px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    z-index:100;
+
+}
+
+.onboarding-header button{
+
+    border:none;
+
+    background:rgba(255,255,255,.9);
+
+    padding:12px 18px;
+
+    border-radius:999px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(10px);
+
+}
+
+.onboarding-header button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+
+}
+
+#onb-btn-prev{
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+#onb-btn-prev.visible{
+
+    opacity:1;
+
+    pointer-events:auto;
+
+}
+
+
+/* ==========================================================
+   VIEWPORT
+   ========================================================== */
+
+.onboarding-slides-viewport{
+
+    width:100%;
+
+    height:100%;
+
+    overflow:hidden;
+
+}
+
+
+/* ==========================================================
+   TRACK
+   ========================================================== */
+
+.onboarding-slides-track{
+
+    display:flex;
+
+    width:100%;
+
+    height:100%;
+
+    transition:transform .6s cubic-bezier(.25,1,.3,1);
+
+    will-change:transform;
+
+}
+
+
+/* ==========================================================
+   SLIDES
+   ========================================================== */
+
+.onb-slide{
+
+    flex:0 0 100%;
+
+    height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    padding:90px 24px 90px;
+
+    position:relative;
+
+    box-sizing:border-box;
+
+}
+
+.onb-slide-content{
+
+    width:100%;
+
+    max-width:500px;
+
+}
+
+
+/* ==========================================================
+   ILLUSTRATION
+   ========================================================== */
+
+.illustration-container{
+
+    width:220px;
+
+    max-width:80%;
+
+    margin:0 auto 40px;
+
+}
+
+.onb-svg{
+
+    width:100%;
+
+    height:auto;
+
+}
+
+
+/* ==========================================================
+   TITLES
+   ========================================================== */
+
+.onb-title{
+
+    font-size:clamp(28px,4vw,38px);
+
+    font-weight:800;
+
+    color:#111827;
+
+    margin-bottom:18px;
+
+    line-height:1.2;
+
+}
+
+.onb-subtitle{
+
+    font-size:17px;
+
+    line-height:1.7;
+
+    color:#6b7280;
+
+}
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+.btn-onb{
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:999px;
+
+    padding:15px 30px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+    text-decoration:none;
+
+    display:inline-flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.btn-onb:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.btn-onb-primary{
+
+    background:#111827;
+
+    color:white;
+
+}
+
+.btn-onb-primary:hover{
+
+    background:#000;
+
+}
+
+.btn-onb-secondary{
+
+    background:white;
+
+    color:#111827;
+
+    border:2px solid #111827;
+
+}
+
+.btn-onb-secondary:hover{
+
+    background:#111827;
+
+    color:white;
+
+}
+
+.btn-onb-link{
+
+    background:none;
+
+    color:#6b7280;
+
+    box-shadow:none;
+
+}
+
+
+/* ==========================================================
+   BOTTOM AREA
+   ========================================================== */
+
+.slide-actions{
+
+    position:absolute;
+
+    left:0;
+
+    bottom:32px;
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+
+/* ==========================================================
+   PROGRESS
+   ========================================================== */
+
+.progress-container{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+.progress-dot{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:999px;
+
+    background:#d1d5db;
+
+    transition:.3s;
+
+}
+
+.progress-dot.active{
+
+    width:26px;
+
+    background:#111827;
+
+}
+
+
+/* ==========================================================
+   BADGE
+   ========================================================== */
+
+.onb-badge{
+
+    display:inline-block;
+
+    margin-top:24px;
+
+    background:#111827;
+
+    color:white;
+
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    font-size:14px;
+
+}
+
+
+/* ==========================================================
+   TAGS
+   ========================================================== */
+
+.onb-tags-container{
+
+    margin-top:25px;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+    gap:10px;
+
+}
+
+.onb-tag{
+
+    padding:9px 18px;
+
+    border-radius:999px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    font-size:14px;
+
+}
+
+
+/* ==========================================================
+   FINAL PAGE
+   ========================================================== */
+
+.final-slide-content{
+
+    max-width:600px;
+
+}
+
+.brand-logo-container{
+
+    margin-bottom:30px;
+
+}
+
+.brand-logo-mock{
+
+    width:110px;
+
+    height:110px;
+
+    border-radius:30px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    margin:auto;
+
+    background:#111827;
+
+    color:white;
+
+    font-weight:800;
+
+    font-size:26px;
+
+    letter-spacing:2px;
+
+}
+
+.onb-cta-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+    margin-top:35px;
+
+}
+
+/* ==========================================================
+   SLIDE BACKGROUNDS
+   ========================================================== */
+
+.slide-grad-1{
+    background:linear-gradient(180deg,#ffffff 0%,#eef6ff 100%);
+}
+
+.slide-grad-2{
+    background:linear-gradient(180deg,#fffdf7 0%,#fff4e8 100%);
+}
+
+.slide-grad-3{
+    background:linear-gradient(180deg,#f8fbff 0%,#edf5ff 100%);
+}
+
+.slide-grad-4{
+    background:linear-gradient(180deg,#fff8f8 0%,#ffecec 100%);
+}
+
+.slide-grad-5{
+    background:linear-gradient(180deg,#fcfcff 0%,#f3efff 100%);
+}
+
+.slide-grad-6{
+    background:linear-gradient(180deg,#ffffff 0%,#eef7ff 100%);
+}
+
+.slide-grad-7{
+    background:linear-gradient(180deg,#ffffff 0%,#f5f5f5 100%);
+}
+
+
+/* ==========================================================
+   SVG ANIMATION
+   ========================================================== */
+
+.onb-svg{
+
+    animation:float 5s ease-in-out infinite;
+
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,.08));
+
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-10px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================================
+   CONTENT ANIMATION
+   ========================================================== */
+
+.onb-slide-content{
+
+    animation:fadeUp .6s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(35px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:none;
+
+    }
+
+}
+
+
+/* ==========================================================
+   BUTTON EFFECTS
+   ========================================================== */
+
+.btn-onb{
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.btn-onb:active{
+
+    transform:scale(.96);
+
+}
+
+.btn-onb-primary{
+
+    background:linear-gradient(135deg,#111827,#1f2937);
+
+}
+
+.btn-onb-primary:hover{
+
+    box-shadow:0 15px 40px rgba(17,24,39,.25);
+
+}
+
+.btn-onb-secondary{
+
+    background:white;
+
+}
+
+.btn-onb-secondary:hover{
+
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+
+}
+
+.btn-onb-link{
+
+    box-shadow:none;
+
+}
+
+
+/* ==========================================================
+   PROGRESS DOT ANIMATION
+   ========================================================== */
+
+.progress-dot{
+
+    transition:
+
+        width .3s ease,
+
+        background .3s ease,
+
+        transform .3s ease;
+
+}
+
+.progress-dot.active{
+
+    transform:scale(1.05);
+
+}
+
+
+/* ==========================================================
+   CARD STYLE
+   ========================================================== */
+
+.onb-slide-content{
+
+    background:rgba(255,255,255,.35);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:28px;
+
+    padding:30px;
+
+    box-shadow:0 20px 60px rgba(0,0,0,.05);
+
+}
+
+
+/* ==========================================================
+   DESKTOP LAYOUT
+   ========================================================== */
+
+@media (min-width:992px){
+
+    .onb-slide{
+
+        flex-direction:row;
+
+        justify-content:center;
+
+        align-items:center;
+
+        gap:90px;
+
+        text-align:left;
+
+        padding:100px;
+
+    }
+
+    .illustration-container{
+
+        width:360px;
+
+        margin:0;
+
+        flex-shrink:0;
+
+    }
+
+    .onb-slide-content{
+
+        max-width:520px;
+
+        padding:45px;
+
+    }
+
+    .onb-title{
+
+        font-size:46px;
+
+    }
+
+    .onb-subtitle{
+
+        font-size:18px;
+
+    }
+
+    .onb-tags-container{
+
+        justify-content:flex-start;
+
+    }
+
+    .onb-cta-group{
+
+        align-items:flex-start;
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET
+   ========================================================== */
+
+@media (max-width:991px){
+
+    .onb-slide{
+
+        padding:90px 40px;
+
+    }
+
+    .illustration-container{
+
+        width:240px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width:768px){
+
+    .onboarding-header{
+
+        padding:18px;
+
+    }
+
+    .onboarding-header button{
+
+        padding:10px 16px;
+
+        font-size:14px;
+
+    }
+
+    .onb-slide{
+
+        padding:90px 20px 100px;
+
+    }
+
+    .illustration-container{
+
+        width:180px;
+
+        margin-bottom:30px;
+
+    }
+
+    .onb-slide-content{
+
+        max-width:100%;
+
+        padding:20px;
+
+        border-radius:22px;
+
+    }
+
+    .onb-title{
+
+        font-size:30px;
+
+    }
+
+    .onb-subtitle{
+
+        font-size:15px;
+
+        line-height:1.6;
+
+    }
+
+    .btn-onb{
+
+        width:100%;
+
+    }
+
+    .onb-cta-group{
+
+        width:100%;
+
+    }
+
+}
+
+
+/* ==========================================================
+   SMALL PHONES
+   ========================================================== */
+
+@media (max-width:430px){
+
+    .illustration-container{
+
+        width:150px;
+
+    }
+
+    .onb-title{
+
+        font-size:25px;
+
+    }
+
+    .onb-subtitle{
+
+        font-size:14px;
+
+    }
+
+    .btn-onb{
+
+        padding:14px 18px;
+
+        font-size:14px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   REDUCE MOTION
+   ========================================================== */
+
+@media (prefers-reduced-motion:reduce){
+
+    *{
+
+        animation:none !important;
+
+        transition:none !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   ACTIVE SLIDE
+   ========================================================== */
+
+.onb-slide{
+
+    opacity:.98;
+
+}
+
+.onb-slide.active{
+
+    opacity:1;
+
+}
+
+
+/* ==========================================================
+   FOCUS ACCESSIBILITY
+   ========================================================== */
+
+button:focus,
+a:focus{
+
+    outline:3px solid rgba(37,99,235,.35);
+
+    outline-offset:4px;
+
+}
+
+
+/* ==========================================================
+   SMOOTH TRANSITIONS
+   ========================================================== */
+
+.onb-slide,
+.onb-slide-content,
+.btn-onb,
+.progress-dot{
+
+    transition:all .3s ease;
+
+}
+</style>
+
+{% load static %}
+
+<div id="imura-onboarding-overlay" class="onboarding-overlay">
+
+    <div class="onboarding-container">
+
+        <!-- ================= HEADER ================= -->
+
+        <div class="onboarding-header">
+
+            <button id="onb-btn-prev" class="btn-onb btn-onb-link">
+                ← Back
+            </button>
+
+            <button id="onb-btn-skip-top" class="btn-onb btn-onb-link">
+                Skip
+            </button>
+
+        </div>
+
+
+        <!-- ================= SLIDES ================= -->
+
+        <div class="onboarding-slides-viewport">
+
+            <div id="onb-slides-track" class="onboarding-slides-track">
+
+
+                <!-- ================= SLIDE 1 ================= -->
+
+                <section class="onb-slide slide-grad-1 active">
+
+                    <div class="illustration-container">
+                        <img src="{% static 'img/welcome.png' %}"
+                             class="onb-svg"
+                             alt="Welcome">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            Welcome to IMURA
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Discover trusted fashion brands,
+                            talented designers and skilled
+                            tailors—all in one place.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= SLIDE 2 ================= -->
+
+                <section class="onb-slide slide-grad-2">
+
+                    <div class="illustration-container">
+                        <img src="{% static 'img/measure.png' %}"
+                             class="onb-svg"
+                             alt="Measurement">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            AI Body Measurement
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Capture accurate body measurements
+                            using only your phone camera.
+                        </p>
+
+                        <span class="onb-badge">
+                            Fast • Accurate • Easy
+                        </span>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= SLIDE 3 ================= -->
+
+                <section class="onb-slide slide-grad-3">
+
+                    <div class="illustration-container">
+                        <img src="{% static 'img/marketplace.png' %}"
+                             class="onb-svg"
+                             alt="Marketplace">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            Explore Fashion
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Browse thousands of products
+                            from trusted sellers and
+                            fashion brands.
+                        </p>
+
+                        <div class="onb-tags-container">
+
+                            <span class="onb-tag">Men</span>
+
+                            <span class="onb-tag">Women</span>
+
+                            <span class="onb-tag">Native</span>
+
+                            <span class="onb-tag">Corporate</span>
+
+                            <span class="onb-tag">Streetwear</span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= SLIDE 4 ================= -->
+
+                <section class="onb-slide slide-grad-4">
+
+                    <div class="illustration-container">
+                        <img src="{% static 'img/tailor.png' %}"
+                             class="onb-svg"
+                             alt="Tailor">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            Connect With Tailors
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Send your measurements directly
+                            to your favourite tailor and
+                            receive perfectly fitted outfits.
+                        </p>
+
+                    </div>
+
+                </section>
+
+                <!-- SLIDE 5 -->
+                <!-- ========================================= -->
+
+                <section class="onb-slide slide-grad-5">
+
+                    <div class="illustration-container">
+                        <img
+                            src="{% static 'img/escrow.png' %}"
+                            class="onb-svg"
+                            alt="Secure Payments">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            Protected Payments
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Shop with confidence. Your payment
+                            is securely held until your order
+                            is successfully completed.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ========================================= -->
+                <!-- SLIDE 6 -->
+                <!-- ========================================= -->
+
+                <section class="onb-slide slide-grad-6">
+
+                    <div class="illustration-container">
+                        <img
+                            src="{% static 'img/try-on.png' %}"
+                            class="onb-svg"
+                            alt="Virtual Try On">
+                    </div>
+
+                    <div class="onb-slide-content">
+
+                        <h1 class="onb-title">
+                            Try Before You Buy
+                        </h1>
+
+                        <p class="onb-subtitle">
+                            Preview outfits digitally and
+                            choose styles that suit you before
+                            placing an order.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ========================================= -->
+                <!-- SLIDE 7 -->
+                <!-- ========================================= -->
+
+                <section class="onb-slide slide-grad-7">
+
+                    <div class="onb-slide-content final-slide-content">
+
+                        <div class="brand-logo-container">
+
+                            <img
+                                src="{% static 'img/logo.png' %}"
+                                class="onb-svg"
+                                style="max-width:120px"
+                                alt="IMURA">
+
+                        </div>
+
+                        <h1 class="onb-title">
+                            Ready to Transform Your Style?
+                        </h1>
+
+                        <p class="onb-subtitle">
+
+                            Join IMURA today and discover
+                            fashion brands, connect with
+                            trusted tailors and enjoy a
+                            personalized shopping experience.
+
+                        </p>
+
+                        <div class="onb-cta-group">
+
+                            <a href="{% url 'account_signup' %}"
+                               class="btn-onb btn-onb-primary onb-finish">
+
+                                Create Account
+
+                            </a>
+
+                            <a href="{% url 'account_login' %}"
+                               class="btn-onb btn-onb-secondary onb-finish">
+
+                                Login
+
+                            </a>
+
+                            <button
+                                id="onb-btn-skip-bottom"
+                                class="btn-onb btn-onb-link">
+
+                                Explore First
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- FOOTER -->
+        <!-- ========================================= -->
+
+        <div class="slide-actions">
+
+            <div class="progress-container">
+
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+
+            </div>
+
+            <button
+                class="btn-onb btn-onb-primary onb-btn-next">
+
+                Next →
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ==========================================================
+       ELEMENTS
+    ========================================================== */
+
+    const splash = document.getElementById("splashScreen");
+
+    const overlay = document.getElementById("imura-onboarding-overlay");
+
+    if (!overlay) return;
+
+    const track = document.getElementById("onb-slides-track");
+
+    const slides = document.querySelectorAll(".onb-slide");
+
+    const prevBtn = document.getElementById("onb-btn-prev");
+
+    const nextBtns = document.querySelectorAll(".onb-btn-next");
+
+    const skipTop = document.getElementById("onb-btn-skip-top");
+
+    const skipBottom = document.getElementById("onb-btn-skip-bottom");
+
+    const finishBtns = document.querySelectorAll(".onb-finish");
+
+    const dots = document.querySelectorAll(".progress-dot");
+
+    const STORAGE_KEY = "imuraOnboardingCompleted";
+
+    const SPLASH_KEY = "imuraSplashShown";
+
+    let current = 0;
+
+    const total = slides.length;
+
+
+
+    /* ==========================================================
+       UPDATE UI
+    ========================================================== */
+
+    function updateUI() {
+        const footer = document.querySelector(".slide-actions");
+        const nextButton = document.querySelector(".onb-btn-next");
+
+        if(current === total - 1){
+
+            footer.style.display = "none";
+
+        }else{
+
+            footer.style.display = "flex";
+
+        }
+
+        track.style.transform =
+            `translate3d(-${current * 100}%,0,0)`;
+
+
+        slides.forEach((slide, index) => {
+
+            slide.classList.toggle("active", index === current);
+
+        });
+
+
+        dots.forEach((dot, index) => {
+
+            dot.classList.toggle("active", index === current);
+
+        });
+
+
+        if (prevBtn) {
+
+            prevBtn.classList.toggle("visible", current > 0);
+
+        }
+
+    }
+
+
+
+    /* ==========================================================
+       NEXT
+    ========================================================== */
+
+    function nextSlide() {
+
+        if (current >= total - 1) return;
+
+        current++;
+
+        updateUI();
+
+    }
+
+
+
+    /* ==========================================================
+       PREVIOUS
+    ========================================================== */
+
+    function previousSlide() {
+
+        if (current <= 0) return;
+
+        current--;
+
+        updateUI();
+
+    }
+
+
+
+    /* ==========================================================
+       FINISH
+    ========================================================== */
+
+    function finishOnboarding() {
+
+        localStorage.setItem(STORAGE_KEY, "true");
+
+        document.body.classList.remove("onboarding-open");
+
+        overlay.remove();
+
+    }
+
+
+
+    /* ==========================================================
+       SHOW ONBOARDING
+    ========================================================== */
+
+    function showOnboarding() {
+
+        if (localStorage.getItem(STORAGE_KEY) === "true") {
+
+            overlay.remove();
+
+            return;
+
+        }
+
+        document.body.classList.add("onboarding-open");
+
+        overlay.classList.add("show");
+
+        updateUI();
+
+    }
+
+
+
+    /* ==========================================================
+       SPLASH SCREEN
+    ========================================================== */
+
+    if (sessionStorage.getItem(SPLASH_KEY) === "1") {
+
+        splash?.remove();
+
+        showOnboarding();
+
+    }
+
+    else {
+
+        sessionStorage.setItem(SPLASH_KEY, "1");
+
+        setTimeout(() => {
+
+            splash?.classList.add("hide");
+
+            setTimeout(() => {
+
+                splash?.remove();
+
+                showOnboarding();
+
+            }, 600);
+
+        }, 2500);
+
+    }
+
+
+
+    /* ==========================================================
+       BUTTON EVENTS
+    ========================================================== */
+
+    nextBtns.forEach(btn => {
+
+        btn.addEventListener("click", nextSlide);
+
+    });
+
+    prevBtn?.addEventListener("click", previousSlide);
+
+    skipTop?.addEventListener("click", finishOnboarding);
+
+    skipBottom?.addEventListener("click", finishOnboarding);
+
+
+
+    finishBtns.forEach(btn => {
+
+        btn.addEventListener("click", finishOnboarding);
+
+    });
+
+
+
+    /* ==========================================================
+       KEYBOARD
+    ========================================================== */
+
+    document.addEventListener("keydown", (e) => {
+
+        if (!overlay.classList.contains("show")) return;
+
+        if (e.key === "ArrowRight") {
+
+            nextSlide();
+
+        }
+
+        if (e.key === "ArrowLeft") {
+
+            previousSlide();
+
+        }
+
+        if (e.key === "Escape") {
+
+            finishOnboarding();
+
+        }
+
+    });
+
+
+
+    /* ==========================================================
+       SWIPE
+    ========================================================== */
+
+    let startX = 0;
+
+    let endX = 0;
+
+
+
+    overlay.addEventListener("touchstart", (e) => {
+
+        startX = e.touches[0].clientX;
+
+    });
+
+
+
+    overlay.addEventListener("touchmove", (e) => {
+
+        endX = e.touches[0].clientX;
+
+    });
+
+
+
+    overlay.addEventListener("touchend", () => {
+
+        const diff = endX - startX;
+
+        if (Math.abs(diff) < 60) return;
+
+        if (diff < 0) {
+
+            nextSlide();
+
+        } else {
+
+            previousSlide();
+
+        }
+
+    });
+
+
+
+    /* ==========================================================
+       CLICK PROGRESS DOTS
+    ========================================================== */
+
+    dots.forEach((dot, index) => {
+
+        dot.addEventListener("click", () => {
+
+            current = index;
+
+            updateUI();
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

@@ -1,423 +1,1122 @@
-{% extends "core/base.html" %}
+{% extends "products/base.html" %}
+{% load static %}
 {% block content %}
 
-{% load static %}
 <style>
-/* ===== Layout ===== */
-.market-container {
-  display: flex;
-  gap: 2rem;
+
+/* ===================================================
+   IMURA MARKETPLACE
+=================================================== */
+
+body{
+    background:#f8fafc;
 }
 
-/* Desktop sidebar */
-.sidebar {
-  width: 250px;
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
+/* Container */
+
+.market-container{
+    max-width:1400px;
+    margin:auto;
 }
 
-/* Sidebar items */
-.sidebar .list-group-item {
-  border: none;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
+/* ===================================================
+   HERO
+=================================================== */
+
+.market-hero{
+
+    background:linear-gradient(135deg,#2563eb,#4f46e5);
+
+    color:white;
+
+    border-radius:24px;
+
+    padding:55px;
+
+    margin-bottom:35px;
+
+    overflow:hidden;
+
+    position:relative;
+
 }
 
-.sidebar .list-group-item.active,
-.sidebar .list-group-item:hover {
-  background-color: #0d6efd;
-  color: white;
+.market-hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:320px;
+
+    height:320px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    right:-80px;
+
+    top:-80px;
+
 }
 
-/* Product Grid */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+.market-hero::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:180px;
+
+    height:180px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    left:-60px;
+
+    bottom:-60px;
+
 }
 
-@media (min-width: 992px) {
-  .product-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
+.market-hero h1{
+
+    font-weight:800;
+
+    font-size:2.5rem;
+
+    position:relative;
+
+    z-index:2;
+
 }
 
-/* Card styling */
-.card {
-  border: none;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  position: relative;
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-}
-.card-img-top {
-  height: 160px;
-  object-fit: cover;
+.market-hero p{
+
+    font-size:1.05rem;
+
+    max-width:650px;
+
+    opacity:.95;
+
+    position:relative;
+
+    z-index:2;
+
 }
 
-/* Buttons */
-.icon-btn {
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 10px 12px;
-  border-radius: 50%;
-  font-size: 18px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  transition: background 0.3s ease;
-}
-.icon-btn:hover {
-  background: #0b5ed7;
-  color: #fff;
+.hero-buttons{
+
+    margin-top:25px;
+
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    position:relative;
+
+    z-index:2;
+
 }
 
-/* Search Bar */
-#searchBar {
-  width: 300px;
-  transition: all 0.3s ease;
-}
-#searchBar input {
-  border-radius: 50px;
-  padding: 5px 15px;
-  width: 100%;
-}
+.hero-buttons .btn{
 
-/* Collapsed search icon for mobile */
-#searchToggle {
-  display: none;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%;
-  font-size: 20px;
+    border-radius:50px;
+
+    padding:12px 28px;
+
+    font-weight:600;
+
 }
 
-/* Sidebar toggle button (mobile only) */
-#sidebarToggle {
-  display: none;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%;
-  font-size: 20px;
+/* ===================================================
+   HEADER
+=================================================== */
+
+.market-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    margin-bottom:25px;
+
+    flex-wrap:wrap;
+
 }
 
-/* Sidebar overlay for mobile */
-@media (max-width: 768px) {
-  .market-container {
-    flex-direction: column;
-  }
+.market-title{
 
-  #sidebarToggle,
-  #searchToggle {
-    display: inline-flex;
-    margin-left: 4px;
-    align-items: center;
-    justify-content: center;
-  }
+    font-weight:800;
 
-  .sidebar {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    width: 220px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    padding: 1rem;
-    display: none;
-    z-index: 1050;
-  }
-  .sidebar.show {
-    display: block;
-  }
+    font-size:2rem;
 
-  #searchBar {
-    display: none;
-    width: 150px;
-  }
-
-  /* Icons container on mobile: single line */
-  .header-icons {
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
-
-  .header-icons .icon-btn {
-    padding: 6px 8px;
-    font-size: 16px;
-  }
 }
 
-/* Floating Stream Button */
-.floating-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #0d6efd;
-  color: #fff;
-  padding: 14px 20px;
-  border-radius: 50px;
-  font-weight: bold;
-  box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
-  text-decoration: none;
-  transition: background 0.3s ease;
-  z-index: 1050;
-}
-.floating-btn:hover {
-  background: #0b5ed7;
-  color: #fff;
+/* ===================================================
+   SEARCH
+=================================================== */
+
+.search-box{
+
+    max-width:420px;
+
+    width:100%;
+
+    position:relative;
+
 }
 
-/* TRY-ON BUTTON OVERLAY */
-.tryon-btn {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(255, 193, 7, 0.85);
-  color: #000;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  z-index: 10;
-  text-decoration: none;
-  transition: background 0.3s ease;
-}
-.tryon-btn:hover {
-  background: rgba(255, 193, 7, 1);
-  color: #000;
+.search-box input{
+
+    border-radius:50px;
+
+    padding:13px 50px 13px 20px;
+
+    border:none;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+
 }
 
-{% if not request.user.is_authenticated %}
-.product-grid {
-  opacity: 0.7;
-}
-{% endif %}
+.search-box button{
 
-/* ===== Splash Screen ===== */
-#splashScreen{
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  opacity: 1;
-  transition: opacity .45s ease;
+    position:absolute;
+
+    right:5px;
+
+    top:5px;
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
 }
 
-#splashScreen img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* ✅ fills entire screen */
-  border-radius: 0;    /* ✅ no rounded corners */
+/* ===================================================
+   CATEGORY CHIPS
+=================================================== */
+
+.category-bar{
+
+    display:flex;
+
+    gap:12px;
+
+    overflow-x:auto;
+
+    padding-bottom:10px;
+
+    margin-bottom:30px;
+
+    scrollbar-width:none;
+
 }
 
-#splashScreen.hide{
-  opacity: 0;
-  pointer-events: none;
+.category-bar::-webkit-scrollbar{
+
+    display:none;
+
+}
+
+.category-chip{
+
+    white-space:nowrap;
+
+    text-decoration:none;
+
+    color:#333;
+
+    background:white;
+
+    padding:12px 22px;
+
+    border-radius:999px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+
+    transition:.25s;
+
+    font-weight:600;
+
+}
+
+.category-chip:hover{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.category-chip.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+/* ===================================================
+   LOGIN CTA
+=================================================== */
+
+.signup-banner{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:22px 30px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:35px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
+
+    gap:20px;
+
+}
+
+.signup-banner h5{
+
+    margin-bottom:8px;
+
+    font-weight:700;
+
+}
+
+.signup-banner p{
+
+    margin:0;
+
+    color:#666;
+
+}
+
+.signup-actions{
+
+    display:flex;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+}
+
+.signup-actions .btn{
+
+    border-radius:40px;
+
+    padding:10px 24px;
+
+}
+
+/* ===================================================
+   PRODUCT GRID
+=================================================== */
+
+.product-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+
+    gap:24px;
+
+}
+
+/* ===================================================
+   MOBILE
+=================================================== */
+
+@media(max-width:768px){
+
+.market-hero{
+
+padding:35px 25px;
+
+}
+
+.market-hero h1{
+
+font-size:2rem;
+
+}
+
+.market-header{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
+.signup-banner{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
 }
 
 </style>
 
-<div class="container mt-4">
+{% if not user.is_authenticated %}
+    {% include "core/onboarding.html" %}
+{% endif %}
 
- 
+<div class="container py-4 market-container">
 
-<div id="splashScreen" aria-hidden="true">
-  <img src="{% static 'img/imura_front.png' %}" alt="IMURA Fashion Hub">
-</div>
-  <!-- ===== HEADER ===== -->
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-  <button id="sidebarToggle"><i class="bi bi-filter"></i></button>
+    <!-- ================= HERO ================= -->
 
-  <!-- Centered title -->
-  <h3 class="fw-bold text-center flex-grow-1 mb-0">🛍 Marketplace</h3>
+    <div class="market-hero">
 
-  <!-- Desktop centered search -->
-  <div id="searchBar" class="mx-auto">
-    <form method="GET" class="d-flex align-items-center">
-      <input type="text" name="q" class="form-control form-control-sm me-2"
-             placeholder="Search products...">
-      <button type="submit" class="btn btn-primary btn-sm">
-        <i class="bi bi-search"></i>
-      </button>
-    </form>
-  </div>
+        <h1>
+            Discover Fashion Without Limits
+        </h1>
 
-  <!-- Mobile icon -->
-  <button id="searchToggle"><i class="bi bi-search"></i></button>
-</div>
+        <p>
 
-  <div class="market-container">
-    <!-- Sidebar -->
-    <div class="sidebar shadow-sm" id="sidebar">
-      <div class="list-group">
-        <a href="{% url 'products:product_list' %}" 
-           class="list-group-item {% if not request.GET.category %}active{% endif %}">All</a>
-        <a href="?category=male"
-           class="list-group-item {% if request.GET.category == 'male' %}active{% endif %}">Male</a>
-        <a href="?category=female"
-           class="list-group-item {% if request.GET.category == 'female' %}active{% endif %}">Female</a>
-      </div>
+            Browse thousands of fashion products from trusted brands,
+            talented designers and skilled tailors. Create a free account
+            when you're ready to order, save favourites and unlock AI-powered
+            fashion tools.
 
-      <!-- Filters -->
-      <div class="mt-4 p-3 bg-light rounded shadow-sm">
-        <h6 class="fw-bold mb-2">Filters</h6>
-        <form method="GET">
-          <div class="mb-2">
-            <input type="number" name="min_price" placeholder="Min ₦" class="form-control form-control-sm">
-          </div>
-          <div class="mb-2">
-            <input type="number" name="max_price" placeholder="Max ₦" class="form-control form-control-sm">
-          </div>
-          <button class="btn btn-primary btn-sm w-100">Apply</button>
-        </form>
-      </div>
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="{% url 'account_signup' %}" class="btn btn-light">
+
+                Create Account
+
+            </a>
+
+            <a href="{% url 'account_login' %}" class="btn btn-outline-light">
+
+                Login
+
+            </a>
+
+        </div>
+
     </div>
 
-    <!-- Main Product Grid -->
-    <div class="flex-grow-1">
-      <div class="product-grid">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="market-header">
+
+        <div>
+
+            <h2 class="market-title">
+
+                🛍 Marketplace
+
+            </h2>
+
+            <small class="text-muted">
+
+                Browse available products
+
+            </small>
+
+        </div>
+
+        <form method="GET" class="search-box">
+
+            <input
+                type="text"
+                class="form-control"
+                name="q"
+                placeholder="Search clothing, brands, designers...">
+
+            <button class="btn btn-primary">
+
+                <i class="bi bi-search"></i>
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ================= CATEGORY CHIPS ================= -->
+
+    <div class="category-bar">
+
+        <a href="{% url 'products:product_list' %}"
+           class="category-chip {% if not request.GET.category %}active{% endif %}">
+
+            All
+
+        </a>
+
+        <a href="?category=male"
+           class="category-chip {% if request.GET.category == 'male' %}active{% endif %}">
+
+            Men
+
+        </a>
+
+        <a href="?category=female"
+           class="category-chip {% if request.GET.category == 'female' %}active{% endif %}">
+
+            Women
+
+        </a>
+
+        <a href="?category=native" class="category-chip">
+
+            Native
+
+        </a>
+
+        <a href="?category=corporate" class="category-chip">
+
+            Corporate
+
+        </a>
+
+        <a href="?category=streetwear" class="category-chip">
+
+            Streetwear
+
+        </a>
+
+    </div>
+
+
+    <!-- ================= CTA ================= -->
+
+    {% if not user.is_authenticated %}
+
+    <div class="signup-banner">
+
+        <div>
+
+            <h5>
+
+                Unlock the Full IMURA Experience ✨
+
+            </h5>
+
+            <p>
+
+                Create a free account to use AI body measurement,
+                Virtual Try-On, secure ordering, chat with sellers,
+                and save your favourite products.
+
+            </p>
+
+        </div>
+
+        <div class="signup-actions">
+
+            <a href="{% url 'account_signup' %}"
+               class="btn btn-primary">
+
+                Create Account
+
+            </a>
+
+            <a href="{% url 'account_login' %}"
+               class="btn btn-outline-primary">
+
+                Login
+
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- Product grid starts here -->
+    <div class="product-grid">
         {% for product in products %}
-          <div class="card shadow-sm">
-            {% if product.images.all %}
-            <div id="carousel{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
-              
-              <!-- TRY-ON BUTTON -->
-              {% if product.enable_digital_tryon %}
-                {% if request.user.is_authenticated %}
-                <a href="#" class="tryon-btn" onclick="handleTryonClick(event)">Try-On</a>
+
+<div class="card product-card shadow-sm">
+
+    <div class="position-relative">
+
+        {% if product.enable_digital_tryon %}
+        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-3">
+            ✨ Try-On
+        </span>
+        {% endif %}
+
+        <span class="badge bg-danger position-absolute top-0 end-0 m-2 z-3">
+            NEW
+        </span>
+
+        {% if product.images.all %}
+
+        <div id="carousel{{ product.id }}"
+             class="carousel slide"
+             data-bs-ride="carousel">
+
+            <div class="carousel-inner">
+
+                {% for img in product.images.all %}
+
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+
+                    <a href="{% url 'products:product_detail' product.pk %}">
+
+                        <img src="{{ img.image.url }}"
+                             class="card-img-top"
+                             alt="{{ product.title }}">
+
+                    </a>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% if product.images.all|length > 1 %}
+
+            <button class="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#carousel{{ product.id }}"
+                    data-bs-slide="prev">
+
+                <span class="carousel-control-prev-icon"></span>
+
+            </button>
+
+            <button class="carousel-control-next"
+                    type="button"
+                    data-bs-target="#carousel{{ product.id }}"
+                    data-bs-slide="next">
+
+                <span class="carousel-control-next-icon"></span>
+
+            </button>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="card-body">
+
+        <h6 class="fw-bold text-truncate mb-2">
+
+            {{ product.title }}
+
+        </h6>
+
+        <div class="mb-2 text-warning">
+
+            ★★★★★
+
+            <small class="text-muted">
+
+                (New)
+
+            </small>
+
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+
+            <h5 class="text-success fw-bold mb-0">
+
+                ₦{{ product.price }}
+
+            </h5>
+
+            <small class="text-muted">
+
+                {{ product.seller.username }}
+
+            </small>
+
+        </div>
+
+        <div class="d-grid gap-2 mt-3">
+
+            <a href="{% url 'products:product_detail' product.pk %}"
+               class="btn btn-outline-primary">
+
+                View Details
+
+            </a>
+
+            {% if user.is_authenticated %}
+
+            <a href="#"
+               class="btn btn-primary">
+
+                Buy Now
+
+            </a>
+
+            {% else %}
+
+            <button
+                class="btn btn-primary auth-required">
+
+                Buy Now
+
+            </button>
+
+            {% endif %}
+
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+
+            {% if user.is_authenticated %}
+
+            <button class="btn btn-light btn-sm">
+
+                ❤️ Wishlist
+
+            </button>
+
+            {% else %}
+
+            <button
+                class="btn btn-light btn-sm auth-required">
+
+                🤍 Wishlist
+
+            </button>
+
+            {% endif %}
+
+            {% if product.enable_digital_tryon %}
+
+                {% if user.is_authenticated %}
+
+                <button class="btn btn-warning btn-sm">
+
+                    👕 Try-On
+
+                </button>
+
                 {% else %}
-                <a href="#" class="tryon-btn" onclick="requireLogin(event)">Try-On</a>
+
+                <button
+                    class="btn btn-warning btn-sm auth-required">
+
+                    👕 Try-On
+
+                </button>
+
                 {% endif %}
 
-              {% else %}
-                <a href="#" class="tryon-btn disabled" onclick="handleUnavailableTryon(event)">Try‑On</a>
-              {% endif %}
-              <div class="carousel-inner">
-                {% for img in product.images.all %}
-                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    {% if request.user.is_authenticated %}
-                    <a href="{% url 'products:product_detail' product.pk %}">
-                    {% else %}
-                    <a href="#" onclick="requireLogin(event)">
-                    {% endif %}
-
-                      <img src="{{ img.image.url }}" class="d-block w-100 card-img-top" alt="{{ product.title }}">
-                    </a>
-                  </div>
-                {% endfor %}
-              </div>
-              <div class="carousel-indicators">
-                {% for img in product.images.all %}
-                  <button type="button" data-bs-target="#carousel{{ product.id }}" data-bs-slide-to="{{ forloop.counter0 }}"
-                          {% if forloop.first %}class="active"{% endif %}></button>
-                {% endfor %}
-              </div>
-            </div>
             {% endif %}
-            <div class="card-body">
-              <h6 class="fw-semibold text-truncate">{{ product.title }}</h6>
-              <p class="text-success fw-bold mb-1">₦{{ product.price }}</p>
-              <small class="text-muted">By {{ product.seller.username }}</small>
-            </div>
-          </div>
-        {% empty %}
-          <p class="text-muted">No products yet.</p>
-        {% endfor %}
-      </div>
+
+        </div>
+
     </div>
-  </div>
+
 </div>
 
-<!-- Floating Stream Button -->
-{% if request.user.is_authenticated %}
-<a href="{% url 'streaming:product_stream' %}" class="floating-btn">Stream</a>
-{% else %}
-<a href="#" class="floating-btn" onclick="requireLogin(event)">Stream</a>
+{% empty %}
+
+<div class="col-12">
+
+    <div class="text-center py-5">
+
+        <img src="{% static 'img/empty-products.svg' %}"
+             style="max-width:250px">
+
+        <h4 class="mt-4">
+
+            No products found
+
+        </h4>
+
+        <p class="text-muted">
+
+            Try another search or browse a different category.
+
+        </p>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+<!-- ===================================================
+     AI FEATURE BANNER
+=================================================== -->
+
+{% if not user.is_authenticated %}
+
+<section class="mt-5">
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+        <div class="row g-0 align-items-center">
+
+            <div class="col-lg-7 p-5">
+
+                <span class="badge bg-primary mb-3">
+
+                    NEW
+
+                </span>
+
+                <h2 class="fw-bold">
+
+                    📸 AI Body Measurement
+
+                </h2>
+
+                <p class="text-muted mt-3">
+
+                    Forget measuring tapes.
+
+                    Take two photos using your phone and
+                    IMURA automatically generates accurate
+                    body measurements that can be sent
+                    directly to your tailor.
+
+                </p>
+
+                <button
+                    class="btn btn-primary btn-lg auth-required">
+
+                    Try AI Measurement
+
+                </button>
+
+            </div>
+
+            <div class="col-lg-5 text-center p-4">
+
+                <img
+                    src="{% static 'img/onboarding/2-measure.svg' %}"
+                    class="img-fluid"
+                    style="max-height:320px;">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
 {% endif %}
 
 
+<!-- ===================================================
+     FOOTER CTA
+=================================================== -->
+
+{% if not user.is_authenticated %}
+
+<section class="mt-5 mb-4">
+
+    <div class="text-center">
+
+        <h2 class="fw-bold">
+
+            Ready to Experience IMURA?
+
+        </h2>
+
+        <p class="text-muted mt-3">
+
+            Create a free account and unlock AI-powered
+            fashion tools.
+
+        </p>
+
+        <div class="mt-4">
+
+            <a href="{% url 'account_signup' %}"
+               class="btn btn-primary btn-lg rounded-pill px-5">
+
+                Create Account
+
+            </a>
+
+            <a href="{% url 'account_login' %}"
+               class="btn btn-outline-primary btn-lg rounded-pill px-5 ms-2">
+
+                Login
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+<!-- ===================================================
+     LOGIN REQUIRED MODAL
+=================================================== -->
+
+<div class="modal fade"
+     id="loginRequiredModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+
+            <div class="modal-body p-5 text-center">
+
+                <div style="font-size:70px;">
+
+                    🔒
+
+                </div>
+
+                <h3 class="fw-bold mt-3">
+
+                    Create Your Free IMURA Account
+
+                </h3>
+
+                <p class="text-muted mt-3">
+
+                    Unlock premium features and enjoy
+                    the complete fashion experience.
+
+                </p>
+
+                <div class="text-start mt-4">
+
+                    <div class="mb-3">
+
+                        ✅ AI Body Measurement
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        👕 Virtual Try-On
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        ❤️ Save Wishlist
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        💬 Chat Sellers
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        🛒 Secure Checkout
+
+                    </div>
+
+                    <div>
+
+                        📦 Order Tracking
+
+                    </div>
+
+                </div>
+
+                <div class="d-grid gap-3 mt-5">
+
+                    <a href="{% url 'account_signup' %}"
+                       class="btn btn-primary btn-lg rounded-pill">
+
+                        Create Account
+
+                    </a>
+
+                    <a href="{% url 'account_login' %}"
+                       class="btn btn-outline-primary btn-lg rounded-pill">
+
+                        Login
+
+                    </a>
+
+                    <button
+                        class="btn btn-link"
+                        data-bs-dismiss="modal">
+
+                        Continue Browsing
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Auto-cycle all carousels
-  document.querySelectorAll('.carousel').forEach(function(carousel){
-    new bootstrap.Carousel(carousel, { interval: 3000, ride: 'carousel' });
-  });
-
-  // Sidebar toggle for mobile
-  const toggleBtn = document.getElementById('sidebarToggle');
-  const sidebar = document.getElementById('sidebar');
-  toggleBtn.addEventListener('click', function() {
-    sidebar.classList.toggle('show');
-  });
-
-  // Search toggle for mobile
-  const searchToggle = document.getElementById('searchToggle');
-  const searchBar = document.getElementById('searchBar');
-  searchToggle.addEventListener('click', function() {
-    searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
-  });
-});
-
-
-  function handleTryonClick(event) {
-    event.preventDefault();
-    // Right now, maybe it's still in test mode
-    alert('Digital Try‑On is available for this product!');
-  }
-
-  function handleUnavailableTryon(event) {
-    event.preventDefault();
-    alert('Digital Try‑On is not available for this product yet.');
-  }
-
-function requireLogin(event) {
-  event.preventDefault();
-
-  if(confirm("Please login to access products and streaming.")) {
-    window.location.href = "{% url 'account_login' %}";
-  }
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-  const splash = document.getElementById("splashScreen");
-  if (!splash) return;
 
-  // Show only once per tab session (optional)
-  const key = "imuraSplashShown";
-  if (sessionStorage.getItem(key) === "1") {
-    splash.remove();
-    return;
-  }
-  sessionStorage.setItem(key, "1");
+    /* =====================================
+       Bootstrap Components
+    ===================================== */
 
-  // Prevent scrolling while splash is visible
-  const prevOverflow = document.body.style.overflow;
-  document.body.style.overflow = "hidden";
+    document.querySelectorAll(".carousel").forEach(function (carousel) {
 
-  setTimeout(() => {
-    splash.classList.add("hide");
+        new bootstrap.Carousel(carousel, {
+            interval: 3500,
+            ride: "carousel",
+            pause: "hover",
+            wrap: true
+        });
 
-    // Remove node after fade
-    setTimeout(() => {
-      splash.remove();
-      document.body.style.overflow = prevOverflow || "";
-    }, 500);
-  }, 5000);
+    });
+
+    const loginModalElement = document.getElementById("loginRequiredModal");
+
+    const loginModal = loginModalElement
+        ? new bootstrap.Modal(loginModalElement)
+        : null;
+
+    /* =====================================
+       Protected Buttons
+    ===================================== */
+
+    document.querySelectorAll(".auth-required").forEach(function (button) {
+
+        button.addEventListener("click", function (e) {
+
+            e.preventDefault();
+
+            if (loginModal) {
+                loginModal.show();
+            }
+
+        });
+
+    });
+
+    /* =====================================
+       Sidebar Toggle
+    ===================================== */
+
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+
+    if (sidebar && sidebarToggle) {
+
+        sidebarToggle.addEventListener("click", function () {
+
+            sidebar.classList.toggle("show");
+
+        });
+
+    }
+
+    /* =====================================
+       Search Toggle (Mobile)
+    ===================================== */
+
+    const searchToggle = document.getElementById("searchToggle");
+    const searchBar = document.getElementById("searchBar");
+
+    if (searchToggle && searchBar) {
+
+        searchToggle.addEventListener("click", function () {
+
+            searchBar.classList.toggle("show-mobile");
+
+        });
+
+    }
+
+    /* =====================================
+       Product Hover Animation
+    ===================================== */
+
+    document.querySelectorAll(".product-card").forEach(function(card){
+
+        card.addEventListener("mouseenter", function(){
+
+            this.style.transform = "translateY(-8px)";
+
+        });
+
+        card.addEventListener("mouseleave", function(){
+
+            this.style.transform = "";
+
+        });
+
+    });
+
+    /* =====================================
+       Lazy Image Fade-in
+    ===================================== */
+
+    document.querySelectorAll(".card-img-top").forEach(function(img){
+
+        img.addEventListener("load", function(){
+
+            img.classList.add("loaded");
+
+        });
+
+    });
+
+    /* =====================================
+       Close Sidebar when Clicking Outside
+    ===================================== */
+
+    document.addEventListener("click", function(e){
+
+        if(
+            sidebar &&
+            sidebar.classList.contains("show") &&
+            !sidebar.contains(e.target) &&
+            e.target !== sidebarToggle
+        ){
+
+            sidebar.classList.remove("show");
+
+        }
+
+    });
+
 });
 </script>
 {% endblock %}

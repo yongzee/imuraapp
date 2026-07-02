@@ -3,154 +3,222 @@
 {% load humanize %}
 
 {% block content %}
-<div class="container mt-4">
-  <h3>Notifications</h3>
+<style>
+  /* ---------- MODERN NOTIFICATIONS BRANDING ---------- */
+  .notification-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .noti-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+  
+  .noti-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  }
+  
+  .noti-card.unread {
+    border-left: 4px solid #0d6efd !important;
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.02) 0%, #ffffff 100%);
+  }
 
-  <div id="notifications-list">
+  .avatar-badge {
+    width: 42px;
+    height: 42px;
+    background: #f1f3f5;
+    color: #495057;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .unread .avatar-badge {
+    background: #e7f1ff;
+    color: #0d6efd;
+  }
+
+  .reply-box-wrapper {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+    margin-top: 12px;
+  }
+
+  .proposal-bubble {
+    background: #fdfbbe;
+    color: #664d03;
+    border: 1px solid #fff3cd;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: inline-block;
+  }
+</style>
+
+<div class="container mt-5 notification-wrapper">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold m-0 tracking-tight text-dark"><i class="bi bi-bell-fill me-2 text-secondary"></i>Inbox Activity</h3>
+      <p class="text-muted small m-0">Manage customer inquiries, style custom layouts, and custom sizing requests.</p>
+    </div>
+  </div>
+
+  <div id="notifications-list" class="d-flex flex-column gap-3">
     {% for n in notifications %}
-      <div class="card mb-2 {% if not n.read %}border-primary{% endif %}" data-id="{{ n.id }}">
-        <div class="card-body d-flex justify-content-between align-items-start">
-
-          <!-- LEFT -->
-          <div style="flex:1">
-            <strong>{{ n.sender.username }}</strong>
-            <div class="text-muted small">{{ n.created_at|naturaltime }}</div>
-            <div>{{ n.verb }}</div>
-
-            {% if n.type == "measurement_share" %}
-
-            <div class="mt-2">
-
-            <div class="small text-info">
-            📏 Measurements shared with you
-            </div>
-
-            <a class="btn btn-sm btn-outline-primary mt-2"
-            href="{% url 'measureApp:view_shared_measurement' n.id %}">
-
-            View Measurements
-
-            </a>
-
-            </div>
-
-            {% endif %}
-
+      <div class="card noti-card border-0 {% if not n.read %}unread{% endif %}" data-id="{{ n.id }}">
+        <div class="card-body p-4">
+          
+          <div class="d-flex align-items-start gap-3">
             
+            <div class="avatar-badge flex-shrink-0">
+              {% if n.type == "message" %}
+                <i class="bi bi-chat-left-text"></i>
+              {% elif n.type == "price_proposal" %}
+                <i class="bi bi-cash-coin"></i>
+              {% elif n.type == "measurement_share" %}
+                <i class="bi bi-rulers"></i>
+              {% else %}
+                <i class="bi bi-info-circle"></i>
+              {% endif %}
+            </div>
 
-
-            {# ================= PRICE PROPOSAL ================= #}
-            {% if n.type == "price_proposal" %}
-              <div class="mt-2">
-                Suggested: ₦{{ n.data.suggested_price }}
-                {% if n.data.message %}
-                  <div class="small">"{{ n.data.message }}"</div>
-                {% endif %}
+            <div class="flex-grow-1">
+              <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-1">
+                <h6 class="fw-bold m-0 text-dark">{{ n.sender.username }}</h6>
+                <small class="text-muted" style="font-size: 0.75rem;">{{ n.created_at|naturaltime }}</small>
               </div>
+              
+              <div class="text-secondary small mb-2">{{ n.verb }}</div>
 
-              {# Seller: accept / decline #}
-              {% if user.id == n.recipient.id and n.accepted is None %}
-                <div class="mt-2 price-actions">
-                  <button class="btn btn-sm btn-success accept-btn"
-                          data-id="{{ n.id }}"
-                          data-product="{{ n.data.product_id }}"
-                          data-price="{{ n.data.suggested_price }}">
-                    Accept
-                  </button>
-                  <button class="btn btn-sm btn-danger decline-btn"
-                          data-id="{{ n.id }}">
-                    Decline
-                  </button>
+              {% if n.type == "measurement_share" %}
+                <div class="mt-3 p-3 bg-light rounded-3 border-start border-info border-3">
+                  <div class="small fw-600 text-info mb-1">
+                    <i class="bi bi-rulers me-1"></i> Sizing Specifications Loaded
+                  </div>
+                  <a class="btn btn-sm btn-primary mt-2 rounded-pill px-3" href="{% url 'measureApp:view_shared_measurement' n.id %}">
+                    View Measurements
+                  </a>
                 </div>
               {% endif %}
 
-              {# Proposer feedback (on original proposal) #}
-              {% if user.id == n.sender.id %}
-                <div class="proposer-feedback mt-2">
-                  {% if n.accepted is True %}
-                    <a href="{% url 'products:detail' n.data.product_id %}?proposed_price={{ n.data.suggested_price }}"
-                       class="btn btn-sm btn-success">
-                      View Product with Accepted Price
-                    </a>
-                  {% elif n.accepted is False %}
-                    <span class="text-danger small">Your proposal was declined.</span>
+              {% if n.type == "price_proposal" %}
+                <div class="mt-3">
+                  <div class="proposal-bubble small shadow-sm mb-2">
+                    <span class="fw-bold">Suggested Value:</span> ₦{{ n.data.suggested_price }}
+                    {% if n.data.message %}
+                      <div class="fst-italic mt-1 text-dark">"{{ n.data.message }}"</div>
+                    {% endif %}
+                  </div>
+
+                  {# Seller Action Block #}
+                  {% if user.id == n.recipient.id and n.accepted is None %}
+                    <div class="d-flex gap-2 mt-2 price-actions">
+                      <button class="btn btn-sm btn-success accept-btn rounded-pill px-3"
+                              data-id="{{ n.id }}"
+                              data-product="{{ n.data.product_id }}"
+                              data-price="{{ n.data.suggested_price }}">
+                        <i class="bi bi-check2 me-1"></i>Accept
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger decline-btn rounded-pill px-3" data-id="{{ n.id }}">
+                        <i class="bi bi-x-lg me-1"></i>Decline
+                      </button>
+                    </div>
+                  {% endif %}
+
+                  {# Proposer feedback #}
+                  {% if user.id == n.sender.id %}
+                    <div class="proposer-feedback mt-2">
+                      {% if n.accepted is True %}
+                        <a href="{% url 'products:detail' n.data.product_id %}?proposed_price={{ n.data.suggested_price }}" class="btn btn-sm btn-success rounded-pill">
+                          View Product with Accepted Price
+                        </a>
+                      {% elif n.accepted is False %}
+                        <span class="text-danger small bg-light p-2 rounded d-inline-block"><i class="bi bi-exclamation-circle me-1"></i>Your proposal was declined.</span>
+                      {% endif %}
+                    </div>
                   {% endif %}
                 </div>
               {% endif %}
-            {% endif %}
 
-            {# ================= INFO NOTIFICATIONS ================= #}
-            {% if n.type == "info" %}
-              {% if "accepted your price proposal" in n.verb %}
-                <div class="mt-2">
-                  <a href="{% url 'products:product_detail' n.data.product_id %}?proposed_price={{ n.data.suggested_price }}"
-                     class="btn btn-sm btn-success">
-                    View Product with Accepted Price
-                  </a>
-                </div>
-              {% elif "declined your price proposal" in n.verb %}
-                <div class="mt-2">
-                  <span class="text-danger small">Your proposal was declined.</span>
+              {% if n.type == "info" %}
+                {% if "accepted your price proposal" in n.verb %}
+                  <div class="mt-2">
+                    <a href="{% url 'products:product_detail' n.data.product_id %}?proposed_price={{ n.data.suggested_price }}" class="btn btn-sm btn-success rounded-pill">
+                      View Product with Accepted Price
+                    </a>
+                  </div>
+                {% elif "declined your price proposal" in n.verb %}
+                  <div class="mt-2">
+                    <span class="text-danger small bg-light p-2 rounded d-inline-block"><i class="bi bi-exclamation-circle me-1"></i>Your proposal was declined.</span>
+                  </div>
+                {% endif %}
+              {% endif %}
+
+              {% if n.type == "message" and n.data.text %}
+                <div class="bg-light text-dark p-3 rounded-3 my-2 small border border-light shadow-sm" style="white-space: pre-wrap;">{{ n.data.text }}</div>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary reply-btn rounded-pill px-3 mt-1"
+                        data-recipient="{{ n.data.other_user_id|default:n.sender.id }}">
+                  <i class="bi bi-reply-fill me-1"></i>Reply
+                </button>
+
+                <div class="reply-box-wrapper reply-box" style="display:none;">
+                  <textarea class="form-control form-control-sm reply-input border-0 bg-white mb-2" rows="2" placeholder="Write an elegant response..."></textarea>
+                  <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 send-reply-btn"
+                            data-recipient="{{ n.data.other_user_id|default:n.sender.id }}">
+                      Send Message
+                    </button>
+                  </div>
                 </div>
               {% endif %}
-            {% endif %}
 
-            {# ================= MESSAGE ================= #}
-            {% if n.type == "message" and n.data.text %}
-              <div class="mt-2">{{ n.data.text }}</div>
+            </div>
 
-              <button type="button"
-                      class="btn btn-sm btn-primary reply-btn mt-2"
-                      data-recipient="{{ n.data.other_user_id|default:n.sender.id }}">
-                Reply
+            <div class="flex-shrink-0 d-flex flex-column justify-content-between align-items-end h-100">
+              <button class="btn btn-sm text-muted hover-danger delete-btn border-0 p-1" data-id="{{ n.id }}" title="Delete Notification">
+                <i class="bi bi-trash3 fs-6"></i>
               </button>
+            </div>
 
-              <div class="reply-box mt-2" style="display:none;">
-                <input type="text" class="form-control form-control-sm reply-input"
-                      placeholder="Write a reply...">
-                <button type="button"
-                        class="btn btn-primary btn-sm w-100 mt-2 send-reply-btn"
-                        data-recipient="{{ n.data.other_user_id|default:n.sender.id }}">
-                  Send Message
-                </button>
-              </div>
-            {% endif %}
-
-
-          <!-- RIGHT -->
-          <div class="d-flex flex-column align-items-end">
-            <small class="text-muted">{{ n.created_at }}</small>
-            <button class="btn btn-sm btn-outline-danger delete-btn mt-2"
-                    data-id="{{ n.id }}"
-                    title="Delete Notification">
-              🗑
-            </button>
           </div>
 
         </div>
       </div>
     {% empty %}
-      <p>No notifications yet.</p>
+      <div class="text-center py-5 bg-white rounded-4 border">
+        <i class="bi bi-envelope-open text-muted fs-1 mb-3 d-block"></i>
+        <p class="text-secondary m-0">No notifications available right now.</p>
+      </div>
     {% endfor %}
   </div>
 
-  <!-- Pagination -->
   {% if notifications.has_other_pages %}
-  <nav>
-    <ul class="pagination">
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
       {% if notifications.has_previous %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ notifications.previous_page_number }}">Previous</a>
+          <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?page={{ notifications.previous_page_number }}"><i class="bi bi-chevron-left"></i></a>
         </li>
       {% endif %}
       {% for num in notifications.paginator.page_range %}
         <li class="page-item {% if notifications.number == num %}active{% endif %}">
-          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?page={{ num }}">{{ num }}</a>
         </li>
       {% endfor %}
       {% if notifications.has_next %}
         <li class="page-item">
-          <a class="page-link" href="?page={{ notifications.next_page_number }}">Next</a>
+          <a class="page-link rounded-circle mx-1 border-0 shadow-sm" href="?page={{ notifications.next_page_number }}"><i class="bi bi-chevron-right"></i></a>
         </li>
       {% endif %}
     </ul>
@@ -174,7 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("notifications-list");
 
   list.addEventListener("click", e => {
-    const target = e.target;
+    const target = e.target.closest('.accept-btn, .decline-btn, .reply-btn, .send-reply-btn, .delete-btn');
+    if (!target) return;
 
     /* ACCEPT */
     if (target.classList.contains("accept-btn")) {
@@ -197,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (d.ok && feedback) {
           feedback.innerHTML = `
             <a href="/products/${productId}/?proposed_price=${price}"
-               class="btn btn-sm btn-success">
+               class="btn btn-sm btn-success rounded-pill">
               View Product with Accepted Price
             </a>`;
         }
@@ -221,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(r => r.json())
       .then(d => {
         if (d.ok && feedback) {
-          feedback.innerHTML = `<span class="text-danger small">Your proposal was declined.</span>`;
+          feedback.innerHTML = `<span class="text-danger small bg-light p-2 rounded d-inline-block">Your proposal was declined.</span>`;
         }
       });
     }
@@ -264,44 +333,43 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // clear + close
         input.value = "";
         card.querySelector(".reply-box").style.display = "none";
 
-        // Insert the "sent" notification at the top so user can view it immediately
         const n = d.notification;
         if (!n) return;
 
         const html = `
-          <div class="card mb-2" data-id="${n.id}">
-            <div class="card-body d-flex justify-content-between align-items-start">
-              <div style="flex:1">
-                <strong>You</strong>
-                <div class="text-muted small">${escapeHtml(n.created_natural)}</div>
-                <div>${escapeHtml(n.verb)}</div>
+          <div class="card noti-card border-0 mb-2" data-id="${n.id}">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-start gap-3">
+                <div class="avatar-badge flex-shrink-0"><i class="bi bi-chat-left-text"></i></div>
+                <div class="flex-grow-1">
+                  <div class="d-flex flex-wrap justify-content-between align-items-baseline mb-1">
+                    <h6 class="fw-bold m-0 text-dark">You</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">${escapeHtml(n.created_natural)}</small>
+                  </div>
+                  <div class="text-secondary small mb-2">${escapeHtml(n.verb)}</div>
+                  <div class="bg-light text-dark p-3 rounded-3 my-2 small border border-light shadow-sm">${escapeHtml(n.text)}</div>
 
-                <div class="mt-2">${escapeHtml(n.text)}</div>
-
-                <button type="button" class="btn btn-sm btn-primary reply-btn mt-2"
-                        data-recipient="${n.other_user_id}">
-                  Reply
-                </button>
-
-                <div class="reply-box mt-2" style="display:none;">
-                  <input type="text" class="form-control form-control-sm reply-input"
-                        placeholder="Write a reply...">
-                  <button type="button"
-                          class="btn btn-primary btn-sm w-100 mt-2 send-reply-btn"
+                  <button type="button" class="btn btn-sm btn-outline-secondary reply-btn rounded-pill px-3 mt-1"
                           data-recipient="${n.other_user_id}">
-                    Send Message
+                    <i class="bi bi-reply-fill me-1"></i>Reply
                   </button>
-                </div>
-              </div>
 
-              <div class="d-flex flex-column align-items-end">
-                <small class="text-muted">${escapeHtml(n.created_at)}</small>
-                <button class="btn btn-sm btn-outline-danger delete-btn mt-2"
-                        data-id="${n.id}" title="Delete Notification">🗑</button>
+                  <div class="reply-box-wrapper reply-box" style="display:none;">
+                    <textarea class="form-control form-control-sm reply-input border-0 bg-white mb-2" rows="2" placeholder="Write an elegant response..."></textarea>
+                    <div class="d-flex justify-content-end">
+                      <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 send-reply-btn"
+                              data-recipient="${n.other_user_id}">
+                        Send Message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <button class="btn btn-sm text-muted hover-danger delete-btn border-0 p-1" data-id="${n.id}"><i class="bi bi-trash3 fs-6"></i></button>
+                </div>
               </div>
             </div>
           </div>

@@ -2,69 +2,330 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-          
-          <h2 class="text-center mb-4 fw-bold text-primary">
-            Join Imura FashionHub
-          </h2>
-          <p class="text-center text-muted mb-4">
-            Create your account to explore the marketplace, measurement tools, and try-on features.
-          </p>
+<style>
+  /* Modern Styling Layout Core */
+  .auth-wrapper {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-card {
+    background: #ffffff;
+    border: 1px solid #eef1f6;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    width: 100%;
+  }
+  .brand-badge {
+    background: rgba(13, 110, 253, 0.06);
+    color: #0d6efd;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .form-control-custom {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+  }
+  .form-control-custom:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+    outline: 0;
+  }
+  .form-label-custom {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.3rem;
+  }
+  .custom-btn-primary {
+    background: #0d6efd;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  .custom-btn-primary:hover {
+    background: #0b5ed7;
+    transform: translateY(-1px);
+  }
+  
+  /* Input Group Fix for Passwords */
+  .input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+  .input-group-custom .form-control-custom {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    flex: 1 1 auto;
+  }
+  .toggle-password-btn-custom {
+    border: 1.5px solid #e2e8f0;
+    border-left: none;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    background-color: #ffffff;
+    color: #64748b;
+    padding: 0 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  /* Wizard Step Steps State Controls */
+  .form-step {
+    display: none;
+  }
+  .form-step.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Step Progress Indicators */
+  .step-indicator-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .step-dot {
+    height: 6px;
+    width: 24px;
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+  .step-dot.active {
+    background-color: #0d6efd;
+    width: 36px;
+  }
+</style>
+
+<div class="container auth-wrapper my-4">
+  <div class="row justify-content-center w-100 m-0">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 px-1">
+      
+      <div class="card auth-card border-0 p-3 p-sm-4">
+        <div class="card-body p-1">
+
+          <div class="step-indicator-wrapper">
+            <div class="step-dot active" id="dot-1"></div>
+            <div class="step-dot" id="dot-2"></div>
+          </div>
 
           {% if form.errors %}
-            <div class="alert alert-danger">
-              <ul class="mb-0">
+            <div class="alert alert-danger border-0 rounded-3 mb-3 p-2 small" id="error-alert">
+              <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please adjust your entries:</div>
+              <ul class="mb-0 ps-3">
                 {% for field, errors in form.errors.items %}
                   {% for error in errors %}
-                    <li>{{ error }}</li>
+                    <li>{{ field|capfirst }}: {{ error }}</li>
                   {% endfor %}
                 {% endfor %}
               </ul>
             </div>
           {% endif %}
 
-          <!-- Signup Form -->
-          <form method="post" novalidate>
+          <form method="post" novalidate id="signup-wizard-form" class="d-flex flex-column gap-2">
             {% csrf_token %}
 
-            {% for field in form %}
-              <div class="mb-3">
-                <label class="form-label fw-semibold">{{ field.label }}</label>
-                {{ field|add_class:"form-control form-control-lg" }}
-                
-                {% if field.help_text %}
-                  <div class="form-text text-muted small">
-                    {{ field.help_text }}
-                  </div>
-                {% endif %}
-
-                {% if field.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ field.errors|join:", " }}
-                  </div>
-                {% endif %}
+            <div class="form-step active" id="step-1">
+              <div class="text-center mb-3">
+                <span class="brand-badge mb-2"><i class="bi bi-stars me-1"></i> Hub Registration</span>
+                <h3 class="fw-bold tracking-tight text-dark m-0 fs-4 fs-sm-3">Join Imura FashionHub</h3>
+                <p class="text-muted small mt-2 mb-0">Create your credentials to access the marketplace ecosystem.</p>
               </div>
-            {% endfor %}
 
-            <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">
-              <i class="bi bi-person-plus"></i> Sign Up
-            </button>
+              <div class="form-group mb-2">
+                <label class="form-label form-label-custom">Username</label>
+                {{ form.username|add_class:"form-control form-control-custom" }}
+                {% if form.username.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.username.errors|join:", " }}</div>{% endif %}
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label form-label-custom">Email Address</label>
+                {{ form.email|add_class:"form-control form-control-custom" }}
+                {% if form.email.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.email.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="form-group mb-2">
+                <label class="form-label form-label-custom">Password</label>
+                <div class="input-group-custom">
+                  {{ form.password1|add_class:"form-control form-control-custom password-field" }}
+                  <button class="btn toggle-password-btn-custom" type="button" style="display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                      <path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                    </svg>
+                  </button>
+                </div>
+                {% if form.password1.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.password1.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="form-group mb-3">
+                <label class="form-label form-label-custom">Confirm Password</label>
+                <div class="input-group-custom">
+                  {{ form.password2|add_class:"form-control form-control-custom password-field" }}
+                  <button class="btn toggle-password-btn-custom" type="button" style="display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                      <path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                    </svg>
+                  </button>
+                </div>
+                {% if form.password2.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.password2.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <button type="button" class="btn btn-primary custom-btn-primary w-100 shadow-sm mt-1" id="next-step-btn">
+                Continue to Next Step <i class="bi bi-arrow-right ms-1 small"></i>
+              </button>
+            </div>
+
+            <div class="form-step" id="step-2">
+              <div class="text-center mb-3">
+                <span class="brand-badge mb-2"><i class="bi bi-person-heart me-1"></i> Quick Personalization</span>
+                <h3 class="fw-bold tracking-tight text-dark m-0 fs-4 fs-sm-3">Let's get to know you more ✨</h3>
+                <p class="text-muted small mt-2 mb-0">Help us tailor your ecosystem tooling capabilities perfectly.</p>
+              </div>
+
+              <div class="form-group mb-2">
+                <label class="form-label form-label-custom">Phone Number</label>
+                {{ form.phone|add_class:"form-control form-control-custom" }}
+                {% if form.phone.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.phone.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="form-group mb-2">
+                <label class="form-label form-label-custom">I am registering as a...</label>
+                {{ form.user_type|add_class:"form-select form-control-custom" }}
+                {% if form.user_type.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.user_type.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="form-group mb-3">
+                <label class="form-label form-label-custom">State of Residence</label>
+                {{ form.state|add_class:"form-select form-control-custom" }}
+                {% if form.state.errors %}<div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ form.state.errors|join:", " }}</div>{% endif %}
+              </div>
+
+              <div class="form-check mb-3 small d-flex align-items-start gap-1">
+                {{ form.agree_terms|add_class:"form-check-input mt-1" }}
+                <label class="form-check-label text-muted fs-7" for="{{ form.agree_terms.id_for_label }}">
+                  I agree to the <a href="#" class="text-decoration-none fw-medium text-primary">Terms of Service</a> and <a href="#" class="text-decoration-none fw-medium text-primary">Privacy Policy</a>
+                </label>
+              </div>
+
+              <div class="row g-2">
+                <div class="col-4">
+                  <button type="button" class="btn btn-light w-100 border text-secondary py-2" id="prev-step-btn" style="border-radius: 12px; font-weight: 600; font-size: 0.95rem;">
+                    Back
+                  </button>
+                </div>
+                <div class="col-8">
+                  <button type="submit" class="btn btn-primary custom-btn-primary w-100 shadow-sm">
+                    <i class="bi bi-person-plus-fill me-1"></i>Create My Account
+                  </button>
+                </div>
+              </div>
+            </div>
+
           </form>
 
-          <div class="mt-4 text-center">
-            <small class="text-muted">Already have an account?</small>
-            <a href="{% url 'account_login' %}" class="fw-semibold text-decoration-none">
-              Login here
+          <div class="mt-3 text-center">
+            <span class="text-muted small">Already registered with us?</span>
+            <a href="{% url 'account_login' %}" class="fw-semibold text-primary text-decoration-none small d-block d-sm-inline ms-sm-1 mt-1 mt-sm-0">
+              Login here <i class="bi bi-arrow-right small"></i>
             </a>
           </div>
 
         </div>
       </div>
+
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const step1 = document.getElementById('step-1');
+  const step2 = document.getElementById('step-2');
+  const nextBtn = document.getElementById('next-step-btn');
+  const prevBtn = document.getElementById('prev-step-btn');
+  const dot1 = document.getElementById('dot-1');
+  const dot2 = document.getElementById('dot-2');
+  const errorAlert = document.getElementById('error-alert');
+
+  // Automatically kick backend validation errors over to step 2 if step 1 data checks out
+  if (errorAlert) {
+    const step1FieldsWithErrors = step1.querySelectorAll('.text-danger').length;
+    const step2FieldsWithErrors = step2.querySelectorAll('.text-danger').length;
+    if (step2FieldsWithErrors > 0 && step1FieldsWithErrors === 0) {
+      goToStep2();
+    }
+  }
+
+  function goToStep2() {
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    dot1.classList.remove('active');
+    dot2.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goToStep1() {
+    step2.classList.remove('active');
+    step1.classList.add('active');
+    dot2.classList.remove('active');
+    dot1.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  nextBtn.addEventListener('click', function() {
+    // Basic client-side check to guarantee inputs have values before skipping steps
+    const step1Inputs = step1.querySelectorAll('input[required]');
+    let valid = true;
+    step1Inputs.forEach(input => {
+      if(!input.value.trim()) {
+        input.classList.add('is-invalid');
+        valid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+    if (valid) goToStep2();
+  });
+
+  prevBtn.addEventListener('click', goToStep1);
+
+  // Smooth inline password visibility interaction toggle handler
+  const toggleButtons = document.querySelectorAll('.toggle-password-btn-custom');
+  const eyePath = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/></svg>`;
+  const eyeSlashPath = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a12 12 0 0 0-2.778.32l1.938 1.938A7 7 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.181.26-.41.586-.683.925zM10.03 5.01l1.532 1.532A2.5 2.5 0 0 0 9.5 5.01c-.13.003-.257.017-.378.04L8.252 4.183a5 5 0 0 1 1.778-.173M12.19 12.19a18 18 0 0 1-1.325 1.241C9.58 14.332 7.82 15.5 6 15.5c-5 0-8-5.5-8-5.5a12 12 0 0 1 2.138-2.61L3.393 6.137A13 13 0 0 0 1.172 8q.086.13.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.813 0 1.569-.175 2.254-.486zM6 8.02a2.5 2.5 0 0 0 3.48 3.48zm-.372 1.94L3.65 7.982A3.5 3.5 0 0 0 5.628 9.96z"/><path d="M13.646 14.354l-12-12 .708-.708 12 12z"/></svg>`;
+
+  toggleButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const inputGroup = this.closest('.input-group-custom');
+      const passwordInput = inputGroup.querySelector('.password-field');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        this.innerHTML = eyeSlashPath;
+      } else {
+        passwordInput.type = 'password';
+        this.innerHTML = eyePath;
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

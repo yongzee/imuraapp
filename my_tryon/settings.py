@@ -88,8 +88,13 @@ SITE_ID = 1
 
 # Redirects
 LOGIN_REDIRECT_URL = "products:product_list"   # where to go after login
-LOGOUT_REDIRECT_URL = "core:dashboard"       # after logout
+LOGOUT_REDIRECT_URL = "account_login"       # after logout
 LOGIN_URL = "account_login"             # login page
+
+
+ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']
+
+ACCOUNT_SIGNUP_FORM_CLASS = 'apps.accounts.forms.CustomSignupForm'
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [

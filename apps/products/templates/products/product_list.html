@@ -1,375 +1,448 @@
 {% extends "products/base.html" %}
 {% block content %}
 <style>
-/* ===== Layout ===== */
-.market-container {
+/* ===== Layout & Clean Typography ===== */
+body {
+  background-color: #f8f9fa;
+}
+
+.market-wrapper {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
-/* Desktop sidebar */
+/* Modern Clean Header Layout */
+.marketplace-header {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 1.5rem;
+}
+
+/* Desktop Sidebar */
 .sidebar {
-  width: 250px;
+  width: 260px;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  height: fit-content;
 }
 
-/* Sidebar items */
 .sidebar .list-group-item {
   border: none;
   border-radius: 8px;
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
 }
 
-.sidebar .list-group-item.active,
-.sidebar .list-group-item:hover {
+.sidebar .list-group-item.active {
   background-color: #0d6efd;
   color: white;
 }
 
-/* Product Grid */
+.sidebar .list-group-item:hover:not(.active) {
+  background-color: #f1f3f5;
+  color: #0d6efd;
+}
+
+/* Responsive Product Grid Matrix */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 768px) {
   .product-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* Card styling */
-.card {
+@media (min-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Clean UI Card Styling */
+.product-card {
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: #fff;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
 }
-.card-img-top {
-  height: 160px;
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 110%; /* Preserves uniform height across all cards regardless of raw photo size */
+  overflow: hidden;
+  background-color: #f1f3f5;
+}
+
+/* FIX: Forces the Carousel container to occupy the padded image frame space */
+.card-img-wrapper .carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.card-img-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-/* Buttons */
-.icon-btn {
-  background: #0d6efd;
-  color: #fff;
+/* Try-On Contextual Badge */
+.tryon-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 193, 7, 0.95);
+  color: #000;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.tryon-badge.disabled {
+  background: rgba(233, 236, 239, 0.9);
+  color: #6c757d;
+  box-shadow: none;
+}
+
+/* Action Circle Buttons */
+.header-action-btn {
+  background: #f1f3f5;
+  color: #212529;
   border: none;
-  padding: 10px 12px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 18px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.3s ease;
-}
-.icon-btn:hover {
-  background: #0b5ed7;
-  color: #fff;
+  transition: all 0.2s ease;
 }
 
-/* Search Bar */
-#searchBar {
-  width: 300px;
-  transition: all 0.3s ease;
+.header-action-btn:hover {
+  background: #e2e6ea;
 }
-#searchBar input {
-  border-radius: 50px;
-  padding: 5px 15px;
+
+/* Search Container Scaling */
+.search-container {
+  max-width: 450px;
   width: 100%;
 }
 
-/* Collapsed search icon for mobile */
-#searchToggle {
-  display: none;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%;
-  font-size: 20px;
+.search-container input {
+  border-radius: 30px;
+  padding-left: 1.25rem;
+  border-color: #dee2e6;
 }
 
-/* Sidebar toggle button (mobile only) */
-#sidebarToggle {
-  display: none;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 50%;
-  font-size: 20px;
+.search-container input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
 }
 
-/* Sidebar overlay for mobile */
-@media (max-width: 768px) {
-  .market-container {
-    flex-direction: column;
-  }
-
-  #sidebarToggle,
-  #searchToggle {
-    display: inline-flex;
-    margin-left: 4px;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sidebar {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    width: 220px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    padding: 1rem;
-    display: none;
-    z-index: 1050;
-  }
-  .sidebar.show {
-    display: block;
-  }
-
-  #searchBar {
-    display: none;
-    width: 150px;
-  }
-
-  /* Icons container on mobile: single line */
-  .header-icons {
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
-
-  .header-icons .icon-btn {
-    padding: 6px 8px;
-    font-size: 16px;
-  }
-}
-
-/* ===== FLOATING ACTION BUTTONS ===== */
-
-/* Base Floating Style */
+/* Floating Action Stack (Desktop View Backup / Secondary Controls) */
 .floating-btn-group {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 25px;
+  right: 25px;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Spaces them apart vertically */
+  gap: 12px;
   z-index: 1050;
 }
 
 .floating-action-btn {
-  padding: 14px 20px;
-  border-radius: 50px;
-  font-weight: bold;
-  box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.15);
   text-decoration: none;
   transition: transform 0.2s ease, background 0.3s ease;
-  text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  color: #fff;
 }
+
 .floating-action-btn:hover {
   transform: translateY(-3px);
-}
-
-/* Stream Button Specifics */
-.stream-btn {
-  background: #0d6efd;
-  color: #fff;
-}
-.stream-btn:hover {
-  background: #0b5ed7;
   color: #fff;
 }
 
-/* WhatsApp Help Button Specifics */
-.whatsapp-help-btn {
-  background: #25D366;
-  color: #fff;
-}
-.whatsapp-help-btn:hover {
-  background: #20ba56;
-  color: #fff;
-}
+.stream-btn { background: #0d6efd; }
+.stream-btn:hover { background: #0b5ed7; }
+.whatsapp-help-btn { background: #25D366; }
+.whatsapp-help-btn:hover { background: #20ba56; }
 
-/* TRY-ON BUTTON OVERLAY */
-.tryon-btn {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(255, 193, 7, 0.85);
-  color: #000;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  z-index: 10;
-  text-decoration: none;
-  transition: background 0.3s ease;
-}
-.tryon-btn:hover {
-  background: rgba(255, 193, 7, 1);
-  color: #000;
+/* Responsive Mobile Layout Adjustments */
+@media (max-width: 768px) {
+  .market-wrapper {
+    flex-direction: column;
+  }
+
+  /* Pop-out Drawer Animation Styling for Mobile Filtering */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100vh;
+    z-index: 1080;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0;
+  }
+  
+  .sidebar.show {
+    left: 0;
+  }
+
+  /* Fixes misalignment by dropping mobile search below brand title when toggled active */
+  #searchBarContainer {
+    display: none;
+    width: 100%;
+    margin-top: 0.75rem;
+    order: 3;
+  }
+  
+  #searchBarContainer.show {
+    display: block;
+  }
+  
+  .floating-btn-group {
+    bottom: 85px; /* Safely avoids overlap with custom global bottom bars */
+  }
 }
 </style>
 
-<div class="container mt-4">
-  <!-- ===== HEADER ===== -->
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-  <button id="sidebarToggle"><i class="bi bi-filter"></i></button>
+<!-- Mobile Filter Dimmer Overlay Backing -->
+<div class="modal-backdrop fade show d-none" id="sidebarOverlay" style="z-index: 1070;"></div>
 
-  <!-- Centered title -->
-  <h3 class="fw-bold text-center flex-grow-1 mb-0">🛍 Marketplace</h3>
-
-  <!-- Desktop centered search -->
-  <div id="searchBar" class="mx-auto">
-    <form method="GET" class="d-flex align-items-center">
-      <input type="text" name="q" class="form-control form-control-sm me-2"
-             placeholder="Search products...">
-      <button type="submit" class="btn btn-primary btn-sm">
-        <i class="bi bi-search"></i>
+<div class="container-fluid px-3 px-md-4 py-3">
+  
+  <!-- ===== ADAPTIVE HEAD CONTROLS ===== -->
+  <header class="marketplace-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      
+      <!-- Mobile Filter Trigger -->
+      <button class="header-action-btn d-md-none" id="sidebarToggle" aria-label="Toggle Filters">
+        <i class="bi bi-filter-left fs-4"></i>
       </button>
-    </form>
-  </div>
 
-  <!-- Mobile icon -->
-  <button id="searchToggle"><i class="bi bi-search"></i></button>
-</div>
+      <!-- Brand Heading Title -->
+      <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-shop text-primary me-2"></i>Marketplace</h3>
 
-  <div class="market-container">
-    <!-- Sidebar -->
-    <div class="sidebar shadow-sm" id="sidebar">
-      <div class="list-group">
-        <a href="{% url 'products:product_list' %}" 
-           class="list-group-item {% if not request.GET.category %}active{% endif %}">All</a>
-        <a href="?category=male"
-           class="list-group-item {% if request.GET.category == 'male' %}active{% endif %}">Male</a>
-        <a href="?category=female"
-           class="list-group-item {% if request.GET.category == 'female' %}active{% endif %}">Female</a>
-      </div>
-
-      <!-- Filters -->
-      <div class="mt-4 p-3 bg-light rounded shadow-sm">
-        <h6 class="fw-bold mb-2">Filters</h6>
-        <form method="GET">
-          <div class="mb-2">
-            <input type="number" name="min_price" placeholder="Min ₦" class="form-control form-control-sm">
-          </div>
-          <div class="mb-2">
-            <input type="number" name="max_price" placeholder="Max ₦" class="form-control form-control-sm">
-          </div>
-          <button class="btn btn-primary btn-sm w-100">Apply</button>
+      <!-- Fluid Search Block -->
+      <div id="searchBarContainer" class="search-container mx-auto mx-md-0 ms-md-auto">
+        <form method="GET" class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ request.GET.q|default:'' }}">
+          <button type="submit" class="btn btn-primary px-3">
+            <i class="bi bi-search"></i>
+          </button>
         </form>
       </div>
-    </div>
 
-    <!-- Main Product Grid -->
-    <div class="flex-grow-1">
+      <!-- Mobile Search Display Switcher -->
+      <button class="header-action-btn d-md-none" id="searchToggle" aria-label="Toggle Search">
+        <i class="bi bi-search fs-5"></i>
+      </button>
+      
+    </div>
+  </header>
+
+  <!-- ===== VIEWPORT CONNECTOR GRID ===== -->
+  <div class="market-wrapper">
+    
+    <!-- Left Navigation Filter Deck (Sidebar) -->
+    <aside class="sidebar shadow-sm" id="sidebar">
+      <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+        <h5 class="fw-bold mb-0">Filters & Options</h5>
+        <button type="button" class="btn-close" id="closeSidebarBtn"></button>
+      </div>
+
+      <h6 class="text-muted text-uppercase small fw-bold mb-3">Categories</h6>
+      <div class="list-group mb-4">
+        <a href="{% url 'products:product_list' %}" class="list-group-item {% if not request.GET.category %}active{% endif %}">
+          <i class="bi bi-grid-fill me-2"></i>All Products
+        </a>
+        <a href="?category=male" class="list-group-item {% if request.GET.category == 'male' %}active{% endif %}">
+          <i class="bi bi-gender-male me-2"></i>Male Edition
+        </a>
+        <a href="?category=female" class="list-group-item {% if request.GET.category == 'female' %}active{% endif %}">
+          <i class="bi bi-gender-female me-2"></i>Female Edition
+        </a>
+      </div>
+
+      <h6 class="text-muted text-uppercase small fw-bold mb-3">Price Window</h6>
+      <div class="p-3 bg-light rounded-3">
+        <form method="GET">
+          {% if request.GET.category %}
+            <input type="hidden" name="category" value="{{ request.GET.category }}">
+          {% endif %}
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-1">Minimum Price</label>
+            <input type="number" name="min_price" placeholder="₦ Min" class="form-control form-control-sm border-0" value="{{ request.GET.min_price }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-muted mb-1">Maximum Price</label>
+            <input type="number" name="max_price" placeholder="₦ Max" class="form-control form-control-sm border-0" value="{{ request.GET.max_price }}">
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm w-100 rounded-2 fw-semibold">Apply Window</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Right Grid Layout (Display Arena) -->
+    <main class="flex-grow-1">
       <div class="product-grid">
         {% for product in products %}
-          <div class="card shadow-sm">
-            {% if product.images.all %}
-            <div id="carousel{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
-              
-              <!-- TRY-ON BUTTON -->
+          <div class="product-card shadow-sm">
+            
+            <!-- Photo Media Frame Container -->
+            <div class="card-img-wrapper">
+              <!-- Try-On Contextual Badge Indicators -->
               {% if product.enable_digital_tryon %}
-                <a href="#" class="tryon-btn" onclick="handleTryonClick(event)">Try‑On</a>
+                <a href="#" class="tryon-badge" onclick="handleTryonClick(event)"><i class="bi bi-magic me-1"></i>Try‑On</a>
               {% else %}
-                <a href="#" class="tryon-btn disabled" onclick="handleUnavailableTryon(event)">Try‑On</a>
+                <a href="#" class="tryon-badge disabled" onclick="handleUnavailableTryon(event)">No Try‑On</a>
               {% endif %}
-              <div class="carousel-inner">
-                {% for img in product.images.all %}
-                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <a href="{% url 'products:product_detail' product.pk %}">
-                      <img src="{{ img.image.url }}" class="d-block w-100 card-img-top" alt="{{ product.title }}">
-                    </a>
-                  </div>
-                {% endfor %}
+
+              {% if product.images.all %}
+              <div id="carousel{{ product.id }}" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="3500">
+                <div class="carousel-inner h-100">
+                  {% for img in product.images.all %}
+                    <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}">
+                      <!-- ADDED: Block formatting utility classes to make the link map across the whole image layout box -->
+                      <a href="{% url 'products:product_detail' product.pk %}" class="d-block w-100 h-100">
+                        <img src="{{ img.image.url }}" alt="{{ product.title }}">
+                      </a>
+                    </div>
+                  {% endfor %}
+                </div>
+                
+                {% if product.images.all|length > 1 %}
+                <div class="carousel-indicators mb-2">
+                  {% for img in product.images.all %}
+                    <button type="button" data-bs-target="#carousel{{ product.id }}" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></button>
+                  {% endfor %}
+                </div>
+                {% endif %}
               </div>
-              <div class="carousel-indicators">
-                {% for img in product.images.all %}
-                  <button type="button" data-bs-target="#carousel{{ product.id }}" data-bs-slide-to="{{ forloop.counter0 }}"
-                          {% if forloop.first %}class="active"{% endif %}></button>
-                {% endfor %}
+              {% else %}
+                <!-- Standard Fallback Placeholder when an item contains no raw product photos -->
+                <div class="d-flex align-items-center justify-content-center position-absolute top-0 start-0 w-100 h-100 text-muted">
+                  <i class="bi bi-image fs-2"></i>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Meta Details and Price Deck Context -->
+            <div class="p-3 d-flex flex-column flex-grow-1 justify-content-between">
+              <div>
+                <h6 class="fw-bold text-dark text-truncate mb-1">{{ product.title }}</h6>
+                <div class="d-flex align-items-center gap-1 mb-2">
+                  <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 11px;">
+                    <i class="bi bi-person me-1"></i>{{ product.seller.username }}
+                  </span>
+                </div>
+              </div>
+              <div class="pt-2 border-top d-flex align-items-center justify-content-between">
+                <span class="text-primary fw-bold fs-6">₦{{ product.price }}</span>
+                <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-sm btn-outline-primary rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                  <i class="bi bi-arrow-right-short fs-5"></i>
+                </a>
               </div>
             </div>
-            {% endif %}
-            <div class="card-body">
-              <h6 class="fw-semibold text-truncate">{{ product.title }}</h6>
-              <p class="text-success fw-bold mb-1">₦{{ product.price }}</p>
-              <small class="text-muted">By {{ product.seller.username }}</small>
-            </div>
+
           </div>
         {% empty %}
-          <p class="text-muted">No products yet.</p>
+          <div class="text-center py-5 bg-white rounded-3 w-100 shadow-sm" style="grid-column: 1 / -1;">
+            <i class="bi bi-bag-x text-muted display-4"></i>
+            <p class="text-muted mt-2 mb-0">No matching items found in the marketplace setup.</p>
+          </div>
         {% endfor %}
       </div>
-    </div>
+    </main>
+
   </div>
 </div>
 
-<!-- Floating Button Stack -->
-<div class="floating-btn-group">
-  <!-- WhatsApp Help & Enquiries Button -->
-  <a href="https://chat.whatsapp.com/JEPZ167WXa37GQUwkkAvip" 
-     target="_blank" 
-     class="floating-action-btn whatsapp-help-btn">
-    <i class="bi bi-whatsapp"></i>
+<!-- ===== UTILITY FLOATING ACTIONS ===== -->
+<div class="floating-btn-group d-none d-md-flex">
+  <a href="https://chat.whatsapp.com/JEPZ167WXa37GQUwkkAvip" target="_blank" class="floating-action-btn whatsapp-help-btn" title="WhatsApp Support">
+    <i class="bi bi-whatsapp fs-5"></i>
   </a>
-
-  <!-- Stream Button -->
-  <a href="{% url 'streaming:product_stream' %}" class="floating-action-btn stream-btn">Stream</a>
+  <a href="{% url 'streaming:product_stream' %}" class="floating-action-btn stream-btn" title="Live Video Stream">
+    <i class="bi bi-play-fill fs-4"></i>
+  </a>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Auto-cycle all carousels
-  document.querySelectorAll('.carousel').forEach(function(carousel){
-    new bootstrap.Carousel(carousel, { interval: 3000, ride: 'carousel' });
-  });
-
-  // Sidebar toggle for mobile
-  const toggleBtn = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
-  if(toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', function() {
-      sidebar.classList.toggle('show');
-    });
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebarDrawer() {
+    sidebar.classList.toggle('show');
+    sidebarOverlay.classList.toggle('d-none');
   }
 
-  // Search toggle for mobile
+  // Sidebar controls
+  if(sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebarDrawer);
+  if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebarDrawer);
+  if(sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebarDrawer);
+
+  // Mobile Inline Search Field Deployment Control
   const searchToggle = document.getElementById('searchToggle');
-  const searchBar = document.getElementById('searchBar');
-  if(searchToggle && searchBar) {
+  const searchBarContainer = document.getElementById('searchBarContainer');
+  if(searchToggle && searchBarContainer) {
     searchToggle.addEventListener('click', function() {
-      searchBar.style.display = searchBar.style.display === 'block' ? 'none' : 'block';
+      searchBarContainer.classList.toggle('show');
     });
   }
 });
 
+function handleTryonClick(event) {
+  event.stopPropagation(); // Prevents clicking the try-on badge from triggering the detail page redirection link
+  alert('Digital Try‑On is available for this product!');
+}
 
-  function handleTryonClick(event) {
-    event.preventDefault();
-    alert('Digital Try‑On is available for this product!');
-  }
-
-  function handleUnavailableTryon(event) {
-    event.preventDefault();
-    alert('Digital Try‑On is not available for this product yet.');
-  }
+function handleUnavailableTryon(event) {
+  event.stopPropagation(); // Prevents clicking the disabled badge from triggering the detail page redirection link
+  alert('Digital Try‑On is not available for this product yet.');
+}
 </script>
 {% endblock %}

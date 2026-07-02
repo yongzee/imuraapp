@@ -5,7 +5,9 @@ from django.contrib.auth import logout
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 
-from .forms import UserForm, ProfileForm
+# Update UserForm to CustomSignupForm
+# Change your import on line 8 of views.py to import all three forms:
+from .forms import UserForm, CustomSignupForm, ProfileForm
 from apps.products.models import ProductImage, ProductVideo
 from apps.notifications.models import Notification
 

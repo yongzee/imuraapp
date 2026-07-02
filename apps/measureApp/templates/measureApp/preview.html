@@ -333,17 +333,27 @@
   </div>
 
   <!-- Form -->
-  <div class="form-section">
-    <label for="userHeight"><strong>Enter Your Real Height (cm):</strong></label><br/>
-    <input type="number" id="userHeight" required placeholder="e.g. 170" min="50" max="250" />
-    <br/>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitForProcessing()">
-      ✅ Submit for Measurement
-    </button>
-    <div class="btn-group">
-      <button class="btn btn-secondary" onclick="openRetakeModal()">🔄 Retake Photos</button>
+    <div class="form-section">
+      <label for="userHeight" class="text-white"><strong>Enter Your Real Height (cm):</strong></label><br/>
+      <input type="number" id="userHeight" required placeholder="e.g. 170" min="50" max="250" class="form-control" />
+      
+      <div class="form-text text-white mt-1" style="font-size: 0.85rem; line-height: 1.4; opacity: 0.95;">
+        💡 <strong>Not sure? Here is a quick range guide to help you estimate:</strong>
+        <ul class="mb-0 ps-3 mt-1 text-white">
+          <li><strong>Short:</strong> Under 163 cm (approx. 5'4" and below)</li>
+          <li><strong>Medium:</strong> 164 cm – 179 cm (approx. 5'5" to 5'10")</li>
+          <li><strong>Tall:</strong> 180 cm and above (approx. 5'11" and up)</li>
+        </ul>
+      </div>
+      <br/>
+  
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForProcessing()">
+        ✅ Submit for Measurement
+      </button>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="openRetakeModal()">🔄 Retake Photos</button>
+      </div>
     </div>
-  </div>
 
   <script>
     /* ========== DOM ========== */
