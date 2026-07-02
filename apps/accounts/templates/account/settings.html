@@ -1,6 +1,5 @@
 {% extends "products/base.html" %}
 {% load static %}
-
 {% block content %}
 <style>
   .settings-container {
@@ -43,7 +42,6 @@
   <div class="card settings-card overflow-hidden">
     <div class="d-flex flex-column">
       
-      <!-- CHANGE PASSWORD -->
       <div class="settings-item d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
           <div class="icon-box bg-primary-subtle text-primary">
@@ -54,11 +52,9 @@
             <small class="text-muted">Update your account access password</small>
           </div>
         </div>
-        <!-- If 'password_change' causes errors, temporarily switch to href="#" -->
-        <a href="{% url 'password_change' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Modify</a>
+        <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Modify</a>
       </div>
 
-      <!-- NOTIFICATIONS -->
       <div class="settings-item d-flex align-items-center justify-content-between opacity-75">
         <div class="d-flex align-items-center gap-3">
           <div class="icon-box bg-light text-secondary">
@@ -72,7 +68,6 @@
         <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1 small">Paused</span>
       </div>
 
-      <!-- DELETE ACCOUNT -->
       <div class="settings-item d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
           <div class="icon-box bg-danger-subtle text-danger">
@@ -83,7 +78,6 @@
             <small class="text-muted">Permanently erase profile information</small>
           </div>
         </div>
-        <!-- NOTE: Changed to '#' to prevent 500 crashes while you debug your 'accounts:delete_account' view route -->
         <a href="#" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Are you completely sure you want to delete your account? This step cannot be undone.');">Delete</a>
       </div>
 
