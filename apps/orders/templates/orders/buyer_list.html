@@ -1,65 +1,103 @@
 {% extends "products/base.html" %}
 {% block content %}
 
-<div class="container mt-4">
-  <h3 class="fw-bold mb-3">🛒 Your Orders</h3>
+<style>
+  .orders-wrapper {
+    max-width: 900px;
+  }
+  .order-item-card {
+    background: #ffffff;
+    border: 1px solid #eef1f6;
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .order-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04) !important;
+  }
+  .status-pill {
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+</style>
+
+<div class="container orders-wrapper mt-4 px-3 px-sm-4">
+  
+  <div class="mb-4">
+    <h3 class="fw-bold text-dark mb-1">🛒 Your Orders</h3>
+    <p class="text-muted small mb-0">Review processing details, check delivery states, or manage active transactions.</p>
+  </div>
 
   {% if orders %}
-    <div class="list-group shadow-sm rounded-3">
+    <div class="d-flex flex-column gap-3">
 
       {% for order in orders %}
-      <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div class="card order-item-card shadow-sm border-0">
+        <div class="card-body p-3 p-sm-4">
+          <div class="row align-items-center g-3">
 
-        <!-- ORDER INFO -->
-        <a href="{% url 'orders:detail' order.pk %}"
-           class="text-decoration-none text-dark flex-grow-1 me-3">
+            <div class="col-12 col-sm-8 text-start">
+              <a href="{% url 'orders:detail' order.pk %}" class="text-decoration-none text-dark d-block">
+                <h6 class="mb-2 fw-bold text-dark tracking-tight fs-5-sm">{{ order.product_title }}</h6>
+                
+                <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
+                  <span><i class="bi bi-shop me-1"></i>{{ order.seller.username }}</span>
+                  <span class="text-secondary opacity-50">•</span>
+                  <span>Qty: <strong>{{ order.quantity }}</strong></span>
+                  <span class="text-secondary opacity-50">•</span>
+                  <span class="text-dark fw-semibold">₦{{ order.price_at_order }}</span>
+                </div>
+              </a>
+            </div>
 
-          <h6 class="mb-1 fw-semibold">{{ order.product_title }}</h6>
+            <div class="col-12 col-sm-4 d-flex justify-content-sm-end align-items-center flex-wrap gap-2">
+              
+              <span class="status-pill text-center flex-fill flex-sm-grow-0
+                {% if order.status == 'pending' %} bg-secondary-subtle text-secondary border border-secondary-subtle
+                {% elif order.status == 'evaluating' %} bg-warning-subtle text-warning-emphasis border border-warning-subtle
+                {% elif order.status == 'completed_by_seller' %} bg-info-subtle text-info-emphasis border border-info-subtle
+                {% elif order.status == 'satisfactory' %} bg-primary-subtle text-primary border border-primary-subtle
+                {% elif order.status == 'paid' %} bg-success-subtle text-success border border-success-subtle
+                {% elif order.status == 'cancelled' %} bg-danger-subtle text-danger border border-danger-subtle
+                {% else %} bg-dark text-white {% endif %}
+              ">
+                {{ order.get_status_display }}
+              </span>
 
-          <small class="text-muted">
-            Seller: {{ order.seller.username }} ·
-            Qty: {{ order.quantity }} ·
-            ₦{{ order.price_at_order }}
-          </small>
-        </a>
+              <a href="{% url 'orders:detail' order.pk %}" class="btn btn-sm btn-light border d-inline-block d-sm-none flex-fill" style="border-radius: 8px;">
+                View
+              </a>
 
-        <!-- RIGHT ACTIONS -->
-        <div class="d-flex align-items-center gap-2">
+              {% if not order.is_paid %}
+              <form method="post" 
+                    action="{% url 'orders:delete' order.pk %}"
+                    onsubmit="return confirm('Are you sure you want to cancel this order?');" 
+                    class="m-0 flex-fill flex-sm-grow-0">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger w-100" style="border-radius: 8px; padding: 6px 12px;" title="Cancel order">
+                  <i class="bi bi-trash"></i>
+                  <span class="d-inline d-sm-none ms-1">Cancel Order</span>
+                </button>
+              </form>
+              {% endif %}
 
-          <!-- STATUS BADGE -->
-          <span class="badge
-            {% if order.status == 'pending' %} bg-secondary
-            {% elif order.status == 'evaluating' %} bg-warning text-dark
-            {% elif order.status == 'completed_by_seller' %} bg-info
-            {% elif order.status == 'satisfactory' %} bg-primary
-            {% elif order.status == 'paid' %} bg-success
-            {% elif order.status == 'cancelled' %} bg-danger
-            {% else %} bg-dark {% endif %}
-          ">
-            {{ order.get_status_display }}
-          </span>
+            </div>
 
-          <!-- DELETE / CANCEL -->
-          {% if not order.is_paid %}
-          <form method="post"
-                action="{% url 'orders:delete' order.pk %}"
-                onsubmit="return confirm('Are you sure you want to cancel this order?');">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-danger"
-                    title="Cancel order">
-              <i class="bi bi-trash"></i>
-            </button>
-          </form>
-          {% endif %}
-
+          </div>
         </div>
       </div>
       {% endfor %}
 
     </div>
   {% else %}
-    <div class="alert alert-light border text-center">
-      <p class="mb-0 text-muted">You have not placed any orders yet.</p>
+    <div class="text-center py-5 bg-light rounded-4 border border-dashed">
+      <i class="bi bi-bag-x text-muted display-5"></i>
+      <h6 class="fw-semibold text-dark mt-3 mb-1">No Orders Found</h6>
+      <p class="text-muted small mb-0">You have not placed any transactional orders yet.</p>
     </div>
   {% endif %}
 </div>
