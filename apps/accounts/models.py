@@ -86,6 +86,7 @@ class Profile(models.Model):
         validators=[phone_validator]
     )
 
+    # Kept fallback to "customer", but registration choices overwrite this immediately
     user_type = models.CharField(
         max_length=30,
         choices=USER_TYPE_CHOICES,
@@ -150,7 +151,6 @@ class Profile(models.Model):
 
     @property
     def completion_percentage(self):
-
         fields = [
             self.avatar,
             self.bio,
@@ -165,12 +165,20 @@ class Profile(models.Model):
             self.tiktok,
             self.state,
         ]
-
         completed = sum(bool(field) for field in fields)
-
         return int((completed / len(fields)) * 100)
-    
-    
+
+    # --- UPDATED SAVE METHOD ---
+    def save(self, *args, **kwargs):
+        # Automatically flip the completed boolean if percentage hits 100%
+        if self.completion_percentage == 100:
+            self.profile_completed = True
+        else:
+            self.profile_completed = False
+            
+        super().save(*args, **kwargs)
+        
+        
 class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="activities")
     action = models.CharField(max_length=255)

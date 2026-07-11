@@ -30,7 +30,7 @@ PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 SECRET_KEY = "django-insecure-!#b@-1x5o*qw-v3yi_mstr4$$flpe$p(rwpi=%4n5z!oki-jld"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
@@ -248,3 +248,11 @@ PAYSTACK_BASE_URL = "https://api.paystack.co"
 CSRF_TRUSTED_ORIGINS = [
     "https://imurafh.onrender.com",
 ]
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Africa/Lagos"

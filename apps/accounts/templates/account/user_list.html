@@ -22,41 +22,55 @@
   </form>
 
   <div class="row">
-    {% for u in users %}
-      <div class="col-md-3 col-6 mb-4">
-        <a href="{% url 'accounts:profile' u.username %}"
-           class="text-decoration-none text-dark">
+  {% for u in users %}
+    <div class="col-md-3 col-6 mb-4">
+      <a href="{% url 'accounts:profile' u.username %}" class="text-decoration-none text-dark">
 
-          <div class="card border-0 shadow-sm h-100 text-center">
-            {% if u.profile.avatar %}
-              <img src="{{ u.profile.avatar.url }}"
-                   class="rounded-circle mx-auto mt-3"
-                   width="90" height="90"
-                   style="object-fit:cover;">
-            {% else %}
-              <img src="{% static 'images/default-avatar.png' %}"
-                   class="rounded-circle mx-auto mt-3"
-                   width="90" height="90">
+        <div class="card border-0 shadow-sm h-100 text-center">
+          {% if u.profile.avatar %}
+            <img src="{{ u.profile.avatar.url }}"
+                 class="rounded-circle mx-auto mt-3"
+                 width="90" height="90"
+                 style="object-fit:cover;">
+          {% else %}
+            <img src="{% static 'images/default-avatar.png' %}"
+                 class="rounded-circle mx-auto mt-3"
+                 width="90" height="90">
+          {% endif %}
+
+          <div class="card-body">
+            <h6 class="fw-bold mb-1">{{ u.username }}</h6>
+            
+            {% if u.profile.bio %}
+              <p class="mb-2 fs-6 opacity-75 fw-light">{{ u.profile.bio }}</p>
             {% endif %}
 
-            <div class="card-body">
-              <h6 class="fw-bold mb-1">{{ u.username }}</h6>
-              <p class="text-muted small mb-1">
-                {{ u.profile.bio|default:"Fashion creator" }}
-              </p>
-              {% if u.profile.location %}
-                <small>📍 {{ u.profile.location }}</small>
+            <div class="mb-3">
+              {% if u.profile.user_type == 'tailor' %}
+                <span class="badge bg-primary text-white px-3 py-1 rounded-pill"><i class="bi bi-scissors me-1"></i> Tailor</span>
+              {% elif u.profile.user_type == 'fashion_designer' %}
+                <span class="badge text-white px-3 py-1 rounded-pill" style="background-color: #6f42c1;"><i class="bi bi-palette me-1"></i> Designer</span>
+              {% elif u.profile.user_type == 'fabric_vendor' %}
+                <span class="badge bg-success text-white px-3 py-1 rounded-pill"><i class="bi bi-shop me-1"></i> Fabric Vendor</span>
+              {% elif u.profile.user_type == 'fashion_brand' %}
+                <span class="badge bg-dark text-white px-3 py-1 rounded-pill"><i class="bi bi-award me-1"></i> Brand</span>
+              {% else %}
+                <span class="badge bg-secondary text-white px-3 py-1 rounded-pill"><i class="bi bi-person me-1"></i> Customer</span>
               {% endif %}
             </div>
+            {% if u.profile.location %}
+              <small class="text-muted d-block mt-2">📍 {{ u.profile.location }}</small>
+            {% endif %}
           </div>
+        </div>
 
-        </a>
-      </div>
-    {% empty %}
+      </a>
+    </div>
+  {% empty %}
+    <div class="col-12 text-center py-4">
       <p class="text-muted">No users found.</p>
-    {% endfor %}
-  </div>
-
+    </div>
+  {% endfor %}
 </div>
 
 {% endblock %}

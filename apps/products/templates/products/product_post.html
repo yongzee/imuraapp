@@ -157,6 +157,30 @@
     background: #212529;
     transform: translateY(-1px);
   }
+
+  /* Disabled button configuration state styling */
+.submit-btn:disabled {
+  background-color: #94a3b8 !important;
+  cursor: not-allowed;
+  transform: none !important;
+  opacity: 0.85;
+}
+
+/* Three dots sequence loading animation layout */
+.animated-dots {
+  display: inline-block;
+  font-weight: bold;
+  animation: dots-sequence 1.5s infinite steps(4, end);
+  width: 1.25em;
+  text-align: left;
+}
+
+@keyframes dots-sequence {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}
 </style>
 
 <div class="container form-container-wrapper">
@@ -316,7 +340,12 @@
           <!-- Submission CTA Row Link -->
           <div class="row mt-4">
             <div class="col-12 text-end">
-              <button type="submit" class="submit-btn">Post Product Listing</button>
+              <button type="submit" class="submit-btn" id="submitBtn" onclick="handleButtonLoading(this)">
+                <span class="btn-text">Post Product Listing</span>
+                <span class="btn-loading d-none">
+                  Posting<span class="animated-dots">...</span>
+                </span>
+              </button>
             </div>
           </div>
         </form>
@@ -348,6 +377,30 @@
       <span class="upload-limit-badge"><i class="bi bi-info-circle"></i> Max file size: 30MB limits.</span>
     `;
     wrapper.appendChild(div);
+  }
+  function handleButtonLoading(button) {
+  // Check if the form is valid before triggering the UI animation loop (for native validation)
+    const form = button.closest('form');
+    if (form && !form.checkValidity()) {
+      return; 
+    }
+
+    const textSpan = button.querySelector('.btn-text');
+    const loadingSpan = button.querySelector('.btn-loading');
+
+    if (textSpan && loadingSpan) {
+      // Swap text components visibility
+      textSpan.classList.add('d-none');
+      loadingSpan.classList.remove('d-none');
+      
+      // Disable interaction safely to avoid processing redundant duplicate entries
+      button.disabled = true;
+      
+      // Submit parent form manually since triggering 'disabled' status stops standard events
+      if (form) {
+        form.submit();
+      }
+    }
   }
 </script>
 

@@ -378,7 +378,7 @@
       <div class="profile-info">
         <h2 class="fw-bold mb-1 tracking-tight">{{ profile_user.username }}</h2>
         <p class="mb-3 fs-6 opacity-75 fw-light">
-          {{ profile_user.profile.bio|default:"Fashion creator & structural designer" }}
+          {{ profile_user.profile.bio|default:profile_user.profile.get_user_type_display }}
         </p>
 
         <!-- CONFIG META -->
