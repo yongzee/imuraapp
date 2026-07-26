@@ -29,6 +29,7 @@ urlpatterns = [
     path("notifications/", include("apps.notifications.urls", namespace="notifications")),
     path("orders/", include("apps.orders.urls")),
     path('measure/', include("apps.measureApp.urls")),
+    path('feedback/', include('apps.feedback.urls')), # Access via /feedback/
     
 ]
 if settings.DEBUG:

@@ -243,6 +243,11 @@ body {
   .floating-btn-group {
     bottom: 85px; /* Safely avoids overlap with custom global bottom bars */
   }
+  @media (max-width: 768px) {
+  .floating-btn-group {
+    bottom: 85px; /* Safely avoids overlap with custom global bottom bars */
+  }
+}
 }
 </style>
 
@@ -399,7 +404,7 @@ body {
 </div>
 
 <!-- ===== UTILITY FLOATING ACTIONS ===== -->
-<div class="floating-btn-group d-none d-md-flex">
+<div class="floating-btn-group d-flex">
   <a href="https://chat.whatsapp.com/JEPZ167WXa37GQUwkkAvip" target="_blank" class="floating-action-btn whatsapp-help-btn" title="WhatsApp Support">
     <i class="bi bi-whatsapp fs-5"></i>
   </a>

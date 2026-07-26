@@ -1,0 +1,234 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Container layout to fit inside base template structure */
+    .feedback-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        min-height: calc(100vh - 120px);
+    }
+
+    .feedback-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 500px;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+    }
+
+    .feedback-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .feedback-card p {
+        font-size: 0.95rem;
+        color: #666;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #444;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        font-size: 1.5rem;
+        color: #d1d5db;
+        cursor: pointer;
+        transition: color 0.15s ease;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #f59e0b;
+    }
+
+    .submit-btn {
+        width: 100%;
+        background-color: #4f46e5;
+        color: #ffffff;
+        border: none;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #4338ca;
+    }
+
+    .submit-btn:disabled {
+        background-color: #a5b4fc;
+        cursor: not-allowed;
+    }
+
+    .alert-message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        display: none;
+    }
+
+    .alert-message.success {
+        background-color: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .alert-message.error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+</style>
+
+<div class="feedback-container">
+    <div class="feedback-card">
+        <h2>We Value Your Feedback</h2>
+        <p>Let us know how we can improve your experience.</p>
+
+        <form id="feedbackForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_type">Feedback Type</label>
+                <select name="feedback_type" id="id_type" class="form-control">
+                    <option value="general">General Comment</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="bug">Bug Report</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" checked><label for="star5">&#9733;</label>
+                    <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
+                    <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
+                    <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+                    <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_name">Name (Optional)</label>
+                <input type="text" name="name" id="id_name" class="form-control" placeholder="Jane Doe">
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email (Optional)</label>
+                <input type="email" name="email" id="id_email" class="form-control" placeholder="jane@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="id_phone">Phone Number (Optional)</label>
+                <input type="tel" name="phone_number" id="id_phone" class="form-control" placeholder="+1 (555) 000-0000">
+            </div>
+
+            <div class="form-group">
+                <label for="id_message">Your Message *</label>
+                <textarea name="message" id="id_message" class="form-control" placeholder="Tell us what you think..." required></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">Send Feedback</button>
+
+            <div id="statusMessage" class="alert-message"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('feedbackForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        statusMessage.style.display = 'none';
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+                statusMessage.className = 'alert-message success';
+                statusMessage.textContent = result.message;
+                statusMessage.style.display = 'block';
+                form.reset();
+            } else {
+                throw new Error(result.message || 'Something went wrong. Please try again.');
+            }
+        } catch (err) {
+            statusMessage.className = 'alert-message error';
+            statusMessage.textContent = err.message;
+            statusMessage.style.display = 'block';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Feedback';
+        }
+    });
+</script>
+{% endblock content %}
