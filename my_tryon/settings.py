@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.orders",
     "apps.measureApp",
     "apps.feedback",
+    "apps.tryon",
     
     # Third-party
     "widget_tweaks",

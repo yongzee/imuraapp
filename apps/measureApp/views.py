@@ -9,7 +9,7 @@ from PIL import Image
 from .pose_capture import process_camera
 import tempfile
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 import os
 import uuid
 from django.contrib.auth.decorators import login_required
@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 from django.templatetags.static import static
 from apps.notifications.models import Notification
 from django.shortcuts import get_object_or_404
-
+from .models import MeasurementProfile, MeasurementItem
 
 User = get_user_model()
 
@@ -361,3 +361,84 @@ def view_shared_measurement(request, notification_id):
         "notif": notif,
         "measurements": measurements
     })
+    
+@login_required
+def manual_input_view(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', 'My Measurement')
+        
+        # Create the parent profile restricted to request.user
+        profile = MeasurementProfile.objects.create(
+            user=request.user,
+            title=title,
+            source='MANUAL'
+        )
+
+        # Grab dynamic arrays sent from the form
+        measure_types = request.POST.getlist('measure_type[]')
+        values = request.POST.getlist('value[]')
+        units = request.POST.getlist('unit[]')
+
+        # Zip and save all dynamic rows
+        for m_type, val, unit in zip(measure_types, values, units):
+            if m_type and val:  # Ensure fields aren't blank
+                MeasurementItem.objects.create(
+                    profile=profile,
+                    measure_type=m_type,
+                    value=val,
+                    unit=unit
+                )
+
+        return redirect('measureApp:my_measurements')
+
+    return render(request, 'measureApp/manual_input.html')
+
+@login_required
+def my_measurements_view(request):
+    # Strictly query only profiles belonging to the logged-in window/user
+    profiles = (
+        MeasurementProfile.objects.filter(user=request.user)
+        .prefetch_related('items')
+        .order_by('-created_at')
+    )
+
+    # Fetch users for the share modal using your helper function
+    users = build_share_users(request.user)
+
+    return render(
+        request,
+        'measureApp/my_measurements.html',
+        {'profiles': profiles, 'users': users},  # <--- ADD 'users': users HERE
+    )
+
+@login_required
+def edit_measurement_view(request, profile_id):
+    # Retrieve profile ensuring it strictly belongs to the logged-in user
+    profile = get_object_or_404(MeasurementProfile, id=profile_id, user=request.user)
+
+    if request.method == 'POST':
+        profile.title = request.POST.get('title', profile.title)
+        profile.save()
+
+        # Delete existing items and recreate updated ones
+        profile.items.all().delete()
+
+        measure_types = request.POST.getlist('measure_type[]')
+        values = request.POST.getlist('value[]')
+        units = request.POST.getlist('unit[]')
+
+        for m_type, val, unit in zip(measure_types, values, units):
+            if m_type and val:
+                MeasurementItem.objects.create(
+                    profile=profile,
+                    measure_type=m_type,
+                    value=val,
+                    unit=unit
+                )
+
+        return redirect('measureApp:my_measurements')
+    
+@login_required
+def print_measurement(request, profile_id):
+    profile = get_object_or_404(MeasurementProfile, id=profile_id, user=request.user)
+    return render(request, 'measureApp/print_measurement.html', {'profile': profile})

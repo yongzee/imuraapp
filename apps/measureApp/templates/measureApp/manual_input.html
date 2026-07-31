@@ -1,0 +1,101 @@
+{% extends "products/base.html" %}
+{% block content %}
+<style>
+  body { background-color: #2e2e2e; color: #f8f9fa; }
+  .card-form { background-color: #3a3a3a; border-radius: 10px; border: none; }
+  .form-control, .form-select { background-color: #2e2e2e; color: #fff; border: 1px solid #555; }
+  .form-control:focus, .form-select:focus { background-color: #2e2e2e; color: #fff; border-color: #0d6efd; box-shadow: none; }
+  .form-label { color: #dddddd; }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+      
+      <!-- Top Action Bar -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="javascript:history.back()" class="text-white-50 text-decoration-none small">
+          &larr; Back
+        </a>
+        <a href="{% url 'measureApp:my_measurements' %}" class="btn btn-outline-light btn-sm shadow-sm" style="color: red;">
+          📋 View Saved Measurements
+        </a>
+      </div>
+
+      <div class="card card-form p-4 shadow">
+        <h3 class="mb-2 text-center fw-bold text-white">Custom Manual Measurements</h3>
+        <p class="text-muted text-center small mb-4">Add any custom measurement types and figures you need.</p>
+        
+        <form method="post" id="measurementForm">
+          {% csrf_token %}
+          
+          <div class="mb-4">
+            <label class="form-label fw-bold">Profile / Outfit Title</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g. Wedding Suit, Summer Shorts" required>
+          </div>
+
+          <hr class="border-secondary mb-4">
+
+          <div id="measurementRows">
+            <!-- Dynamic Row Template -->
+            <div class="row g-2 align-items-center mb-3 measurement-row">
+              <div class="col-5">
+                <input type="text" name="measure_type[]" class="form-control" placeholder="e.g. Neck, Bicep" required>
+              </div>
+              <div class="col-4">
+                <input type="number" step="0.1" name="value[]" class="form-control" placeholder="Value" required>
+              </div>
+              <div class="col-2">
+                <select name="unit[]" class="form-select">
+                  <option value="inches">in</option>
+                  <option value="cm">cm</option>
+                </select>
+              </div>
+              <div class="col-1 text-center">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-row" style="display:none;">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <button type="button" id="addRowBtn" class="btn btn-outline-light btn-sm">+ Add Another Measure Type</button>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">Save Measurement Profile</button>
+            <a href="{% url 'measureApp:my_measurements' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('addRowBtn').addEventListener('click', function() {
+    const container = document.getElementById('measurementRows');
+    const firstRow = container.querySelector('.measurement-row');
+    const newRow = firstRow.cloneNode(true);
+    
+    // Clear inputs in cloned row
+    newRow.querySelectorAll('input').forEach(input => input.value = '');
+    
+    // Show the delete button for cloned rows
+    const deleteBtn = newRow.querySelector('.remove-row');
+    deleteBtn.style.display = 'block';
+    
+    container.appendChild(newRow);
+  });
+
+  document.getElementById('measurementRows').addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-row')) {
+      const rows = document.querySelectorAll('.measurement-row');
+      // Ensure at least one row remains
+      if (rows.length > 1) {
+        e.target.closest('.measurement-row').remove();
+      }
+    }
+  });
+</script>
+{% endblock %}

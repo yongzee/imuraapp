@@ -15,4 +15,8 @@ urlpatterns = [
     path("results/", views.result, name="results"),
     path("share-measurement/", views.share_measurement, name="share_measurement"),
     path("shared/<int:notification_id>/", views.view_shared_measurement, name="view_shared_measurement"),
+    path('manual/', views.manual_input_view, name='manual_input'),
+    path('my-measurements/', views.my_measurements_view, name='my_measurements'),
+    path('edit-measurement/<int:profile_id>/', views.edit_measurement_view, name='edit_measurement'),
+    path('measurement/<int:profile_id>/print/', views.print_measurement, name='print_measurement'),
 ]

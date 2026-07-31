@@ -17,7 +17,7 @@
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     }
     .card-img-top {
-      height: 250px;
+      height: 220px;
       object-fit: cover;
       border-bottom: 1px solid #444;
     }
@@ -41,22 +41,37 @@
     .btn-secondary:hover {
       background-color: #565e64;
     }
+    .btn-success {
+      background-color: #198754;
+      border: none;
+    }
+    .btn-success:hover {
+      background-color: #146c43;
+    }
   </style>
 
   <div class="container py-5">
-    <h2 class="text-center mb-4 fw-bold">Choose a Method</h2>
-    <p class="text-center text-muted mb-5">Follow the instructions for best results</p>
+    <h2 class="text-center mb-2 fw-bold" style="color: blue;">Choose a Method</h2>
+    <p class="text-center text-muted mb-4">Follow instructions for best results or enter your measurements directly</p>
+    
+    <div class="text-end mb-4">
+      <a href="{% url 'measureApp:my_measurements' %}" class="btn btn-outline-light btn-sm" style="color: red;">
+        📋 View Saved Measurements
+      </a>
+    </div>
 
     <div class="row g-4">
 
       <!-- Camera Capture Card -->
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card h-100 shadow">
           <img src="{% static 'images/pik.png' %}" class="card-img-top" alt="Camera Guide">
-          <div class="card-body">
-            <h5 class="card-title">Use Your Camera</h5>
-            <p class="card-text">Stand upright, face the camera, ensure full-body visibility, and use a plain background.</p>
-            <div class="d-grid">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="card-title">Use Your Camera</h5>
+              <p class="card-text">Stand upright, face the camera, ensure full-body visibility, and use a plain background.</p>
+            </div>
+            <div class="d-grid mt-3">
               <a href="{% url 'measureApp:height'%}" class="btn btn-primary">Open Camera</a>
             </div>
           </div>
@@ -64,14 +79,32 @@
       </div>
 
       <!-- Image Upload Card -->
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card h-100 shadow">
           <img src="{% static 'images/pik1.png' %}" class="card-img-top" alt="Upload Guide">
-          <div class="card-body">
-            <h5 class="card-title">Upload an Image</h5>
-            <p class="card-text">Choose a clear, well-lit, full-body photo taken from the front with no obstructions.</p>
-            <div class="d-grid">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="card-title">Upload an Image</h5>
+              <p class="card-text">Choose a clear, well-lit, full-body photo taken from the front with no obstructions.</p>
+            </div>
+            <div class="d-grid mt-3">
               <a href="{% url 'measureApp:upload_image' %}" class="btn btn-secondary">Upload Image</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Input Card -->
+      <div class="col-md-4">
+        <div class="card h-100 shadow">
+          <img src="{% static 'images/manual_input.png' %}" class="card-img-top" alt="Manual Input Guide" onerror="this.src='https://via.placeholder.com/300x220/3a3a3a/ffffff?text=Manual+Entry'">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="card-title">Manual Input</h5>
+              <p class="card-text">Enter your custom measurements manually using a measuring tape and save them to your profile.</p>
+            </div>
+            <div class="d-grid mt-3">
+              <a href="{% url 'measureApp:manual_input' %}" class="btn btn-success">Enter Manually</a>
             </div>
           </div>
         </div>

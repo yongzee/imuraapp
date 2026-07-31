@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Profile - {{ profile.title }}</title>
+    <style>
+        /* Base Page Styles */
+        :root {
+            --primary-color: #2e2e2e;
+            --border-color: #e0e0e0;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #333333;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative; /* Context for absolute watermark positioning */
+        }
+
+        /* Diagonal Watermark */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.05); /* Soft, non-intrusive gray */
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+        }
+
+        /* Content Container to sit above Watermark */
+        .content-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Document Header */
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .brand-badge {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666666;
+        }
+
+        /* Metadata Details */
+        .meta {
+            background-color: rgba(248, 249, 250, 0.85); /* Slightly translucent */
+            border-left: 4px solid var(--primary-color);
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #555555;
+            margin-bottom: 25px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .meta strong {
+            color: #222222;
+        }
+
+        /* Measurements Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(248, 249, 250, 0.8);
+        }
+
+        /* Print Action Toolbar (Visible on screen only) */
+        .no-print-bar {
+            margin-bottom: 20px;
+            text-align: right;
+            position: relative;
+            z-index: 2;
+        }
+
+        .print-btn {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .print-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Optimized Styles for PDF / Print Output */
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+                max-width: 100%;
+            }
+
+            .no-print-bar {
+                display: none !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm;
+            }
+
+            .watermark {
+                font-size: 90px;
+                color: rgba(0, 0, 0, 0.06) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            th {
+                background-color: #333333 !important;
+                color: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            tbody tr:nth-child(even) {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Element -->
+    <div class="watermark">imurafh</div>
+
+    <div class="content-wrap">
+        <!-- Print Action Bar (Hidden when printing/saving PDF) -->
+        <div class="no-print-bar">
+            <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        </div>
+
+        <!-- Main Document Header -->
+        <div class="doc-header">
+            <h2>{{ profile.title }}</h2>
+            <span class="brand-badge">Measurement Profile</span>
+        </div>
+
+        <!-- Metadata Section -->
+        <div class="meta">
+            <strong>Source:</strong> {{ profile.get_source_display }} &nbsp;|&nbsp;
+            <strong>Date Saved:</strong> {{ profile.created_at|date:"M d, Y" }}
+        </div>
+
+        <!-- Measurement Items Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Measurement Type</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in profile.items.all %}
+                <tr>
+                    <td><strong>{{ item.measure_type }}</strong></td>
+                    <td>{{ item.value }}</td>
+                    <td>{{ item.unit }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #888888; padding: 20px;">
+                        No specific measurements listed.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Automatically open the print/save-as-pdf dialog on window open
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

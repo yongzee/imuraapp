@@ -1,0 +1,276 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .tryon-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  .usage-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    background-color: #f0f4f8;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .usage-badge.limit-reached {
+    background-color: #fef2f2;
+    color: #991b1b;
+  }
+
+  .tryon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .input-card, .result-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background-color: #f8fafc;
+    cursor: pointer;
+  }
+
+  .local-preview {
+    width: 100%;
+    height: 120px;
+    margin-top: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f1f5f9;
+  }
+
+  .local-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-submit:hover:not(:disabled) {
+    background-color: #1d4ed8;
+  }
+
+  .btn-submit:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  .image-preview {
+    width: 100%;
+    min-height: 280px;
+    max-height: 450px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f8fafc;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .status-message {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .error-message {
+    color: #dc2626;
+  }
+</style>
+
+<div class="tryon-container">
+  <h2>Virtual Fitting Room</h2>
+  
+  <div id="usage-status" class="usage-badge {% if remaining_tryons == 0 %}limit-reached{% endif %}">
+    Try-ons remaining: <span id="tryon-count">{{ remaining_tryons }}</span> / 2
+  </div>
+
+  <div class="tryon-grid">
+    <!-- Input Section -->
+    <div class="input-card">
+      <form id="tryon-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label for="model_image">Your Photo (Model)</label>
+          <input type="file" id="model_image" name="model_image" accept="image/*" required>
+          <div class="local-preview" id="model-preview-container">
+            <img id="model-preview" src="" alt="Model Preview">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="garment_image">Garment Photo</label>
+          <input type="file" id="garment_image" name="garment_image" accept="image/*" required>
+          <div class="local-preview" id="garment-preview-container">
+            <img id="garment-preview" src="" alt="Garment Preview">
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-submit" {% if remaining_tryons == 0 %}disabled{% endif %}>
+          {% if remaining_tryons > 0 %}
+            Generate Try-On
+          {% else %}
+            Limit Reached
+          {% endif %}
+        </button>
+      </form>
+      <div id="status-msg" class="status-message"></div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="result-card">
+      <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Result</label>
+      <div class="image-preview" id="result-box">
+        <p style="color: #64748b;">Your generated image will appear here</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('tryon-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const countDisplay = document.getElementById('tryon-count');
+    const usageBadge = document.getElementById('usage-status');
+    const statusMsg = document.getElementById('status-msg');
+    const resultBox = document.getElementById('result-box');
+
+    // Local image preview handler
+    function setupFilePreview(inputId, containerId, imgId) {
+      const input = document.getElementById(inputId);
+      const container = document.getElementById(containerId);
+      const img = document.getElementById(imgId);
+
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          img.src = URL.createObjectURL(file);
+          container.style.display = 'flex';
+        } else {
+          container.style.display = 'none';
+          img.src = '';
+        }
+      });
+    }
+
+    setupFilePreview('model_image', 'model-preview-container', 'model-preview');
+    setupFilePreview('garment_image', 'garment-preview-container', 'garment-preview');
+
+    // Form Submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      statusMsg.textContent = 'Uploading images & processing with Fashn AI...';
+      statusMsg.className = 'status-message';
+      submitBtn.disabled = true;
+
+      // FormData automatically handles file uploads from input[type="file"]
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(window.location.href, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          // Update usage badge
+          countDisplay.textContent = data.remaining;
+          statusMsg.textContent = 'Try-on completed successfully!';
+
+          if (data.remaining === 0) {
+            usageBadge.classList.add('limit-reached');
+            submitBtn.textContent = 'Limit Reached';
+            submitBtn.disabled = true;
+          } else {
+            submitBtn.disabled = false;
+          }
+
+          // Display output image
+          if (data.output && data.output.length > 0) {
+            resultBox.innerHTML = `<img src="${data.output[0]}" alt="Try-On Result" />`;
+          } else if (data.prediction_id) {
+            resultBox.innerHTML = `<p style="color: #64748b;">Processing started (ID: ${data.prediction_id}). Check back shortly.</p>`;
+          }
+
+        } else {
+          statusMsg.textContent = data.error || 'An error occurred during processing.';
+          statusMsg.className = 'status-message error-message';
+          
+          if (response.status === 403) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Limit Reached';
+          } else {
+            submitBtn.disabled = false;
+          }
+        }
+      } catch (err) {
+        statusMsg.textContent = 'Network error. Please try again.';
+        statusMsg.className = 'status-message error-message';
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+{% endblock %}

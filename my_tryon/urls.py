@@ -30,6 +30,7 @@ urlpatterns = [
     path("orders/", include("apps.orders.urls")),
     path('measure/', include("apps.measureApp.urls")),
     path('feedback/', include('apps.feedback.urls')), # Access via /feedback/
+    path('tryon/', include('apps.tryon.urls')),
     
 ]
 if settings.DEBUG:
