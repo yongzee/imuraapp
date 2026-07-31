@@ -162,19 +162,27 @@
 
         <!-- Users List -->
         <div id="userList">
+          {% load static %}
           {% for u in users %}
             <label class="d-flex align-items-center mb-2 user-item p-2 rounded"
-            style="cursor:pointer; gap:10px;"
-            data-username="{{ u.username|lower }}">
+                  style="cursor:pointer; gap:10px;"
+                  data-username="{{ u.username|lower }}">
 
               <input type="checkbox"
                     class="form-check-input user-checkbox"
                     value="{{ u.id }}">
 
-              <img src="{{ u.avatar }}"
-                  width="35" height="35"
-                  class="rounded-circle"
-                  alt="{{ u.username }}">
+              {% if u.profile.avatar %}
+                <img src="{{ u.profile.avatar.url }}"
+                    width="35" height="35"
+                    class="rounded-circle object-fit-cover"
+                    alt="{{ u.username }}">
+              {% else %}
+                <img src="{% static 'images/avatar.jpg' %}"
+                    width="35" height="35"
+                    class="rounded-circle object-fit-cover"
+                    alt="Default Avatar">
+              {% endif %}
 
               <span class="username">{{ u.username }}</span>
             </label>
@@ -182,8 +190,6 @@
             <p class="text-muted">No users found.</p>
           {% endfor %}
         </div>
-
-      </div>
 
       <div class="modal-footer">
         <button class="btn btn-success" id="sendMeasurementBtn" type="button">

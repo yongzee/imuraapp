@@ -192,24 +192,23 @@
 
         <!-- Users List Container -->
         <div id="userList" class="pe-1" style="max-height: 320px; overflow-y: auto;">
+          {% load static %}
           {% for u in users %}
             <label class="d-flex align-items-center p-2 mb-2 rounded user-item" 
-                   data-username="{{ u.username|lower }}" 
-                   data-fullname="{{ u.get_full_name|default:u.username|lower }}"
-                   style="cursor: pointer;">
+                  data-username="{{ u.username|lower }}" 
+                  data-fullname="{{ u.get_full_name|default:u.username|lower }}"
+                  style="cursor: pointer;">
               
               <div class="me-3">
                 <input type="checkbox" class="form-check-input user-checkbox" value="{{ u.id }}" onchange="handleUserSelectionChange(this)">
               </div>
 
-              <!-- Avatar with Letter Fallback -->
+              <!-- Avatar with Default Fallback -->
               <div class="me-3">
-                {% if u.avatar %}
-                  <img src="{{ u.avatar }}" width="38" height="38" class="rounded-circle object-fit-cover" alt="{{ u.username }}">
+                {% if u.profile.avatar %}
+                  <img src="{{ u.profile.avatar.url }}" width="38" height="38" class="rounded-circle object-fit-cover" alt="{{ u.username }}">
                 {% else %}
-                  <div class="avatar-placeholder rounded-circle bg-primary d-flex justify-content-center align-items-center text-white">
-                    {{ u.username|slice:":1"|upper }}
-                  </div>
+                  <img src="{% static 'images/avatar.jpg' %}" width="38" height="38" class="rounded-circle object-fit-cover" alt="Default Avatar">
                 {% endif %}
               </div>
 
@@ -231,8 +230,6 @@
             <p class="mb-0">No matching users found.</p>
           </div>
         </div>
-
-      </div>
 
       <div class="modal-footer border-secondary">
         <button class="btn btn-outline-light btn-sm" data-bs-dismiss="modal" type="button">Cancel</button>
