@@ -3,75 +3,159 @@
 
 {% block content %}
 <style>
-  .tryon-container {
-    max-width: 900px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    font-family: system-ui, -apple-system, sans-serif;
+  :root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --accent-green: #16a34a;
+    --accent-green-hover: #15803d;
+    --bg-slate: #f8fafc;
+    --card-border: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+  }
+
+  .tryon-wrapper {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+  }
+
+  .tryon-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .tryon-header h2 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+  }
+
+  .tryon-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
   }
 
   .usage-badge {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    background-color: #f0f4f8;
-    color: #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background-color: #eff6ff;
+    color: var(--primary);
     font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #bfdbfe;
+    margin-top: 1rem;
   }
 
   .usage-badge.limit-reached {
     background-color: #fef2f2;
     color: #991b1b;
+    border-color: #fecaca;
   }
 
   .tryon-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    align-items: start;
   }
 
-  .input-card, .result-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
-    background-color: #ffffff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Mobile-Only Modifications */
+  @media (max-width: 640px) {
+    .card {
+      padding: 1.25rem 1rem;
+      border-radius: 12px;
+    }
+
+    .tryon-wrapper {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+  }
+
+  .card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
   }
 
   .form-group label {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
     margin-bottom: 0.5rem;
   }
 
-  .form-group input[type="file"] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    box-sizing: border-box;
-    background-color: #f8fafc;
+  .custom-file-upload {
+    position: relative;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    background-color: var(--bg-slate);
     cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  .custom-file-upload:hover {
+    border-color: var(--primary);
+    background-color: #f0f9ff;
+  }
+
+  .custom-file-upload input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .upload-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
   }
 
   .local-preview {
     width: 100%;
-    height: 120px;
-    margin-top: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    height: 140px;
+    margin-top: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
     display: none;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #f1f5f9;
+    background-color: #ffffff;
   }
 
   .local-preview img {
@@ -80,74 +164,188 @@
     object-fit: contain;
   }
 
+  .select-custom {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background-color: var(--bg-slate);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .select-custom:focus {
+    border-color: var(--primary);
+  }
+
   .btn-submit {
     width: 100%;
-    padding: 0.75rem;
-    background-color: #2563eb;
+    padding: 0.875rem;
+    background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
     margin-top: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
   }
 
   .btn-submit:hover:not(:disabled) {
-    background-color: #1d4ed8;
+    background-color: var(--primary-hover);
+  }
+
+  .btn-submit:active:not(:disabled) {
+    transform: scale(0.99);
   }
 
   .btn-submit:disabled {
     background-color: #94a3b8;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
-  .image-preview {
+  .btn-download {
+    background-color: var(--accent-green);
+    margin-top: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+  }
+
+  .btn-download:hover {
+    background-color: var(--accent-green-hover);
+  }
+
+  .image-preview-container {
     width: 100%;
-    min-height: 280px;
-    max-height: 450px;
+    min-height: 380px;
     border: 2px dashed #cbd5e1;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    background-color: #f8fafc;
+    background-color: var(--bg-slate);
+    padding: 1rem;
+    box-sizing: border-box;
   }
 
-  .image-preview img {
+  .image-preview-container img {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 360px;
+    border-radius: 8px;
     object-fit: contain;
+  }
+
+  .feedback-card {
+    margin-top: 2.5rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .feedback-card {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+
+  .feedback-content h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0369a1;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .feedback-content p {
+    font-size: 0.9rem;
+    color: #0c4a6e;
+    margin: 0;
+  }
+
+  .btn-feedback {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background-color: #0284c7;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
+  }
+
+  .btn-feedback:hover {
+    background-color: #0369a1;
   }
 
   .status-message {
     margin-top: 1rem;
     font-size: 0.9rem;
     text-align: center;
+    font-weight: 500;
   }
 
   .error-message {
     color: #dc2626;
   }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 0.75rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 
-<div class="tryon-container">
-  <h2>Virtual Fitting Room</h2>
-  
-  <div id="usage-status" class="usage-badge {% if remaining_tryons == 0 %}limit-reached{% endif %}">
-    Try-ons remaining: <span id="tryon-count">{{ remaining_tryons }}</span> / 2
+<div class="tryon-wrapper">
+  <div class="tryon-header">
+    <h2>Virtual Fitting Room</h2>
+    <p>Upload a photo of yourself and a garment to generate an instant AI try-on.</p>
+    <div id="usage-status" class="usage-badge {% if remaining_tryons == 0 %}limit-reached{% endif %}">
+      ⚡ Try-ons remaining: <span id="tryon-count">{{ remaining_tryons }}</span> / 2
+    </div>
   </div>
 
   <div class="tryon-grid">
-    <!-- Input Section -->
-    <div class="input-card">
+    <!-- Input Form -->
+    <div class="card">
+      <div class="card-title">
+        <span>📸</span> Upload Photos
+      </div>
       <form id="tryon-form" enctype="multipart/form-data">
         {% csrf_token %}
-        
+
         <div class="form-group">
           <label for="model_image">Your Photo (Model)</label>
-          <input type="file" id="model_image" name="model_image" accept="image/*" required>
+          <div class="custom-file-upload">
+            <span class="upload-text" id="model-label-text">Click or drag photo here</span>
+            <input type="file" id="model_image" name="model_image" accept="image/*" required>
+          </div>
           <div class="local-preview" id="model-preview-container">
             <img id="model-preview" src="" alt="Model Preview">
           </div>
@@ -155,15 +353,27 @@
 
         <div class="form-group">
           <label for="garment_image">Garment Photo</label>
-          <input type="file" id="garment_image" name="garment_image" accept="image/*" required>
+          <div class="custom-file-upload">
+            <span class="upload-text" id="garment-label-text">Click or drag garment image</span>
+            <input type="file" id="garment_image" name="garment_image" accept="image/*" required>
+          </div>
           <div class="local-preview" id="garment-preview-container">
             <img id="garment-preview" src="" alt="Garment Preview">
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" class="select-custom">
+            <option value="tops">Tops / Shirts</option>
+            <option value="bottoms">Bottoms / Pants / Skirts</option>
+            <option value="one-pieces">One-Pieces / Dresses</option>
+          </select>
+        </div>
+
         <button type="submit" id="submit-btn" class="btn-submit" {% if remaining_tryons == 0 %}disabled{% endif %}>
           {% if remaining_tryons > 0 %}
-            Generate Try-On
+            ✨ Generate Try-On
           {% else %}
             Limit Reached
           {% endif %}
@@ -172,13 +382,28 @@
       <div id="status-msg" class="status-message"></div>
     </div>
 
-    <!-- Output Section -->
-    <div class="result-card">
-      <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Result</label>
-      <div class="image-preview" id="result-box">
-        <p style="color: #64748b;">Your generated image will appear here</p>
+    <!-- Output Preview -->
+    <div class="card">
+      <div class="card-title">
+        <span>👗</span> Result
+      </div>
+      <div class="image-preview-container" id="result-box">
+        <p style="color: var(--text-muted); font-size: 0.95rem; text-align: center;" id="placeholder-text">
+          Your generated fitting will appear here
+        </p>
       </div>
     </div>
+  </div>
+
+  <!-- Feedback Banner -->
+  <div class="feedback-card">
+    <div class="feedback-content">
+      <h4>How was your try-on experience?</h4>
+      <p>We'd love to hear your thoughts and what features you'd like to see next!</p>
+    </div>
+    <a href="{% url 'feedback_page' %}" class="btn-feedback">
+      💬 Give Feedback
+    </a>
   </div>
 </div>
 
@@ -191,17 +416,124 @@
     const statusMsg = document.getElementById('status-msg');
     const resultBox = document.getElementById('result-box');
 
-    // Local image preview handler
-    function setupFilePreview(inputId, containerId, imgId) {
+    let pollInterval = null;
+
+    // --- AUTO LOAD GARMENT FROM URL PARAMETER ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const garmentUrlParam = urlParams.get('garment_url');
+
+    if (garmentUrlParam) {
+      autoLoadGarmentFromUrl(garmentUrlParam);
+    }
+
+    async function autoLoadGarmentFromUrl(imageUrl) {
+      const garmentLabel = document.getElementById('garment-label-text');
+      const garmentContainer = document.getElementById('garment-preview-container');
+      const garmentPreviewImg = document.getElementById('garment-preview');
+      const garmentInput = document.getElementById('garment_image');
+
+      if (garmentLabel) garmentLabel.textContent = 'Loading product photo...';
+
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "selected_garment.jpg", { type: blob.type || 'image/jpeg' });
+
+        // Inject file into HTML file input
+        const container = new DataTransfer();
+        container.items.add(file);
+        garmentInput.files = container.files;
+
+        // Show preview box
+        garmentPreviewImg.src = URL.createObjectURL(file);
+        garmentContainer.style.display = 'flex';
+        if (garmentLabel) garmentLabel.textContent = 'Selected from Marketplace';
+        
+        // REMOVE REQUIRED ATTR TO ALLOW SUBMISSION
+        garmentInput.removeAttribute('required');
+      } catch (err) {
+        console.error('Failed to pre-load garment image:', err);
+        if (garmentLabel) garmentLabel.textContent = 'Click to upload garment photo';
+      }
+    }
+
+    // Helper: Extract valid URL string
+    function extractImageUrl(output) {
+      if (!output) return '';
+      let rawUrl = '';
+      if (typeof output === 'string') {
+        rawUrl = output;
+      } else if (Array.isArray(output) && output.length > 0) {
+        return extractImageUrl(output[0]);
+      } else if (typeof output === 'object') {
+        rawUrl = output.image || output.url || (output.images && output.images[0]) || Object.values(output)[0] || '';
+      } else {
+        rawUrl = String(output);
+      }
+      return rawUrl.trim().replace(/^['"]|['"]$/g, '');
+    }
+
+    // Force Download Handler with Blob Fallback
+    async function forceDownloadImage(imageUrl, filename = 'tryon-result.jpg') {
+      const downloadBtn = document.getElementById('download-btn');
+      if (downloadBtn) {
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = 'Preparing Download...';
+      }
+
+      try {
+        const response = await fetch(imageUrl, { mode: 'cors' });
+        if (!response.ok) throw new Error('CORS or Network Error');
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+      } catch (error) {
+        console.warn('Direct blob fetch restricted by CORS. Opening in new window:', error);
+        window.open(imageUrl, '_blank');
+      } finally {
+        if (downloadBtn) {
+          downloadBtn.disabled = false;
+          downloadBtn.textContent = '📥 Download Result';
+        }
+      }
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function setupFilePreview(inputId, containerId, imgId, labelTextId) {
       const input = document.getElementById(inputId);
       const container = document.getElementById(containerId);
       const img = document.getElementById(imgId);
+      const label = document.getElementById(labelTextId);
 
       input.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
           img.src = URL.createObjectURL(file);
           container.style.display = 'flex';
+          if (label) label.textContent = file.name;
         } else {
           container.style.display = 'none';
           img.src = '';
@@ -209,66 +541,153 @@
       });
     }
 
-    setupFilePreview('model_image', 'model-preview-container', 'model-preview');
-    setupFilePreview('garment_image', 'garment-preview-container', 'garment-preview');
+    setupFilePreview('model_image', 'model-preview-container', 'model-preview', 'model-label-text');
+    setupFilePreview('garment_image', 'garment-preview-container', 'garment-preview', 'garment-label-text');
 
-    // Form Submission
+    function showLoadingState(message) {
+      resultBox.innerHTML = `
+        <div class="spinner"></div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; text-align: center;">${message}</p>
+      `;
+    }
+
+    function renderOutput(outputData, remaining) {
+      const imageUrl = extractImageUrl(outputData);
+
+      if (imageUrl) {
+        resultBox.innerHTML = `
+          <img src="${imageUrl}" alt="Try-On Result" id="tryon-result-img" />
+          <button type="button" id="download-btn" class="btn-submit btn-download">
+            📥 Download Result
+          </button>
+        `;
+
+        const imgElement = document.getElementById('tryon-result-img');
+        imgElement.onerror = function() {
+          resultBox.innerHTML = `
+            <p style="color: #dc2626; font-size: 0.875rem; text-align: center; margin-bottom: 0.75rem;">
+              Image preview couldn't load directly (CORS restriction).
+            </p>
+            <a href="${imageUrl}" target="_blank" class="btn-submit btn-download">
+              🔗 Open Image Directly
+            </a>
+          `;
+        };
+
+        const downloadBtn = document.getElementById('download-btn');
+        if (downloadBtn) {
+          downloadBtn.addEventListener('click', () => {
+            forceDownloadImage(imageUrl, 'tryon-result.jpg');
+          });
+        }
+      } else {
+        resultBox.innerHTML = `<p style="color: #dc2626; font-size: 0.9rem;">No image URL returned by API.</p>`;
+      }
+
+      if (remaining !== undefined) {
+        countDisplay.textContent = remaining;
+      }
+
+      statusMsg.textContent = '✨ Try-on completed successfully!';
+      statusMsg.className = 'status-message';
+
+      if (remaining === 0) {
+        usageBadge.classList.add('limit-reached');
+        submitBtn.textContent = 'Limit Reached';
+        submitBtn.disabled = true;
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✨ Generate Try-On';
+      }
+    }
+
+    function renderError(errorMessage, isLimitError = false) {
+      statusMsg.textContent = errorMessage;
+      statusMsg.className = 'status-message error-message';
+      resultBox.innerHTML = `<p style="color: #dc2626; font-size: 0.9rem;">Generation failed.</p>`;
+
+      if (isLimitError) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Limit Reached';
+        usageBadge.classList.add('limit-reached');
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✨ Generate Try-On';
+      }
+    }
+
+    function pollStatus(predictionId) {
+      let attempts = 0;
+      const maxAttempts = 40;
+
+      const statusBaseUrl = "{% url 'tryon:check_tryon_status' pred_id='PRED_ID_PLACEHOLDER' %}";
+
+      pollInterval = setInterval(async () => {
+        attempts++;
+        showLoadingState(`AI is processing your fitting... (${attempts * 2}s)`);
+
+        if (attempts > maxAttempts) {
+          clearInterval(pollInterval);
+          renderError('Generation timed out. Please try again.');
+          return;
+        }
+
+        try {
+          const pollUrl = statusBaseUrl.replace('PRED_ID_PLACEHOLDER', predictionId);
+          const response = await fetch(pollUrl);
+          const data = await response.json();
+
+          if (data.status === 'completed') {
+            clearInterval(pollInterval);
+            renderOutput(data.output, data.remaining);
+          } else if (data.status === 'failed' || !response.ok) {
+            clearInterval(pollInterval);
+            renderError(data.error || 'AI generation failed.');
+          }
+        } catch (err) {
+          clearInterval(pollInterval);
+          renderError('Lost connection while checking status.');
+        }
+      }, 2000);
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      statusMsg.textContent = 'Uploading images & processing with Fashn AI...';
+      if (pollInterval) clearInterval(pollInterval);
+
+      statusMsg.textContent = 'Preparing images...';
       statusMsg.className = 'status-message';
       submitBtn.disabled = true;
 
-      // FormData automatically handles file uploads from input[type="file"]
+      showLoadingState('Uploading and starting AI processing...');
+
       const formData = new FormData(form);
 
       try {
-        const response = await fetch(window.location.href, {
+        const response = await fetch("{% url 'tryon:initiate_tryon' %}", {
           method: 'POST',
           body: formData,
           headers: {
+            'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}',
             'X-Requested-With': 'XMLHttpRequest',
           }
         });
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
-          // Update usage badge
-          countDisplay.textContent = data.remaining;
-          statusMsg.textContent = 'Try-on completed successfully!';
-
-          if (data.remaining === 0) {
-            usageBadge.classList.add('limit-reached');
-            submitBtn.textContent = 'Limit Reached';
-            submitBtn.disabled = true;
-          } else {
-            submitBtn.disabled = false;
-          }
-
-          // Display output image
-          if (data.output && data.output.length > 0) {
-            resultBox.innerHTML = `<img src="${data.output[0]}" alt="Try-On Result" />`;
+        if (response.ok) {
+          if (data.status === 'completed') {
+            renderOutput(data.output, data.remaining);
           } else if (data.prediction_id) {
-            resultBox.innerHTML = `<p style="color: #64748b;">Processing started (ID: ${data.prediction_id}). Check back shortly.</p>`;
+            statusMsg.textContent = 'AI is generating your fitting...';
+            pollStatus(data.prediction_id);
           }
-
         } else {
-          statusMsg.textContent = data.error || 'An error occurred during processing.';
-          statusMsg.className = 'status-message error-message';
-          
-          if (response.status === 403) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Limit Reached';
-          } else {
-            submitBtn.disabled = false;
-          }
+          renderError(data.error || 'An error occurred.', response.status === 403);
         }
       } catch (err) {
-        statusMsg.textContent = 'Network error. Please try again.';
-        statusMsg.className = 'status-message error-message';
-        submitBtn.disabled = false;
+        renderError('Network error during upload. Please check server logs.');
       }
     });
   });

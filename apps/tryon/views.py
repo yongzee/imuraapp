@@ -1,7 +1,9 @@
 import base64
-import json
-import time
-import requests
+import io
+import urllib.request
+from PIL import Image
+from fashn import Fashn
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -9,117 +11,160 @@ from django.shortcuts import render
 
 from .models import TryOnUsage
 
-FASHN_API_KEY = getattr(settings, "FASHN_API_KEY", "your-fashn-ai-api-key")
+
+def file_to_base64_uri(uploaded_file, max_size=(1024, 1024), quality=80):
+    """
+    Resizes and compresses an uploaded image buffer before converting to Base64.
+    Keeps payload sizes light and prevents upload connection drops.
+    """
+    try:
+        img = Image.open(uploaded_file)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality, optimize=True)
+        buffer.seek(0)
+
+        encoded_bytes = base64.b64encode(buffer.read()).decode("utf-8")
+        return f"data:image/jpeg;base64,{encoded_bytes}"
+    except Exception:
+        uploaded_file.seek(0)
+        encoded_bytes = base64.b64encode(uploaded_file.read()).decode("utf-8")
+        content_type = getattr(uploaded_file, "content_type", "image/jpeg")
+        return f"data:{content_type};base64,{encoded_bytes}"
 
 
-def file_to_base64_uri(uploaded_file):
-    """Converts an uploaded file buffer in memory into a base64 Data URI."""
-    encoded_bytes = base64.b64encode(uploaded_file.read()).decode("utf-8")
-    content_type = uploaded_file.content_type or "image/jpeg"
-    return f"data:{content_type};base64,{encoded_bytes}"
+def fetch_url_to_base64_uri(image_url):
+    """Downloads a remote image URL server-side and converts it directly to a Base64 URI."""
+    req = urllib.request.Request(image_url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req) as response:
+        image_bytes = response.read()
+    encoded_bytes = base64.b64encode(image_bytes).decode("utf-8")
+    return f"data:image/jpeg;base64,{encoded_bytes}"
 
 
 @login_required
 def tryon_view(request):
-    # Fetch or create the user's try-on usage record
+    """Renders the main Try-On HTML page with optional pre-loaded garment URL support."""
     usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+    garment_url = request.GET.get("garment_url", "").strip()
+    
+    return render(
+        request,
+        "tryon/tryon.html",
+        {
+            "remaining_tryons": usage.remaining_tryons(),
+            "garment_url": garment_url,
+        },
+    )
 
-    if request.method == "POST":
-        # Check usage limit
-        if not usage.can_use_tryon():
-            return JsonResponse(
-                {"error": "You have reached your limit of 2 free try-ons."},
-                status=403,
-            )
 
-        # Retrieve file objects from request.FILES
-        model_file = request.FILES.get("model_image")
-        garment_file = request.FILES.get("garment_image")
+@login_required
+def initiate_tryon(request):
+    """Starts prediction on Fashn AI using file upload or remote URL fallback."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method."}, status=405)
 
-        if not model_file or not garment_file:
-            return JsonResponse(
-                {"error": "Both model photo and garment photo are required."},
-                status=400,
-            )
+    api_key = getattr(settings, "FASHN_API_KEY", "").strip()
+    if not api_key:
+        return JsonResponse(
+            {"error": "Fashn AI API key is not configured on the server."}, status=500
+        )
 
-        try:
-            # Convert uploaded images to base64 URIs
-            model_b64 = file_to_base64_uri(model_file)
+    usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+    if not usage.can_use_tryon():
+        return JsonResponse(
+            {"error": "You have reached your limit of free try-ons."}, status=403
+        )
+
+    model_file = request.FILES.get("model_image")
+    garment_file = request.FILES.get("garment_image")
+    garment_url = request.POST.get("garment_url", "").strip()
+
+    if not model_file:
+        return JsonResponse({"error": "Model photo is required."}, status=400)
+
+    if not garment_file and not garment_url:
+        return JsonResponse(
+            {"error": "Please upload a garment image or select a product."}, status=400
+        )
+
+    try:
+        model_b64 = file_to_base64_uri(model_file)
+
+        # Prioritize uploaded file over remote URL string
+        if garment_file:
             garment_b64 = file_to_base64_uri(garment_file)
+        else:
+            garment_b64 = fetch_url_to_base64_uri(garment_url)
 
-            headers = {
-                "Authorization": f"Bearer {FASHN_API_KEY}",
-                "Content-Type": "application/json",
-            }
+        client = Fashn(api_key=api_key)
 
-            payload = {
-                "model_name": "tryon-max",
-                "inputs": {
-                    "model_image": model_b64,
-                    "garment_image": garment_b64,
-                    "category": "tops",  # Options: 'tops', 'bottoms', 'one-pieces'
-                },
-            }
+        prediction = client.predictions.run(
+            model_name="tryon-max",
+            inputs={
+                "model_image": model_b64,
+                "product_image": garment_b64,
+            },
+        )
 
-            # 1. Initiate job with Fashn AI
-            response = requests.post(
-                "https://api.fashn.ai/v1/run", json=payload, headers=headers
-            )
-            res_data = response.json()
+        return JsonResponse({
+            "status": "processing",
+            "prediction_id": prediction.id,
+        })
 
-            if response.status_code not in [200, 201]:
-                error_detail = res_data.get("error")
-                error_msg = (
-                    error_detail.get("message")
-                    if isinstance(error_detail, dict)
-                    else (error_detail or "Fashn AI request failed.")
-                )
-                return JsonResponse({"error": error_msg}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Try-on execution failed: {str(e)}"}, status=500)
 
-            pred_id = res_data.get("id")
-            output_images = res_data.get("output")
 
-            # 2. Poll until job completes if output isn't immediately available
-            if not output_images and pred_id:
-                status_url = f"https://api.fashn.ai/v1/status/{pred_id}"
-                max_retries = 30  # Wait up to 30 seconds
-                for _ in range(max_retries):
-                    time.sleep(1)
-                    poll_res = requests.get(status_url, headers=headers).json()
-                    status = poll_res.get("status")
+@login_required
+def check_tryon_status(request, pred_id):
+    """Polled via AJAX by the frontend every 2 seconds until complete."""
+    api_key = getattr(settings, "FASHN_API_KEY", "").strip()
 
-                    if status == "completed":
-                        output_images = poll_res.get("output")
-                        break
-                    elif status == "failed":
-                        error_msg = poll_res.get("error", {}).get(
-                            "message", "Generation failed."
-                        )
-                        return JsonResponse({"error": error_msg}, status=400)
+    if not api_key:
+        return JsonResponse(
+            {"error": "Fashn AI API key is not configured on the server."}, status=500
+        )
 
-            # 3. Increment count upon successful output generation
-            if output_images:
+    try:
+        client = Fashn(api_key=api_key)
+        prediction = client.predictions.status(pred_id)
+
+        if prediction.status == "completed":
+            usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+
+            session_key = f"processed_pred_{pred_id}"
+            if not request.session.get(session_key):
                 usage.tryon_count += 1
                 usage.save()
+                request.session[session_key] = True
 
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "remaining": usage.remaining_tryons(),
-                        "prediction_id": pred_id,
-                        "output": output_images,
-                    }
-                )
+            raw_output = prediction.output
+            if isinstance(raw_output, list) and len(raw_output) > 0:
+                image_url = raw_output[0]
             else:
-                return JsonResponse(
-                    {"error": "Generation timed out. Please try again."},
-                    status=504,
-                )
+                image_url = raw_output
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({
+                "status": "completed",
+                "output": image_url,
+                "remaining": usage.remaining_tryons(),
+            })
 
-    # GET Request: Pass remaining try-ons count to context
-    return render(
-        request, "tryon/tryon.html", {"remaining_tryons": usage.remaining_tryons()}
-    )
+        elif prediction.status in ("failed", "cancelled"):
+            error_details = getattr(prediction, "error", "Generation failed.")
+            error_msg = getattr(error_details, "message", str(error_details))
+
+            return JsonResponse(
+                {"status": "failed", "error": error_msg}, status=400
+            )
+
+        return JsonResponse({"status": "processing"})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    

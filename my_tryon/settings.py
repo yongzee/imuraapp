@@ -20,6 +20,7 @@ load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.getenv("DEBUG", "0") == "1"
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
+FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 
 
 
@@ -245,6 +246,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
+
+
 
 # 👇 Allow your production domain to securely submit POST forms
 CSRF_TRUSTED_ORIGINS = [

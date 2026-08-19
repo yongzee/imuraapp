@@ -28,7 +28,7 @@
     border-radius: 18px;
     overflow: hidden;
     background: #f1f3f5;
-    /* Perfect fashion portrait ratio - keeps layout perfectly static */
+    /* Fashion portrait ratio */
     aspect-ratio: 4 / 5; 
     width: 100%;
   }
@@ -47,10 +47,44 @@
     object-fit: cover;
   }
 
+  /* --- Top-Left Try-On Overlay Badge (Synced with Product List Styling) --- */
+  .tryon-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(255, 193, 7, 0.95);
+    color: #000;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tryon-badge:hover:not(.disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    color: #000;
+  }
+
+  .tryon-badge.disabled {
+    background: rgba(233, 236, 239, 0.9);
+    color: #6c757d;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
   /* Modern Floating Switcher Pill */
   .media-pill-switcher {
     display: inline-flex;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(233, 236, 239, 0.75);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(0, 0, 0, 0.08);
     padding: 4px;
@@ -63,7 +97,7 @@
     background: transparent;
     color: #495057;
     font-weight: 600;
-    padding: 6px 16px;
+    padding: 6px 18px;
     font-size: 0.85rem;
     border-radius: 20px;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -73,22 +107,6 @@
     background: #ffffff;
     color: #000000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  .tryon-badge {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    background: linear-gradient(135deg, #e63946, #d62839);
-    color: #fff;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
   }
 
   /* Custom Clean Indicators */
@@ -223,9 +241,11 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    text-decoration: none;
   }
   .btn-action-primary:hover {
     background: #212529;
+    color: #ffffff;
     transform: translateY(-2px);
   }
 
@@ -285,10 +305,10 @@
         <div class="text-center mb-3">
           <div class="media-pill-switcher">
             <button type="button" id="showImagesBtn" class="media-pill-btn active">
-              📸 Images ({{ images|length }})
+              <i class="bi bi-images me-1"></i> Images ({{ images|length }})
             </button>
             <button type="button" id="showVideosBtn" class="media-pill-btn">
-              🎥 Videos ({{ videos|length }})
+              <i class="bi bi-film me-1"></i> Videos ({{ videos|length }})
             </button>
           </div>
         </div>
@@ -296,8 +316,14 @@
 
         <!-- Media Framework Windows -->
         <div class="media-container-frame">
-          {% if product.enable_digital_tryon %}
-            <div class="tryon-badge">Digital Try-On</div>
+
+          <!-- Top-Left Virtual Try-On Overlay Badge -->
+          {% if product.enable_digital_tryon and images %}
+            <a href="{% url 'tryon:index' %}?garment_url={{ images.0.image.url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
+              <i class="bi bi-magic me-1"></i>Try‑On
+            </a>
+          {% else %}
+            <span class="tryon-badge disabled" onclick="event.stopPropagation();">No Try‑On</span>
           {% endif %}
 
           <!-- Image Stream Carousel Viewport -->
@@ -334,7 +360,7 @@
             <div class="carousel-inner">
               {% for stream_item in videos %}
               <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <video controls autoplay muted playsinline preload="auto">
+                <video controls playsinline preload="auto">
                   <source src="{{ stream_item.video.url }}" type="video/mp4">
                   Your browser does not support the video tag.
                 </video>
@@ -353,6 +379,13 @@
             {% endif %}
           </div>
           {% endif %}
+
+          {% if not images and not videos %}
+            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+              <i class="bi bi-image fs-1"></i>
+            </div>
+          {% endif %}
+
         </div>
         
       </div>
@@ -367,10 +400,10 @@
         <div class="price-tag-wrapper">
           {% if proposed_price %}
             <span class="proposed-label">Proposed Price</span>
-            <span class="product-price">₦{{ proposed_price }}</span>
-            <span class="product-original-price">₦{{ product.price }}</span>
+            <span class="product-price">₦{{ proposed_price|intcomma }}</span>
+            <span class="product-original-price">₦{{ product.price|intcomma }}</span>
           {% else %}
-            <span class="product-price">₦{{ product.price }}</span>
+            <span class="product-price">₦{{ product.price|intcomma }}</span>
           {% endif %}
         </div>
 
@@ -512,7 +545,7 @@
           <h5 class="text-danger"><i class="bi bi-shield-check"></i> Buyer Protection Tips</h5>
           <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.6;">
             <li><strong>Transact Securely:</strong> Pay online directly within IMURA to ensure automated tracking, secure hold, and straightforward conflict mitigation access.</li>
-            <li class="mt-1"><strong>Face-to-Face Check:</strong> If meeting locally, always complete transactions within highly visible public areas throughout daylight hours. Thoroughly audit condition before final payload balance transfer.</li>
+            <li class="mt-1"><strong>Face-to-Face Check:</strong> If meeting locally, always complete transactions within highly visible public areas throughout daylight hours. Thoroughly inspect items before final transfer.</li>
           </ul>
         </div>
 
@@ -524,71 +557,77 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const priceItBtn = document.getElementById("priceItBtn");
-    const priceItInputContainer = document.getElementById("priceItInputContainer");
-    const submitPriceIt = document.getElementById("submitPriceIt");
-    const sendMessageBtn = document.getElementById("sendMessageBtn");
+  const priceItBtn = document.getElementById("priceItBtn");
+  const priceItInputContainer = document.getElementById("priceItInputContainer");
+  const submitPriceIt = document.getElementById("submitPriceIt");
+  const sendMessageBtn = document.getElementById("sendMessageBtn");
 
+  if (priceItBtn && priceItInputContainer) {
     priceItBtn.addEventListener("click", () => {
-        priceItInputContainer.style.display = priceItInputContainer.style.display === "none" ? "block" : "none";
+      priceItInputContainer.style.display = priceItInputContainer.style.display === "none" ? "block" : "none";
     });
+  }
 
+  if (submitPriceIt) {
     submitPriceIt.addEventListener("click", () => {
-        const suggestedPrice = document.getElementById("priceItInput").value;
-        if(!suggestedPrice) { alert("Please enter a price"); return; }
+      const suggestedPrice = document.getElementById("priceItInput").value;
+      if (!suggestedPrice) { alert("Please enter a price"); return; }
 
-        const formData = new FormData();
-        formData.append("suggested_price", suggestedPrice);
-        formData.append("product_id", "{{ product.id }}");
-        formData.append("message", "");
+      const formData = new FormData();
+      formData.append("suggested_price", suggestedPrice);
+      formData.append("product_id", "{{ product.id }}");
+      formData.append("message", "");
 
-        fetch("{% url 'notifications:propose_price' %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.ok){
-                alert("Price suggestion sent!");
-                priceItInputContainer.style.display = "none";
-                document.getElementById("priceItInput").value = "";
-            }
-        });
+      fetch("{% url 'notifications:propose_price' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          alert("Price suggestion sent!");
+          priceItInputContainer.style.display = "none";
+          document.getElementById("priceItInput").value = "";
+        }
+      });
     });
+  }
 
+  if (sendMessageBtn) {
     sendMessageBtn.addEventListener("click", () => {
-        const message = document.getElementById("messageText").value;
-        if(!message){ alert("Please enter a message"); return; }
+      const message = document.getElementById("messageText").value;
+      if (!message) { alert("Please enter a message"); return; }
 
-        const formData = new FormData();
-        formData.append("recipient_id", "{{ product.seller.id }}");
-        formData.append("text", message);
+      const formData = new FormData();
+      formData.append("recipient_id", "{{ product.seller.id }}");
+      formData.append("text", message);
 
-        fetch("{% url 'notifications:send_message' %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.ok){
-                alert("Message sent!");
-                document.getElementById("messageText").value = "";
-            }
-        });
+      fetch("{% url 'notifications:send_message' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          alert("Message sent!");
+          document.getElementById("messageText").value = "";
+        }
+      });
     });
+  }
 
   // ====== DISCRETE MEDIA PANEL SWITCHER CONTROLS ======
   const showImagesBtn = document.getElementById("showImagesBtn");
   const showVideosBtn = document.getElementById("showVideosBtn");
   const imagesCarousel = document.getElementById("productImagesCarousel");
   const videosCarousel = document.getElementById("productVideosCarousel");
-  
+
   let bsImagesInstance = null;
   let bsVideosInstance = null;
 
-  if (imagesCarousel) {
+  if (imagesCarousel && typeof bootstrap !== "undefined") {
     bsImagesInstance = new bootstrap.Carousel(imagesCarousel, {
       interval: 5000, 
       ride: "carousel",
@@ -596,23 +635,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (videosCarousel) {
+  if (videosCarousel && typeof bootstrap !== "undefined") {
     bsVideosInstance = new bootstrap.Carousel(videosCarousel, {
       interval: false, 
       wrap: true
     });
   }
-  
-  if(imagesCarousel && videosCarousel) {
-    const allVideos = videosCarousel.querySelectorAll("video");
+
+  if (showImagesBtn && showVideosBtn) {
+    const allVideos = videosCarousel ? videosCarousel.querySelectorAll("video") : [];
 
     showImagesBtn.addEventListener("click", () => {
       showImagesBtn.classList.add("active");
       showVideosBtn.classList.remove("active");
-      
-      imagesCarousel.style.display = "block";
-      videosCarousel.style.display = "none";
-      
+
+      if (imagesCarousel) imagesCarousel.style.display = "block";
+      if (videosCarousel) videosCarousel.style.display = "none";
+
       allVideos.forEach(v => v.pause());
       if (bsImagesInstance) bsImagesInstance.cycle();
     });
@@ -620,16 +659,18 @@ document.addEventListener("DOMContentLoaded", () => {
     showVideosBtn.addEventListener("click", () => {
       showVideosBtn.classList.add("active");
       showImagesBtn.classList.remove("active");
-      
-      videosCarousel.style.display = "block";
-      imagesCarousel.style.display = "none";
-      
+
+      if (videosCarousel) videosCarousel.style.display = "block";
+      if (imagesCarousel) imagesCarousel.style.display = "none";
+
       if (bsImagesInstance) bsImagesInstance.pause();
 
-      const currentActiveVid = videosCarousel.querySelector(".carousel-item.active video");
-      if (currentActiveVid) {
-        currentActiveVid.muted = true;
-        currentActiveVid.play().catch(()=>{});
+      if (videosCarousel) {
+        const currentActiveVid = videosCarousel.querySelector(".carousel-item.active video");
+        if (currentActiveVid) {
+          currentActiveVid.muted = true;
+          currentActiveVid.play().catch(() => {});
+        }
       }
     });
   }
@@ -644,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
           bsVideosInstance.next();
         } else {
           c.currentTime = 0;
-          c.play().catch(()=>{});
+          c.play().catch(() => {});
         }
       });
     });
@@ -661,14 +702,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (nextVideo && videosCarousel.style.display !== "none") {
         nextVideo.muted = true;
         nextVideo.currentTime = 0;
-        nextVideo.play().catch(()=>{});
+        nextVideo.play().catch(() => {});
       }
     });
 
     const initialVideo = videosCarousel.querySelector(".carousel-item.active video");
     if (initialVideo && videosCarousel.style.display !== "none") {
       initialVideo.muted = true;
-      initialVideo.play().catch(()=>{});
+      initialVideo.play().catch(() => {});
     }
   }
 });

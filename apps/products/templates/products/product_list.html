@@ -135,6 +135,7 @@ body {
   background: rgba(233, 236, 239, 0.9);
   color: #6c757d;
   box-shadow: none;
+  cursor: not-allowed;
 }
 
 /* Action Circle Buttons */
@@ -243,11 +244,6 @@ body {
   .floating-btn-group {
     bottom: 85px; /* Safely avoids overlap with custom global bottom bars */
   }
-  @media (max-width: 768px) {
-  .floating-btn-group {
-    bottom: 85px; /* Safely avoids overlap with custom global bottom bars */
-  }
-}
 }
 </style>
 
@@ -338,9 +334,11 @@ body {
             <div class="card-img-wrapper">
               <!-- Try-On Contextual Badge Indicators -->
               {% if product.enable_digital_tryon %}
-                <a href="#" class="tryon-badge" onclick="handleTryonClick(event)"><i class="bi bi-magic me-1"></i>Try‑On</a>
+                <a href="{% url 'tryon:index' %}?garment_url={{ product.images.first.image.url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
+                  <i class="bi bi-magic me-1"></i>Try‑On
+                </a>
               {% else %}
-                <a href="#" class="tryon-badge disabled" onclick="handleUnavailableTryon(event)">No Try‑On</a>
+                <span class="tryon-badge disabled" onclick="event.stopPropagation();">No Try‑On</span>
               {% endif %}
 
               {% if product.images.all %}
@@ -348,7 +346,6 @@ body {
                 <div class="carousel-inner h-100">
                   {% for img in product.images.all %}
                     <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}">
-                      <!-- ADDED: Block formatting utility classes to make the link map across the whole image layout box -->
                       <a href="{% url 'products:product_detail' product.pk %}" class="d-block w-100 h-100">
                         <img src="{{ img.image.url }}" alt="{{ product.title }}">
                       </a>
@@ -439,15 +436,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-
-function handleTryonClick(event) {
-  event.stopPropagation(); // Prevents clicking the try-on badge from triggering the detail page redirection link
-  alert('Digital Try‑On is available for this product!');
-}
-
-function handleUnavailableTryon(event) {
-  event.stopPropagation(); // Prevents clicking the disabled badge from triggering the detail page redirection link
-  alert('Digital Try‑On is not available for this product yet.');
-}
 </script>
 {% endblock %}

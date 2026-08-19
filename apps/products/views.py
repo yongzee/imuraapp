@@ -1,59 +1,42 @@
-ALLOWED_IMAGE_TYPES = [
-
-"image/jpeg",
-"image/png",
-"image/webp"
-
-]
-
-ALLOWED_VIDEO_TYPES = [
-
-"video/mp4",
-"video/quicktime",
-"video/webm",
-"video/3gpp",
-"video/x-msvideo",
-"video/x-matroska",
-"application/octet-stream"
-
-]
-
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages  # <-- added for notifications
+from django.contrib import messages
 
 from .forms import ProductForm
 from .models import Product, Category, ProductImage, ProductVideo
-from apps.streaming.models import Like
-from django.contrib import messages
+from apps.streaming.models import Like, StreamVideo
 from apps.notifications.models import Notification
-from apps.streaming.models import StreamVideo  #  Correct path
+
+ALLOWED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+]
+
+ALLOWED_VIDEO_TYPES = [
+    "video/mp4",
+    "video/quicktime",
+    "video/webm",
+    "video/3gpp",
+    "video/x-msvideo",
+    "video/x-matroska",
+    "application/octet-stream"
+]
+
 
 @login_required
 def product_post(request):
-
     if request.method == "POST":
-
-        form = ProductForm(
-            request.POST,
-            request.FILES
-        )
+        form = ProductForm(request.POST, request.FILES)
 
         if form.is_valid():
-
             image_files = request.FILES.getlist("images")
             video_files = request.FILES.getlist("videos")
 
             # Require at least one media
             if not image_files and not video_files:
-
-                messages.error(
-                    request,
-                    "Upload at least one image or video"
-                )
-
+                messages.error(request, "Upload at least one image or video")
                 return render(
                     request,
                     "products/product_post.html",
@@ -61,9 +44,7 @@ def product_post(request):
                 )
 
             product = form.save(commit=False)
-
             product.seller = request.user
-
             product.save()
 
             valid_images = 0
@@ -71,152 +52,80 @@ def product_post(request):
 
             # IMAGE UPLOAD
             for img in image_files:
-
                 if not img.content_type.startswith("image"):
-
-                    messages.error(
-                        request,
-                        f"{img.name} invalid image"
-                    )
+                    messages.error(request, f"{img.name} invalid image")
                     continue
 
                 if img.size > 5 * 1024 * 1024:
-
-                    messages.error(
-                        request,
-                        f"{img.name} too large (5MB max)"
-                    )
+                    messages.error(request, f"{img.name} too large (5MB max)")
                     continue
 
                 try:
-
                     ProductImage.objects.create(
                         product=product,
                         image=img
                     )
-
                     valid_images += 1
-
-                except Exception as e:
-
-                    messages.error(
-                        request,
-                        f"{img.name} upload failed"
-                    )
+                except Exception:
+                    messages.error(request, f"{img.name} upload failed")
 
             # VIDEO UPLOAD
+            allowed_extensions = ["mp4", "mov", "webm", "avi", "mkv", "3gp"]
+
             for vid in video_files:
-
-                print("VIDEO TYPE:", vid.content_type)
-                print("VIDEO NAME:", vid.name)
-
                 file_ext = vid.name.split('.')[-1].lower()
-
-                allowed_extensions = [
-                    "mp4",
-                    "mov",
-                    "webm",
-                    "avi",
-                    "mkv",
-                    "3gp"
-                ]
 
                 # Validate format
                 if vid.content_type not in ALLOWED_VIDEO_TYPES and file_ext not in allowed_extensions:
-
-                    messages.error(
-                        request,
-                        f"{vid.name} unsupported format"
-                    )
-
+                    messages.error(request, f"{vid.name} unsupported format")
                     continue
 
                 # Validate size
                 if vid.size > 50 * 1024 * 1024:
-
-                    messages.error(
-                        request,
-                        f"{vid.name} too large (50MB max)"
-                    )
-
+                    messages.error(request, f"{vid.name} too large (50MB max)")
                     continue
 
                 try:
-
                     ProductVideo.objects.create(
                         product=product,
                         video=vid
                     )
-
                     valid_videos += 1
-
                 except Exception as e:
-
                     print("VIDEO ERROR:", e)
-
-                    messages.error(
-                        request,
-                        f"{vid.name} failed upload"
-                    )
+                    messages.error(request, f"{vid.name} failed upload")
 
             # If nothing uploaded → delete product
             if valid_images == 0 and valid_videos == 0:
-
                 product.delete()
-
-                messages.error(
-
-                    request,
-
-                    "No valid media uploaded"
-
-                )
-
+                messages.error(request, "No valid media uploaded")
                 return render(
-
                     request,
-
                     "products/product_post.html",
-
                     {"form": form}
-
                 )
 
             messages.success(
-
                 request,
-
                 f"Product posted ({valid_images} images, {valid_videos} videos)"
-
             )
-
             return redirect("products:product_list")
 
         else:
-
-            messages.error(
-                request,
-                "Fix form errors"
-            )
+            messages.error(request, "Fix form errors")
 
     else:
-
         form = ProductForm()
 
     return render(
-
         request,
-
         "products/product_post.html",
-
         {"form": form}
-
     )
 
-@login_required
+
 @login_required
 def product_list(request):
-
     category_filter = request.GET.get("category")
     min_price = request.GET.get("min_price")
     max_price = request.GET.get("max_price")
@@ -224,34 +133,26 @@ def product_list(request):
 
     products = Product.objects.all().order_by("-created_at")
 
-    # ==============================
-    # FLASH NOTIFICATIONS (FIXED)
-    # ==============================
+    # FLASH NOTIFICATIONS
     notifications = Notification.objects.filter(
         recipient=request.user,
         read=False
     )
 
     for n in notifications:
-
         if n.type == "success":
             messages.success(request, n.verb)
-
         elif n.type == "warning":
             messages.warning(request, n.verb)
-
         elif n.type == "error":
             messages.error(request, n.verb)
-
         else:
             messages.info(request, n.verb)
 
         n.read = True
         n.save(update_fields=["read"])
 
-    # ==============================
-    # YOUR EXISTING FILTER LOGIC
-    # ==============================
+    # FILTERS
     if category_filter:
         if category_filter.lower() in ["male", "female"]:
             products = products.filter(category__name__iexact=category_filter)
@@ -286,27 +187,15 @@ def product_list(request):
         "search_query": search_query,
     })
 
+
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
-    # 1. Fetch gallery images
     images = product.images.all()
-    
-    # 2. Try the explicit filter query first
-    try:
-        # If your StreamVideo model imports cleanly, keep this:
-        from streams.models import StreamVideo # Adjust to your exact app name
-        videos = StreamVideo.objects.filter(product=product)
-    except (ImportError, NameError):
-        # Fallback: dynamically check the model's related managers if import fails
-        if hasattr(product, 'videos'):
-            videos = product.videos.all()
-        elif hasattr(product, 'streamvideo_set'):
-            videos = product.streamvideo_set.all()
-        else:
-            videos = []
+    primary_image = images.first()  # Primary garment image for try-on
 
-    # Check for proposed price query strings
+    videos = StreamVideo.objects.filter(product=product)
+
     proposed_price = request.GET.get("proposed_price")
     if proposed_price:
         try:
@@ -314,18 +203,20 @@ def product_detail(request, pk):
         except ValueError:
             proposed_price = None
 
-    # Performance evaluation helper metrics for our template layout engine
-    has_images = images.exists() if hasattr(images, 'exists') else bool(images)
-    has_videos = videos.exists() if hasattr(videos, 'exists') else bool(videos)
+    has_images = images.exists()
+    has_videos = videos.exists()
 
     return render(request, "products/product_detail.html", {
         "product": product,
         "images": images,
+        "primary_image": primary_image,  # Pass garment target image to template
         "videos": videos,
         "proposed_price": proposed_price,
         "has_images": has_images,
         "has_videos": has_videos,
     })
+
+
 @login_required
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -364,4 +255,3 @@ def product_delete(request, pk):
 
     messages.error(request, "Invalid request.")
     return redirect(product.get_absolute_url())
-
