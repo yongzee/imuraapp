@@ -334,9 +334,13 @@ body {
             <div class="card-img-wrapper">
               <!-- Try-On Contextual Badge Indicators -->
               {% if product.enable_digital_tryon and images %}
-                <a href="{% url 'tryon:index' %}?garment_url={{ images.0.image.url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
-                  <i class="bi bi-magic me-1"></i>Try‑On
-                </a>
+                {% with raw_url=images.0.image.url %}
+                  {% with secure_url="https://"|add:raw_url|cut:"http://"|cut:"https://" %}
+                    <a href="{% url 'tryon:index' %}?garment_url={{ secure_url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
+                      <i class="bi bi-magic me-1"></i>Try‑On
+                    </a>
+                  {% endwith %}
+                {% endwith %}
               {% else %}
                 <span class="tryon-badge disabled" onclick="event.stopPropagation();">No Try‑On</span>
               {% endif %}
