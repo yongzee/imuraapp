@@ -333,10 +333,11 @@ body {
             <!-- Photo Media Frame Container -->
             <div class="card-img-wrapper">
               <!-- Try-On Contextual Badge Indicators -->
-              {% if product.enable_digital_tryon and images %}
-                {% with raw_url=images.0.image.url %}
+              {% if product.enable_digital_tryon %}
+                {% with raw_url=product.images.first.image.url %}
+                  {# Strips http:// if present and forces https:// #}
                   {% with secure_url="https://"|add:raw_url|cut:"http://"|cut:"https://" %}
-                    <a href="{% url 'tryon:index' %}?garment_url={{ secure_url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
+                    <a href="{% url 'tryon:index' %}?garment_url={{ secure_url|urlencode }}" class="tryon-badge">
                       <i class="bi bi-magic me-1"></i>Try‑On
                     </a>
                   {% endwith %}
