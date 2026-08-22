@@ -333,8 +333,8 @@ body {
             <!-- Photo Media Frame Container -->
             <div class="card-img-wrapper">
               <!-- Try-On Contextual Badge Indicators -->
-              {% if product.enable_digital_tryon %}
-                <a href="{% url 'tryon:index' %}?garment_url={{ product.images.first.image.url|urlencode }}" class="tryon-badge";">
+              {% if product.enable_digital_tryon and images %}
+                <a href="{% url 'tryon:index' %}?garment_url={{ images.0.image.url|urlencode }}" class="tryon-badge" onclick="event.stopPropagation();">
                   <i class="bi bi-magic me-1"></i>Try‑On
                 </a>
               {% else %}

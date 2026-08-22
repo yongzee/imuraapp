@@ -434,8 +434,18 @@
 
       if (garmentLabel) garmentLabel.textContent = 'Loading product photo...';
 
+      // Sanitize and force https:// protocol before calling fetch()
+      let cleanUrl = imageUrl.trim();
+      if (cleanUrl.startsWith('http://')) {
+        cleanUrl = 'https://' + cleanUrl.slice(7);
+      } else if (!cleanUrl.startsWith('https://')) {
+        cleanUrl = 'https://' + cleanUrl.replace(/^\/+/, '');
+      }
+
       try {
-        const response = await fetch(imageUrl);
+        const response = await fetch(cleanUrl);
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+
         const blob = await response.blob();
         const file = new File([blob], "selected_garment.jpg", { type: blob.type || 'image/jpeg' });
 

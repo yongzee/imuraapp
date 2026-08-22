@@ -52,6 +52,13 @@ def tryon_view(request):
     usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
     garment_url = request.GET.get("garment_url", "").strip()
     
+    # Ensure URL has an absolute protocol scheme
+    if garment_url:
+        if garment_url.startswith("http://"):
+            garment_url = "https://" + garment_url[7:]
+        elif not garment_url.startswith("https://"):
+            garment_url = "https://" + garment_url.lstrip("/")
+
     return render(
         request,
         "tryon/tryon.html",
@@ -60,7 +67,6 @@ def tryon_view(request):
             "garment_url": garment_url,
         },
     )
-
 
 @login_required
 def initiate_tryon(request):
