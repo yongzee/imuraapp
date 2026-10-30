@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
+    
 
     # add this
     "cloudinary",
@@ -90,8 +92,7 @@ MIDDLEWARE = [
 SITE_ID = 1
 
 # Redirects
-LOGIN_REDIRECT_URL = "products:product_list"   # where to go after login
-LOGOUT_REDIRECT_URL = "account_login"       # after logout
+LOGIN_REDIRECT_URL = "products:product_list"   # where to go after login    
 LOGIN_URL = "account_login"             # login page
 
 
@@ -104,15 +105,18 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",  # allauth
 ]
 
-# Allauth settings
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"  # users can login with email or username
+# Allauth Settings
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"  # Users can login with email or username
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "none"  # options: none, optional, mandatory
+ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
-ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_LOGOUT_REDIRECT_URL = "/"
-ACCOUNT_LOGOUT_ON_GET = True  # logout immediately without confirmation
+
+# Session & Logout Fixes
+ACCOUNT_SESSION_REMEMBER = False              # Do not force persistent login sessions
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True        # Terminate session when the browser/app is closed
+ACCOUNT_LOGOUT_REDIRECT_URL = "account_login" # Redirect to login page after logout
+ACCOUNT_LOGOUT_ON_GET = True
 
 # Zoho SMTP settings
 # Temporary toggle to see if SMTP is the bottleneck
@@ -162,7 +166,8 @@ WSGI_APPLICATION = "my_tryon.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default="postgresql://postgres.zwoospuoqaimysbvbmvv:Labrosky123@@aws-1-eu-west-1.pooler.supabase.com:5432/postgres",
-        ssl_require=True
+        conn_max_age=600,
+        ssl_require=True if os.getenv("DATABASE_URL") else False,
     )
 }
 
@@ -229,10 +234,6 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 #MEDIA_URL = "/media/"
 #MEDIA_ROOT = BASE_DIR / "media"

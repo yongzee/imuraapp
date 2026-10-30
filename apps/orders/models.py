@@ -1,8 +1,7 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
-from apps.products.models import Product
-import uuid
 from django.utils import timezone
 
 User = settings.AUTH_USER_MODEL
@@ -29,8 +28,9 @@ class Order(models.Model):
     seller = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="orders_received"
     )
+    # FIX: String reference eliminates circular dependency with apps.products.models
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="orders"
+        "products.Product", on_delete=models.CASCADE, related_name="orders"
     )
 
     # ================= PRODUCT SNAPSHOT =================
@@ -75,10 +75,7 @@ class Order(models.Model):
     is_sent_to_seller = models.BooleanField(default=False)
     tracking_number = models.CharField(max_length=255, blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    # 🔐 PAYSTACK FIELDS (NEW)
+    # ================= PAYSTACK & PAYOUT =================
     payment_reference = models.CharField(
         max_length=100,
         blank=True,
@@ -90,21 +87,21 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     payout_released = models.BooleanField(default=False)
     payout_released_at = models.DateTimeField(null=True, blank=True)
-    
+
     extra_days_requested = models.PositiveIntegerField(default=0)
     dispatched_at = models.DateTimeField(null=True, blank=True)
-   
+
     delivery_note = models.TextField(blank=True, null=True)
     delivery_contact = models.CharField(max_length=100, blank=True, null=True)
     delivery_deadline = models.DateTimeField(null=True, blank=True)
-    
+
     seller_bank_name = models.CharField(max_length=100, blank=True, null=True)
     seller_account_name = models.CharField(max_length=100, blank=True, null=True)
     seller_account_number = models.CharField(max_length=20, blank=True, null=True)
-    
+
     payout_receipt = models.FileField(
         upload_to="receipts/",
         blank=True,
@@ -113,7 +110,7 @@ class Order(models.Model):
 
     payment_verified_by_admin = models.BooleanField(default=False)
     payment_verified_at = models.DateTimeField(null=True, blank=True)
-    
+
     seller_confirmed_payout = models.BooleanField(default=False)
     seller_payout_confirmed_at = models.DateTimeField(blank=True, null=True)
 
@@ -129,12 +126,11 @@ class Order(models.Model):
         ],
         default="none"
     )
-    
+
     def save(self, *args, **kwargs):
         if not self.payment_reference:
-            self.payment_reference = f"ORD-{uuid.uuid4().hex[:12]}"
+            self.payment_reference = self.generate_payment_reference()
         super().save(*args, **kwargs)
-
 
     def generate_payment_reference(self):
         return f"ORD-{uuid.uuid4().hex[:12].upper()}"
@@ -144,8 +140,7 @@ class Order(models.Model):
 
     def get_absolute_url(self):
         return reverse("orders:detail", args=[self.pk])
-    
+
     @property
     def final_price(self):
         return self.suggested_price or self.price_at_order
-

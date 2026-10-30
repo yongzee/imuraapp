@@ -8,8 +8,10 @@ from django.contrib.auth import get_user_model
 # Update UserForm to CustomSignupForm
 # Change your import on line 8 of views.py to import all three forms:
 from .forms import UserForm, CustomSignupForm, ProfileForm
-from apps.products.models import ProductImage, ProductVideo
+from apps.products.models import Product, ProductImage, ProductVideo
 from apps.notifications.models import Notification
+from apps.products.models import Category, Product, Subcategory # Adjust imports based on your app structure
+
 
 User = get_user_model()
 
@@ -107,29 +109,76 @@ def delete_account(request):
 # ==============================
 def user_list(request):
     query = request.GET.get("q", "").strip()
+    active_tab = request.GET.get("tab", "products")
+    category_id = request.GET.get("category", "").strip()
+    subcategory_id = request.GET.get("subcategory", "").strip()
+    min_price = request.GET.get("min_price", "").strip()
+    max_price = request.GET.get("max_price", "").strip()
 
+    # 1. Fetch Users & Optimize Profile Relationships
     users = User.objects.select_related("profile").all()
 
+    # 2. Fetch Products with Prefetched Cloudinary Images and Related Models
+    products = Product.objects.select_related(
+        "seller", "category", "subcategory"
+    ).prefetch_related("images").all()
+
+    # 3. Fetch Categories with Subcategories for Sidebar Accordion
+    categories = Category.objects.prefetch_related("subcategories").all()
+
+    # 4. Global Search Filter
     if query:
         users = users.filter(
-            Q(username__icontains=query) |
-            Q(profile__bio__icontains=query) |
-            Q(profile__location__icontains=query)
+            Q(username__icontains=query)
+            | Q(first_name__icontains=query)
+            | Q(last_name__icontains=query)
+            | Q(profile__bio__icontains=query)
+            | Q(profile__location__icontains=query)
+            | Q(profile__user_type__icontains=query)
+        )
+        products = products.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(brand__icontains=query)
+            | Q(color__icontains=query)
+            | Q(category__name__icontains=query)
+            | Q(subcategory__name__icontains=query)
         )
 
-    users = users.order_by("username")
+    # 5. Category & Subcategory Filtering
+    if subcategory_id:
+        if subcategory_id.isdigit():
+            products = products.filter(subcategory_id=subcategory_id)
+        else:
+            products = products.filter(subcategory__name__iexact=subcategory_id)
+    elif category_id:
+        if category_id.isdigit():
+            products = products.filter(category_id=category_id)
+        else:
+            products = products.filter(
+                Q(category__slug=category_id) | Q(category__name__iexact=category_id)
+            )
 
-    return render(
-        request,
-        "account/user_list.html",
-        {
-            "users": users,
-            "query": query,
-        },
-    )
+    # 6. Price Range Filtering
+    if min_price and min_price.replace(".", "", 1).isdigit():
+        products = products.filter(price__gte=float(min_price))
+    if max_price and max_price.replace(".", "", 1).isdigit():
+        products = products.filter(price__lte=float(max_price))
 
+    # 7. Ordering
+    users = users.order_by("username").distinct()
+    products = products.order_by("-created_at").distinct()
 
-# ==============================
+    # 8. Render Context
+    context = {
+        "users": users,
+        "products": products,
+        "categories": categories,
+        "query": query,
+        "active_tab": active_tab,
+    }
+
+    return render(request, "account/user_list.html", context)
 # SEND MESSAGE
 # ==============================
 @login_required

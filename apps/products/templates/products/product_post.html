@@ -113,6 +113,7 @@
 
   /* Enhanced Upload Zones */
   .upload-zone {
+    position: relative;
     border: 2px dashed #dee2e6;
     border-radius: 16px;
     padding: 1.25rem;
@@ -133,6 +134,18 @@
     font-weight: 500;
   }
 
+  .remove-zone-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
   .add-more-btn {
     border-radius: 12px;
     padding: 6px 14px;
@@ -141,6 +154,7 @@
     transition: all 0.2s ease;
   }
 
+  /* Submit Button Style */
   .submit-btn {
     background: #000000;
     border: none;
@@ -151,6 +165,7 @@
     color: white;
     width: 100%;
     transition: all 0.2s ease;
+    min-height: 52px;
   }
 
   .submit-btn:hover {
@@ -158,36 +173,199 @@
     transform: translateY(-1px);
   }
 
-  /* Disabled button configuration state styling */
-.submit-btn:disabled {
-  background-color: #94a3b8 !important;
-  cursor: not-allowed;
-  transform: none !important;
-  opacity: 0.85;
-}
+  /* Full Screen Popup Loader Overlay */
+  .loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(11, 31, 58, 0.45); /* IMURAFH Navy backdrop blur */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-/* Three dots sequence loading animation layout */
-.animated-dots {
-  display: inline-block;
-  font-weight: bold;
-  animation: dots-sequence 1.5s infinite steps(4, end);
-  width: 1.25em;
-  text-align: left;
-}
+  .loader-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
 
-@keyframes dots-sequence {
-  0%, 20% { content: ""; }
-  40% { content: "."; }
-  60% { content: ".."; }
-  80%, 100% { content: "..."; }
-}
+  .loader-card {
+    background: #ffffff;
+    padding: 2.25rem 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 360px;
+    width: 90%;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: popupScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popupScale {
+    from {
+      transform: scale(0.85);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .loader-svg-container {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 1.25rem;
+    transition: all 0.3s ease;
+  }
+
+  .loader-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .clothing-icon {
+    stroke: #0B1F3A; /* IMURAFH Navy */
+  }
+
+  .loader-ring {
+    fill: none;
+    stroke: #D4AF37; /* Gold Accent */
+    stroke-width: 5.5;
+    stroke-linecap: round;
+    stroke-dasharray: 180 80;
+    transform-origin: 50% 50%;
+    animation: popup-spin 1.2s linear infinite;
+  }
+
+  @keyframes popup-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loader-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0B1F3A;
+    margin-bottom: 0.25rem;
+  }
+
+  .loader-subtext {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  .btn-continue-browsing {
+    margin-top: 1.25rem;
+    background-color: #f1f3f5;
+    color: #0B1F3A;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-continue-browsing:hover {
+    background-color: #e9ecef;
+    color: #000;
+  }
+
+  /* ===== Minimized State: Shift to Bottom Left ===== */
+  .loader-overlay.minimized {
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    width: auto;
+    height: auto;
+    top: auto;
+    right: auto;
+    bottom: 24px;
+    left: 24px;
+    pointer-events: none;
+  }
+
+  .loader-overlay.minimized .loader-card {
+    pointer-events: auto;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    max-width: 320px;
+    background: #ffffff;
+  }
+
+  .loader-overlay.minimized .loader-svg-container {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 0;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .loader-overlay.minimized .loader-title {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+
+  .loader-overlay.minimized .loader-subtext {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .loader-overlay.minimized .btn-continue-browsing {
+    display: none;
+  }
 </style>
+
+<!-- Full-Page Pop-up Loader -->
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="loader-card">
+    <div class="loader-svg-container">
+      <svg class="loader-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle class="loader-ring" cx="50" cy="50" r="42" />
+        <g class="clothing-icon" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M50 38 C50 33, 54 33, 54 36 C54 40, 50 41, 50 44" />
+          <path d="M50 44 L32 52 L68 52 Z" />
+          <path d="M35 52 L28 56 L33 64 L38 61 L38 72 L62 72 L62 61 L67 64 L72 56 L65 52" />
+        </g>
+      </svg>
+    </div>
+    <div class="loader-text-wrapper">
+      <div class="loader-title" id="loaderTitle">Posting Listing...</div>
+      <div class="loader-subtext" id="loaderSubtext">Publishing your item to the marketplace.</div>
+    </div>
+    <button type="button" class="btn-continue-browsing" id="continueBrowsingBtn">
+      Continue Browsing
+    </button>
+  </div>
+</div>
 
 <div class="container form-container-wrapper">
   <div class="row justify-content-center">
     <div class="col-lg-10">
       
-      <!-- Django Native Form Error Alerts Container -->
       {% if form.errors %}
       <div class="alert alert-danger p-3 mb-4 rounded-4 shadow-sm">
         <h6 class="font-weight-bold mb-2"><i class="bi bi-exclamation-triangle-fill"></i> Please resolve the following errors:</h6>
@@ -210,7 +388,7 @@
           <p class="text-muted small">Fill in the item details below to publish your listing to the marketplace.</p>
         </div>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="productForm">
           {% csrf_token %}
           
           <div class="row g-4">
@@ -227,10 +405,22 @@
               {{ form.brand }}
             </div>
 
-            <!-- Category Assignment Selection -->
+            <!-- Taxonomy: Main Category -->
             <div class="col-md-4">
-              <label class="field-label">{{ form.category.label }}</label>
+              <label class="field-label">Category</label>
               {{ form.category }}
+            </div>
+
+            <!-- Taxonomy: Dynamic Subcategory -->
+            <div class="col-md-4">
+              <label class="field-label">Subcategory</label>
+              {{ form.subcategory }}
+            </div>
+
+            <!-- Taxonomy: Target Audience / Gender -->
+            <div class="col-md-4">
+              <label class="field-label">Target Audience / Gender</label>
+              {{ form.gender }}
             </div>
 
             <!-- Structural Condition Assessment -->
@@ -252,13 +442,13 @@
             </div>
 
             <!-- Origin Shipping Location -->
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="field-label">{{ form.shipping_from.label }}</label>
               {{ form.shipping_from }}
             </div>
 
             <!-- Regional Delivery Allocation Zones -->
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="field-label">{{ form.delivery_zones.label }}</label>
               {{ form.delivery_zones }}
             </div>
@@ -288,7 +478,7 @@
                   </label>
                 </div>
                 <span class="toggle-instruction-text">
-                  If you want buyers to try on your dress virtually, click this option to enable AR viewports.
+                  If you want buyers to try on your item virtually, click this option to enable AR viewports.
                 </span>
               </div>
             </div>
@@ -309,13 +499,13 @@
               </button>
             </div>
 
-            <!-- Base Form Markdown Text Area Field -->
+            <!-- Base Form Description Text Area -->
             <div class="col-12">
               <label class="field-label">{{ form.description.label }}</label>
               {{ form.description }}
             </div>
 
-            <!-- Financial Pricing Config Block -->
+            <!-- Pricing Config Block -->
             <div class="col-md-6">
               <label class="field-label">{{ form.price.label }}</label>
               {{ form.price }}
@@ -337,14 +527,11 @@
 
           </div>
 
-          <!-- Submission CTA Row Link -->
+          <!-- Submission Row -->
           <div class="row mt-4">
             <div class="col-12 text-end">
-              <button type="submit" class="submit-btn" id="submitBtn" onclick="handleButtonLoading(this)">
-                <span class="btn-text">Post Product Listing</span>
-                <span class="btn-loading d-none">
-                  Posting<span class="animated-dots">...</span>
-                </span>
+              <button type="submit" class="submit-btn" id="submitBtn">
+                Post Product Listing
               </button>
             </div>
           </div>
@@ -356,13 +543,71 @@
 </div>
 
 <script>
-  // Re‑usable helper routines for handling multiple file fields injections
+  document.addEventListener('DOMContentLoaded', function () {
+    // Cascading Category -> Subcategory Handler
+    const categorySelect = document.getElementById('id_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+
+    if (categorySelect && subcategorySelect) {
+      categorySelect.addEventListener('change', function () {
+        const categoryId = this.value;
+        subcategorySelect.innerHTML = '<option value="">Select Subcategory...</option>';
+
+        if (categoryId) {
+          fetch(`/products/ajax/load-subcategories/?category_id=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+              data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name;
+                subcategorySelect.appendChild(option);
+              });
+            })
+            .catch(error => console.error('Error fetching subcategories:', error));
+        }
+      });
+    }
+
+    // Form Submission Handling with Pop-up Overlay
+    const productForm = document.getElementById('productForm');
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    const submitBtn = document.getElementById('submitBtn');
+    const continueBrowsingBtn = document.getElementById('continueBrowsingBtn');
+    const loaderSubtext = document.getElementById('loaderSubtext');
+
+    if (productForm && loaderOverlay) {
+      productForm.addEventListener('submit', function () {
+        // Display full-screen blur popup modal
+        loaderOverlay.classList.remove('minimized');
+        loaderOverlay.classList.add('active');
+        
+        // Disable submit button to prevent double form submission
+        setTimeout(() => {
+          if (submitBtn) submitBtn.disabled = true;
+        }, 10);
+      });
+    }
+
+    // Minimize Loader to Bottom Left
+    if (continueBrowsingBtn && loaderOverlay) {
+      continueBrowsingBtn.addEventListener('click', function () {
+        loaderOverlay.classList.add('minimized');
+        if (loaderSubtext) {
+          loaderSubtext.textContent = 'Posting in background...';
+        }
+      });
+    }
+  });
+
+  // Dynamic Upload Row Handlers with Remove Buttons
   function addImageField() {
     const wrapper = document.getElementById("image-wrapper");
     const div = document.createElement("div");
     div.className = "upload-zone mt-2";
     div.innerHTML = `
-      <input type="file" name="images" class="form-control" multiple accept="image/*">
+      <button type="button" class="remove-zone-btn" onclick="this.parentElement.remove()">&times;</button>
+      <input type="file" name="images" class="form-control me-3" multiple accept="image/*">
       <span class="upload-limit-badge"><i class="bi bi-info-circle"></i> Max file size: 5MB per upload element.</span>
     `;
     wrapper.appendChild(div);
@@ -373,34 +618,11 @@
     const div = document.createElement("div");
     div.className = "upload-zone mt-2";
     div.innerHTML = `
-      <input type="file" name="videos" class="form-control" multiple accept="video/*">
+      <button type="button" class="remove-zone-btn" onclick="this.parentElement.remove()">&times;</button>
+      <input type="file" name="videos" class="form-control me-3" multiple accept="video/*">
       <span class="upload-limit-badge"><i class="bi bi-info-circle"></i> Max file size: 30MB limits.</span>
     `;
     wrapper.appendChild(div);
-  }
-  function handleButtonLoading(button) {
-  // Check if the form is valid before triggering the UI animation loop (for native validation)
-    const form = button.closest('form');
-    if (form && !form.checkValidity()) {
-      return; 
-    }
-
-    const textSpan = button.querySelector('.btn-text');
-    const loadingSpan = button.querySelector('.btn-loading');
-
-    if (textSpan && loadingSpan) {
-      // Swap text components visibility
-      textSpan.classList.add('d-none');
-      loadingSpan.classList.remove('d-none');
-      
-      // Disable interaction safely to avoid processing redundant duplicate entries
-      button.disabled = true;
-      
-      // Submit parent form manually since triggering 'disabled' status stops standard events
-      if (form) {
-        form.submit();
-      }
-    }
   }
 </script>
 

@@ -1,16 +1,26 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}IMURAFH{% endblock %}</title>
+  <title>{% block title %}IMURA{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
+  <meta name="theme-color" content="#101B35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Imura">
+  <link rel="apple-touch-icon"
+      href="{% static 'pwa/icons/icon-192.png' %}">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  {% load static %}
+  
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 </head>
 
 <style>
@@ -58,6 +68,27 @@
   .custom-navbar .nav-link:hover {
     color: #ffffff !important;
     background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Top Header Action Buttons for Mobile */
+  .mobile-header-btn {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.25rem;
+    padding: 4px 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .mobile-header-btn .badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.6rem;
+    padding: 3px 5px;
+    border-radius: 50rem;
+    border: 2px solid #000000;
   }
 
   /* Right-sliding Offcanvas Drawer Customizations */
@@ -142,6 +173,14 @@
     transition: transform 0.15s ease;
   }
 
+  .mobile-nav-link .avatar-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 2px;
+  }
+
   .mobile-nav-link:hover, 
   .mobile-nav-link.active {
     color: #000000;
@@ -149,16 +188,6 @@
 
   .mobile-nav-link:active i {
     transform: scale(0.9);
-  }
-
-  .mobile-bottom-nav .badge {
-    position: absolute;
-    top: -2px;
-    right: 18%;
-    font-size: 0.65rem;
-    padding: 3px 6px;
-    border-radius: 50rem;
-    border: 2px solid #ffffff;
   }
 
   /* Structural offset applied ONLY on mobile layouts to accommodate bottom menu bar height */
@@ -177,14 +206,34 @@
   <!-- Re-architected Top Navbar with Right Side-Sliding Drawer -->
   <nav class="navbar navbar-expand-lg navbar-dark custom-navbar shadow-sm">
     <div class="container">
-      <a class="navbar-brand fw-bold tracking-tight text-uppercase" href="{% url 'products:product_list' %}">
-        IMURAFH
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'products:product_list' %}">
+        <img src="{% static 'images/logo3.png' %}" alt="Imura" height="40" class="d-inline-block align-text-top">
       </a>
 
-      <!-- Trigger targeted to offcanvas container below -->
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Mobile Top Actions + Hamburger Toggle -->
+      <div class="d-flex align-items-center gap-2 d-lg-none">
+        
+        <!-- Mobile Orders Icon Button -->
+        <a href="{% url 'orders:list' %}" class="mobile-header-btn" title="Orders">
+          <i class="bi bi-receipt"></i>
+          {% if orders_count and orders_count > 0 %}
+            <span class="badge bg-danger">{{ orders_count }}</span>
+          {% endif %}
+        </a>
+
+        <!-- Mobile Notifications/Alerts Icon Button -->
+        <a href="{% url 'notifications:list' %}" class="mobile-header-btn me-1" title="Alerts">
+          <i class="bi bi-bell"></i>
+          {% if unread_notifications_count and unread_notifications_count > 0 %}
+            <span class="badge bg-danger">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
+
+        <!-- Hamburger Menu Trigger -->
+        <button class="navbar-toggler border-0 p-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
 
       <!-- Offcanvas container moving content in from right side -->
       <div class="offcanvas offcanvas-end offcanvas-right-menu" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
@@ -248,10 +297,28 @@
               </a>
             </li>
 
-            <li class="nav-item">
-              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'products:product_post' %}">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-uppercase tracking-wider small {% if request.resolver_match.view_name == 'products:product_post' or request.resolver_match.view_name == 'products:bulk_create_products' %}active{% endif %}" 
+                href="#" 
+                id="desktopPostDropdown" 
+                role="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false">
                 Post
               </a>
+              <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-4 p-2 mt-2" aria-labelledby="desktopPostDropdown">
+                <li>
+                  <a class="dropdown-item py-2 rounded-3 small fw-semibold" href="{% url 'products:product_post' %}">
+                    <i class="bi bi-plus-circle me-2"></i> Single Product
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                  <a class="dropdown-item py-2 rounded-3 small fw-semibold" href="{% url 'products:bulk_create_products' %}">
+                    <i class="bi bi-layers-fill me-2"></i> Bulk Post (Fast Entry)
+                  </a>
+                </li>
+              </ul>
             </li>
 
             <li class="nav-item">
@@ -262,55 +329,57 @@
 
             {% if user.is_authenticated %}
               <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle d-flex align-items-center text-uppercase tracking-wider small" href="#" role="button" data-bs-toggle="dropdown">
-                {% if user.profile.avatar %}
-                  <img src="{{ user.profile.avatar.url }}" class="rounded-circle me-2" width="24" height="24" alt="{{ user.username }}">
-                {% else %}
-                  <i class="bi bi-person me-2"></i>
-                {% endif %}
-                {{ user.username }}
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                <li>
-                  <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:profile' user.username %}">
-                    Profile
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:profile_edit' %}">
-                    Edit Profile
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:settings' %}">
-                    Settings
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item py-2 text-danger text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'account_logout' %}">
-                    Logout
-                  </a>
-                </li>
-              </ul>
+                <a class="nav-link dropdown-toggle d-flex align-items-center text-uppercase tracking-wider small" href="#" role="button" data-bs-toggle="dropdown">
+                  {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" class="rounded-circle me-2" width="24" height="24" alt="{{ user.username }}">
+                  {% else %}
+                    <i class="bi bi-person me-2"></i>
+                  {% endif %}
+                  {{ user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                  <li>
+                    <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:profile' user.username %}">
+                      Profile
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:profile_edit' %}">
+                      Edit Profile
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2 text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'accounts:settings' %}">
+                      Settings
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item py-2 text-danger text-uppercase tracking-wider small d-flex align-items-center" href="{% url 'account_logout' %}">
+                      Logout
+                    </a>
+                  </li>
+                </ul>
               </li>
-              {% else %}
+            {% else %}
               <li class="nav-item">
-              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_login' %}">
-                Login
-              </a>
+                <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_login' %}">
+                  Login
+                </a>
               </li>
               <li class="nav-item">
-              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_signup' %}">
-                Register
-              </a>
+                <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_signup' %}">
+                  Register
+                </a>
               </li>
             {% endif %}
-          </div>
+          </ul>
+        </div>
       </div>
     </div>
   </nav>
-<!-- Contextual Message System Alerts Wrapper -->
+
+  <!-- Contextual Message System Alerts Wrapper -->
   {% if messages %}
     <div class="container mt-3">
       {% for message in messages %}
@@ -332,6 +401,7 @@
     <div class="container-fluid">
       <div class="row text-center align-items-center">
         
+        <!-- 1. Products -->
         <div class="col p-0">
           <a href="{% url 'products:product_list' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'products:product_list' %}active{% endif %}">
             <i class="bi bi-bag"></i>
@@ -339,47 +409,71 @@
           </a>
         </div>
 
+        <!-- 2. Videos -->
         <div class="col p-0">
-          <a href="{% url 'streaming:product_stream' %}" class="mobile-nav-link">
-            <!-- Changed to bi-play-circle (or you could use bi-camera-video) -->
+          <a href="{% url 'streaming:product_stream' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'streaming:product_stream' %}active{% endif %}">
             <i class="bi bi-play-circle"></i>
             <span>Videos</span>
           </a>
         </div>
 
-        <div class="col p-0">
-          <a href="{% url 'products:product_post' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'products:product_post' %}active{% endif %}">
+        <!-- 3. Post (Plus Button Dropup) -->
+        <div class="col p-0 dropup">
+          <a href="#" 
+            class="mobile-nav-link {% if request.resolver_match.view_name == 'products:product_post' or request.resolver_match.view_name == 'products:bulk_create_products' %}active{% endif %}" 
+            data-bs-toggle="dropdown" 
+            aria-expanded="false">
             <i class="bi bi-plus-circle-fill" style="font-size: 1.45rem; color: #000000;"></i>
             <span>Post</span>
           </a>
+          <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2 mb-2">
+            <li>
+              <a class="dropdown-item py-2 rounded-3 small fw-semibold" href="{% url 'products:product_post' %}">
+                <i class="bi bi-plus-circle me-2"></i> Single Product
+              </a>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <a class="dropdown-item py-2 rounded-3 small fw-semibold" href="{% url 'products:bulk_create_products' %}">
+                <i class="bi bi-layers-fill me-2"></i> Bulk Post (Fast Entry)
+              </a>
+            </li>
+          </ul>
         </div>
 
+        <!-- 4. Measure -->
         <div class="col p-0">
-          <a href="{% url 'measureApp:index' %}" class="mobile-nav-link">
-            <!-- Changed bi-ruler to the correct plural: bi-rulers -->
+          <a href="{% url 'measureApp:index' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'measureApp:index' %}active{% endif %}">
             <i class="bi bi-rulers"></i>
             <span>Measure</span>
           </a>
         </div>
         
+        <!-- 5. Tryon -->
         <div class="col p-0">
-          <a href="{% url 'orders:list' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'orders:list' %}active{% endif %}">
-            <i class="bi bi-receipt"></i>
-            <span>Orders</span>
-            {% if orders_count and orders_count > 0 %}
-              <span class="badge bg-danger">{{ orders_count }}</span>
-            {% endif %}
+          <a href="{% url 'tryon:index' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'tryon:index' %}active{% endif %}">
+            <i class="bi bi-person-bounding-box"></i>
+            <span>Tryon</span>
           </a>
         </div>
 
+        <!-- 6. Profile (Or Login if Unauthenticated) -->
         <div class="col p-0">
-          <a href="{% url 'notifications:list' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}">
-            <i class="bi bi-bell"></i>
-            <span>Alerts</span>
-            {% if unread_notifications_count and unread_notifications_count > 0 %}
-              <span class="badge bg-danger">{{ unread_notifications_count }}</span>
-            {% endif %}
-          </a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' user.username %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'accounts:profile' %}active{% endif %}">
+              {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" class="avatar-icon" alt="{{ user.username }}">
+              {% else %}
+                <i class="bi bi-person-circle"></i>
+              {% endif %}
+              <span>Profile</span>
+            </a>
+          {% else %}
+            <a href="{% url 'account_login' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'account_login' %}active{% endif %}">
+              <i class="bi bi-person"></i>
+              <span>Login</span>
+            </a>
+          {% endif %}
         </div>
 
       </div>
@@ -395,5 +489,18 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script src="{% static 'pwa/install.js' %}?v=2.1" defer></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js")
+          .catch(function (error) {
+            console.error("Imura service worker registration failed:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

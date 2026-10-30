@@ -45,11 +45,26 @@ def fetch_url_to_base64_uri(image_url):
     encoded_bytes = base64.b64encode(image_bytes).decode("utf-8")
     return f"data:image/jpeg;base64,{encoded_bytes}"
 
-
-@login_required
 def tryon_view(request):
-    """Renders the main Try-On HTML page with optional pre-loaded garment URL support."""
-    usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+    """Renders the main Try-On HTML page with guest session tracking and user limits."""
+    remaining_tryons = 0
+
+    if request.user.is_authenticated:
+        # Get or create usage for logged-in users, ensuring they get 2 tries if newly created
+        usage, created = TryOnUsage.objects.get_or_create(user=request.user)
+        
+        # If your TryOnUsage model defaults to something else, you can ensure the limit is set to 2:
+        # if created and hasattr(usage, 'remaining_tryons'): ...
+        
+        remaining_tryons = usage.remaining_tryons()
+    else:
+        # For guest users, initialize session tracking if it doesn't exist
+        # Let's say we give them 1 try total.
+        if 'guest_tryons_left' not in request.session:
+            request.session['guest_tryons_left'] = 1
+        
+        remaining_tryons = request.session['guest_tryons_left']
+
     garment_url = request.GET.get("garment_url", "").strip()
     
     # Ensure URL has an absolute protocol scheme
@@ -63,12 +78,11 @@ def tryon_view(request):
         request,
         "tryon/tryon.html",
         {
-            "remaining_tryons": usage.remaining_tryons(),
+            "remaining_tryons": remaining_tryons,
             "garment_url": garment_url,
         },
     )
 
-@login_required
 def initiate_tryon(request):
     """Starts prediction on Fashn AI using file upload or remote URL fallback."""
     if request.method != "POST":
@@ -80,11 +94,24 @@ def initiate_tryon(request):
             {"error": "Fashn AI API key is not configured on the server."}, status=500
         )
 
-    usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
-    if not usage.can_use_tryon():
-        return JsonResponse(
-            {"error": "You have reached your limit of free try-ons."}, status=403
-        )
+    # Check limits based on authentication status
+    if request.user.is_authenticated:
+        usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+        if not usage.can_use_tryon():
+            return JsonResponse(
+                {"error": "You have reached your limit of free try-ons."}, status=403
+            )
+    else:
+        # Guest user gets 1 try tracked via session
+        guest_tries_left = request.session.get('guest_tryons_left', 1)
+        if guest_tries_left <= 0:
+            return JsonResponse(
+                {
+                    "error": "You have used your free guest try-on. Please log in to continue using this feature.", 
+                    "login_required": True
+                }, 
+                status=403
+            )
 
     model_file = request.FILES.get("model_image")
     garment_file = request.FILES.get("garment_image")
@@ -126,7 +153,7 @@ def initiate_tryon(request):
         return JsonResponse({"error": f"Try-on execution failed: {str(e)}"}, status=500)
 
 
-@login_required
+
 def check_tryon_status(request, pred_id):
     """Polled via AJAX by the frontend every 2 seconds until complete."""
     api_key = getattr(settings, "FASHN_API_KEY", "").strip()
@@ -141,13 +168,27 @@ def check_tryon_status(request, pred_id):
         prediction = client.predictions.status(pred_id)
 
         if prediction.status == "completed":
-            usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
-
             session_key = f"processed_pred_{pred_id}"
-            if not request.session.get(session_key):
-                usage.tryon_count += 1
-                usage.save()
-                request.session[session_key] = True
+            remaining_tryons = 0
+            message = None
+
+            if request.user.is_authenticated:
+                usage, _ = TryOnUsage.objects.get_or_create(user=request.user)
+                if not request.session.get(session_key):
+                    usage.tryon_count += 1
+                    usage.save()
+                    request.session[session_key] = True
+                remaining_tryons = usage.remaining_tryons()
+            else:
+                # Deduct from guest session if not already counted for this prediction
+                if not request.session.get(session_key):
+                    request.session['guest_tryons_left'] = max(0, request.session.get('guest_tryons_left', 1) - 1)
+                    request.session[session_key] = True
+                    request.session.modified = True
+                
+                remaining_tryons = request.session.get('guest_tryons_left', 0)
+                if remaining_tryons == 0:
+                    message = "Please log in to continue using this feature."
 
             raw_output = prediction.output
             if isinstance(raw_output, list) and len(raw_output) > 0:
@@ -155,11 +196,15 @@ def check_tryon_status(request, pred_id):
             else:
                 image_url = raw_output
 
-            return JsonResponse({
+            response_data = {
                 "status": "completed",
                 "output": image_url,
-                "remaining": usage.remaining_tryons(),
-            })
+                "remaining": remaining_tryons,
+            }
+            if message:
+                response_data["message"] = message
+
+            return JsonResponse(response_data)
 
         elif prediction.status in ("failed", "cancelled"):
             error_details = getattr(prediction, "error", "Generation failed.")
@@ -173,4 +218,3 @@ def check_tryon_status(request, pred_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    

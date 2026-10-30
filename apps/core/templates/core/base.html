@@ -4,27 +4,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>IMURAFH | Premium Fashion Marketplace</title>
+  
+  <title>{% block title %}Imura | Discover Fashion and Connect with Tailors{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Discover fashion on Imura, explore clothing, connect with tailors and designers, and manage your measurements in one place.{% endblock %}">
+  <meta name="robots" content="index, follow">
+  
+  <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
+  <meta name="theme-color" content="#101B35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Imura">
+  <link rel="apple-touch-icon" href="{% static 'pwa/icons/icon-192.png' %}">
 
-  <!-- Bootstrap CSS (Upstream compatibility) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/dist/css/bootstrap.min.css" type="text/css">
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <!-- Custom Site CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
   <!-- Premium Global Onboarding State Architecture Override Styles -->
   <style>
-    .onboarding-overlay{
-    position:fixed;
-    inset:0;
-    z-index:999999;
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+    }
+
+    /* Base Content Wrapper Settings */
+    .main-content {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .main-content {
+        padding: 32px;
+      }
+    }
+
+    /* ===== Premium Modernized Header UI ===== */
+    .custom-navbar {
+      background: #000000 !important;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-brand {
+      font-size: 1.35rem;
+      letter-spacing: -0.5px;
+    }
+
+    .custom-navbar .nav-link {
+      color: rgba(255, 255, 255, 0.75) !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 8px 16px !important;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .custom-navbar .nav-link:hover {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Right-sliding Offcanvas Drawer Customizations */
+    .offcanvas-right-menu {
+      background-color: #ffffff !important;
+      max-width: 300px !important;
+    }
+    
+    @media (max-width: 991.98px) {
+      .offcanvas-right-menu .nav-link {
+        color: #212529 !important;
+        padding: 12px 16px !important;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f3f5;
+      }
+      .offcanvas-right-menu .nav-link:hover {
+        background: #f8f9fa;
+        color: #000000 !important;
+      }
+    }
+
+    /* ===== Premium Mobile Bottom Navigation Bar ===== */
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1030;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+      padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+    }
+
+    .mobile-nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #6c757d;
+      text-decoration: none;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      transition: color 0.15s ease-in-out;
+      position: relative;
+    }
+
+    .mobile-nav-link i {
+      font-size: 1.3rem;
+      margin-bottom: 2px;
+      transition: transform 0.15s ease;
+    }
+
+    .mobile-nav-link .avatar-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 2px;
+    }
+
+    .mobile-nav-link:hover, 
+    .mobile-nav-link.active {
+      color: #000000;
+    }
+
+    @media (max-width: 991.98px) {
+      body {
+        padding-bottom: 70px !important;
+      }
+      footer.desktop-footer {
+        display: none !important;
+      }
     }
   </style>
 
   <!-- Instant Layout State Interception Engine -->
   <script>
     (function() {
-      // Execute instantly during HTML parsing before body renders to avoid white/dark layout flash
       const ONBOARDING_KEY = "imuraOnboardingCompleted";
       if (localStorage.getItem(ONBOARDING_KEY) !== "true") {
         document.documentElement.classList.add("onboarding-runtime-active");
@@ -32,58 +165,157 @@
     })();
   </script>
 </head>
-<body class="">
 
-  <!-- Global Application Navbar Layer -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark site-navbar">
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+  <!-- Global Application Navbar Layer with Offcanvas Support -->
+  <nav class="navbar navbar-expand-lg navbar-dark custom-navbar shadow-sm">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="{% url 'core:dashboard' %}">IMURAFH Fashion Hub</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <a class="navbar-brand fw-bold text-uppercase" href="{% url 'core:dashboard' %}">IMURA</a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="navbar-toggler border-0 p-1 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          {% if user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
-                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="{% if user.is_authenticated and user.profile.avatar %}<img src="{{ user.profile.avatar.url }}">{% else %}<img src="https://via.placeholder.com/40">{% endif %}" 
-                    alt="Profile" class="rounded-circle me-2" style="width:35px; height:35px; object-fit:cover;">
-                {{ user.username }}
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <li><a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">Profile</a></li>
-                <li><a class="dropdown-item" href="{% url 'core:dashboard' %}">Dashboard</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="{% url 'account_logout' %}">Logout</a></li>
-              </ul>
-            </li>
-          {% else %}
+      <!-- Offcanvas / Desktop Navigation Container -->
+      <div class="offcanvas offcanvas-end offcanvas-right-menu" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header border-bottom d-lg-none">
+          <h5 class="offcanvas-title fw-semibold text-uppercase tracking-wider small" id="offcanvasNavbarLabel">Menu</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+          <ul class="navbar-nav ms-auto align-items-lg-center w-100 justify-content-end gap-1">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'core:dashboard' %}">Dashboard</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'products:product_list' %}">Products</a>
             </li>
-          {% endif %}
-        </ul>
+            <li class="nav-item">
+              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'measureApp:index' %}">Measure</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-uppercase tracking-wider small" href="{% url 'tryon:index' %}">Tryon</a>
+            </li>
+
+            {% if user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center text-uppercase tracking-wider small" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="rounded-circle me-2" style="width:24px; height:24px; object-fit:cover;">
+                  {% else %}
+                    <i class="bi bi-person me-2"></i>
+                  {% endif %}
+                  {{ user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-4 p-2 mt-2" aria-labelledby="userDropdown">
+                  <li><a class="dropdown-item py-2 small fw-semibold" href="{% url 'accounts:profile' user.username %}">Profile</a></li>
+                  <li><a class="dropdown-item py-2 small fw-semibold" href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                  <li><hr class="dropdown-divider my-1"></li>
+                  <li><a class="dropdown-item py-2 text-danger small fw-semibold" href="{% url 'account_logout' %}">Logout</a></li>
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_login' %}">Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-uppercase tracking-wider small" href="{% url 'account_signup' %}">Register</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
     </div>
   </nav>
 
+  <!-- Contextual Message System Alerts Wrapper -->
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <!-- Marketplace Main Content Template Block View Container -->
-  <main class="container py-4 main-content-wrapper">
+  <main class="main-content flex-grow-1">
     {% block content %}
     {% endblock %}
   </main>
 
-  <!-- Global Footer Application Element -->
-  <footer class="bg-dark text-white text-center py-3 mt-5 site-footer">
-    <p class="mb-0">&copy; {{ year|default:"2026" }} IMURA. All rights reserved.</p>
+  <!-- Modern Responsive Bottom UI Bar - Strict Mobile Only Scope (d-lg-none) -->
+  <div class="mobile-bottom-nav d-lg-none">
+    <div class="container-fluid">
+      <div class="row text-center align-items-center">
+        <div class="col p-0">
+          <a href="{% url 'core:dashboard' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'core:dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        <div class="col p-0">
+          <a href="{% url 'products:product_list' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'products:product_list' %}active{% endif %}">
+            <i class="bi bi-bag"></i>
+            <span>Products</span>
+          </a>
+        </div>
+        <div class="col p-0">
+          <a href="{% url 'measureApp:index' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'measureApp:index' %}active{% endif %}">
+            <i class="bi bi-rulers"></i>
+            <span>Measure</span>
+          </a>
+        </div>
+        <div class="col p-0">
+          <a href="{% url 'tryon:index' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'tryon:index' %}active{% endif %}">
+            <i class="bi bi-person-bounding-box"></i>
+            <span>Tryon</span>
+          </a>
+        </div>
+        <div class="col p-0">
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' user.username %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'accounts:profile' %}active{% endif %}">
+              {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" class="avatar-icon" alt="{{ user.username }}">
+              {% else %}
+                <i class="bi bi-person-circle"></i>
+              {% endif %}
+              <span>Profile</span>
+            </a>
+          {% else %}
+            <a href="{% url 'account_login' %}" class="mobile-nav-link {% if request.resolver_match.view_name == 'account_login' %}active{% endif %}">
+              <i class="bi bi-person"></i>
+              <span>Login</span>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Footer Application Element (Desktop Only Scope) -->
+  <footer class="bg-dark text-white text-center py-3 mt-auto desktop-footer d-none d-lg-block site-footer">
+    <p class="mb-0">&copy; {{ year|default:"2026" }} IMURA. <span class="text-secondary">All rights reserved.</span></p>
   </footer>
 
   <!-- Bootstrap Structural Dependencies JavaScript Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'pwa/install.js' %}?v=2.1" defer></script>
+  
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js")
+          .catch(function (error) {
+            console.error("Imura service worker registration failed:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -167,17 +167,24 @@ document.addEventListener('DOMContentLoaded', function () {
   const eyeSlashPath = `<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a12 12 0 0 0-2.778.32l1.938 1.938A7 7 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.181.26-.41.586-.683.925zM10.03 5.01l1.532 1.532A2.5 2.5 0 0 0 9.5 5.01c-.13.003-.257.017-.378.04L8.252 4.183a5 5 0 0 1 1.778-.173M12.19 12.19a18 18 0 0 1-1.325 1.241C9.58 14.332 7.82 15.5 6 15.5c-5 0-8-5.5-8-5.5a12 12 0 0 1 2.138-2.61L3.393 6.137A13 13 0 0 0 1.172 8q.086.13.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.813 0 1.569-.175 2.254-.486zM6 8.02a2.5 2.5 0 0 0 3.48 3.48zm-.372 1.94L3.65 7.982A3.5 3.5 0 0 0 5.628 9.96z"/><path d="M13.646 14.354l-12-12 .708-.708 12 12z"/>`;
 
   toggleButtons.forEach(button => {
-    button.addEventListener('click', function () {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const inputGroup = this.closest('.input-group-custom');
+      if (!inputGroup) return;
+      
       const passwordInput = inputGroup.querySelector('.password-field');
       const svgElement = this.querySelector('svg');
       
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        svgElement.innerHTML = eyeSlashPath;
-      } else {
-        passwordInput.type = 'password';
-        svgElement.innerHTML = eyePath;
+      if (passwordInput && svgElement) {
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          svgElement.innerHTML = eyeSlashPath;
+        } else {
+          passwordInput.type = 'password';
+          svgElement.innerHTML = eyePath;
+        }
       }
     });
   });

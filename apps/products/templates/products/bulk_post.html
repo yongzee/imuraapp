@@ -1,0 +1,654 @@
+{% extends "products/base.html" %}
+{% block content %}
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    color: #212529;
+  }
+
+  .bulk-container {
+    max-width: 900px;
+    margin: 2rem auto 4rem auto;
+  }
+
+  .card-box {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.02);
+  }
+
+  .form-control, .form-select {
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border: 1px solid #dee2e6;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .step-badge {
+    background: #000;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  .feature-toggle-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1rem;
+  }
+
+  /* Switch styling */
+  .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ced4da; transition: .3s; border-radius: 34px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+  input:checked + .slider { background-color: #000; }
+  input:checked + .slider:before { transform: translateX(22px); }
+
+  /* Product Summary Cards */
+  .product-summary-card {
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fff;
+  }
+
+  .btn-black {
+    background: #000;
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+  }
+  .btn-black:hover { background: #212529; color: #fff; }
+
+  .upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: center;
+    background: #fdfdfd;
+  }
+
+  /* --- LOADER STYLING (FULLSCREEN & MINIMIZED STATES) --- */
+
+  /* Backdrop / Overlay Container */
+  .loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(11, 31, 58, 0.45); /* IMURAFH Navy backdrop blur */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, backdrop-filter 0.3s ease;
+  }
+
+  .loader-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Loader Card (Centered Popup) */
+  .loader-card {
+    background: #ffffff;
+    padding: 2.25rem 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 360px;
+    width: 90%;
+    position: fixed;
+    bottom: auto;
+    left: auto;
+    transform: scale(1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* SVG Graphics */
+  .loader-svg-container {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .loader-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .clothing-icon {
+    stroke: #0B1F3A; /* IMURAFH Navy */
+  }
+
+  .loader-ring {
+    fill: none;
+    stroke: #D4AF37; /* Gold Accent */
+    stroke-width: 5.5;
+    stroke-linecap: round;
+    stroke-dasharray: 180 80;
+    transform-origin: 50% 50%;
+    animation: popup-spin 1.2s linear infinite;
+  }
+
+  @keyframes popup-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loader-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0B1F3A;
+    margin-bottom: 0.25rem;
+  }
+
+  .loader-subtext {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  .btn-continue-bg {
+    background-color: transparent;
+    border: 1.5px solid #0B1F3A;
+    color: #0B1F3A;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 8px 16px;
+    margin-top: 1.25rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-continue-bg:hover {
+    background-color: #0B1F3A;
+    color: #ffffff;
+  }
+
+  /* --- MINIMIZED BOTTOM-LEFT FLOATING LOADER STATE --- */
+  .loader-overlay.minimized {
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    pointer-events: none; /* Allow interacting with page underneath */
+  }
+
+  .loader-overlay.minimized .loader-card {
+    pointer-events: auto;
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 310px;
+    padding: 1rem 1.25rem;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(11, 31, 58, 0.18);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .loader-overlay.minimized .loader-svg-container {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 0;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .loader-overlay.minimized .loader-text-group {
+    flex: 1;
+  }
+
+  .loader-overlay.minimized .loader-title {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  .loader-overlay.minimized .loader-subtext {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .loader-overlay.minimized .btn-continue-bg {
+    display: none; /* Hide background button when minimized */
+  }
+</style>
+
+<!-- Full-Page / Bottom-Left Floating Loader Overlay -->
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="loader-card" id="loaderCard">
+    <div class="loader-svg-container">
+      <svg class="loader-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle class="loader-ring" cx="50" cy="50" r="42" />
+        <g class="clothing-icon" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M50 38 C50 33, 54 33, 54 36 C54 40, 50 41, 50 44" />
+          <path d="M50 44 L32 52 L68 52 Z" />
+          <path d="M35 52 L28 56 L33 64 L38 61 L38 72 L62 72 L62 61 L67 64 L72 56 L65 52" />
+        </g>
+      </svg>
+    </div>
+    <div class="loader-text-group">
+      <div class="loader-title" id="loaderTitle">Publishing Batch...</div>
+      <div class="loader-subtext" id="loaderSubtext">Uploading listings to marketplace.</div>
+    </div>
+    <button class="btn btn-continue-bg w-100" id="continueBgBtn" onclick="minimizeLoader()">
+      Continue in Background
+    </button>
+  </div>
+</div>
+
+<div class="container bulk-container">
+  
+  <!-- Step Indicator -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <span class="step-badge" id="stepBadge">Step 1 of 3</span>
+      <h3 class="fw-bold mt-2" id="stepTitle">Seller Settings</h3>
+    </div>
+    <button id="draftBtn" class="btn btn-outline-secondary btn-sm rounded-pill" onclick="saveDraftManually()">
+      <i class="bi bi-bookmark"></i> Save Draft
+    </button>
+  </div>
+
+  <!-- STEP 1: Global Seller Settings -->
+  <div id="step1Container" class="card-box">
+    <p class="text-muted small mb-4">Set these once. They will apply to all products added in this posting session.</p>
+    <form id="globalSettingsForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-bold small">Shipping From</label>
+          <input type="text" id="global_shipping_from" class="form-control" placeholder="e.g. Lagos, Nigeria" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold small">Delivery Zones</label>
+          <input type="text" id="global_delivery_zones" class="form-control" placeholder="e.g. Nationwide, West Africa" required>
+        </div>
+        <div class="col-md-6">
+          <div class="feature-toggle-box d-flex align-items-center justify-content-between mt-2">
+            <div>
+              <span class="fw-bold small d-block">Enable Price Negotiations</span>
+              <span class="text-muted extra-small">Allow buyers to make counter-offers</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="global_enable_product_pricing">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="feature-toggle-box d-flex align-items-center justify-content-between mt-2">
+            <div>
+              <span class="fw-bold small d-block">Enable Digital Try-On</span>
+              <span class="text-muted extra-small">Activate AR viewports for listings</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="global_enable_digital_tryon">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-black w-100 mt-4" onclick="proceedToItemEntry()">Continue to Add Products &rarr;</button>
+    </form>
+  </div>
+
+  <!-- STEP 2: Item Entry Form -->
+  <div id="step2Container" class="card-box d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0" id="itemCounterHeading">Product 1</h5>
+      <span class="badge bg-light text-dark border" id="stagedBadge">0 Items Staged</span>
+    </div>
+
+    <form id="itemForm">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label fw-bold small">Product Images (1-5)</label>
+          <div class="upload-zone">
+            <input type="file" id="item_images" class="form-control" accept="image/*" multiple required>
+            <span class="text-muted extra-small mt-1 d-block">Max 5MB per file. Square (1:1) recommended.</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold small">Product Title</label>
+          <input type="text" id="item_title" class="form-control" placeholder="e.g. Senator Wear" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold small">Brand</label>
+          <input type="text" id="item_brand" class="form-control" placeholder="e.g. Bespoke">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Category</label>
+          <select id="item_category" class="form-select" required>
+            <option value="">Select Category...</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Condition</label>
+          <select id="item_condition" class="form-select" required>
+            <option value="new">New</option>
+            <option value="used">Used</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Size</label>
+          <input type="text" id="item_size" class="form-control" placeholder="e.g. L, XL, 42">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Color</label>
+          <input type="text" id="item_color" class="form-control" placeholder="e.g. Royal Blue">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Price (₦)</label>
+          <input type="number" id="item_price" class="form-control" placeholder="45000" step="0.01" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small">Quantity</label>
+          <input type="number" id="item_quantity" class="form-control" value="1" min="1" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-bold small">Description (Optional)</label>
+          <textarea id="item_description" class="form-control" rows="2" placeholder="Brief description..."></textarea>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="button" class="btn btn-outline-dark flex-fill" onclick="stageProduct(false)">
+          <i class="bi bi-plus-circle"></i> Save & Add Another
+        </button>
+        <button type="button" class="btn btn-outline-secondary flex-fill" onclick="stageProduct(true)">
+          <i class="bi bi-files"></i> Duplicate This Item
+        </button>
+      </div>
+      <button type="button" class="btn btn-black w-100 mt-2" onclick="goToReviewStep()">
+        Review Staged Products (&rarr;)
+      </button>
+    </form>
+  </div>
+
+  <!-- STEP 3: Review & Batch Publishing -->
+  <div id="step3Container" class="card-box d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Review Batch</h5>
+      <button class="btn btn-sm btn-outline-dark" onclick="returnToItemEntry()">+ Add More Items</button>
+    </div>
+
+    <div id="reviewList"></div>
+
+    <button id="publishBtn" type="button" class="btn btn-black w-100 mt-4" onclick="publishBatch()">
+      Publish All Products
+    </button>
+  </div>
+
+</div>
+
+<script>
+  let globalSettings = {};
+  let stagedProducts = [];
+  let isPublishingActive = false;
+
+  // Minimize Loader to Bottom Left
+  function minimizeLoader() {
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    if (loaderOverlay) {
+      loaderOverlay.classList.add('minimized');
+      document.getElementById('loaderSubtext').innerText = 'Uploading in background...';
+    }
+  }
+
+  // Restore Loader to Centered Overlay
+  function expandLoader() {
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    if (loaderOverlay && isPublishingActive) {
+      loaderOverlay.classList.remove('minimized');
+      document.getElementById('loaderSubtext').innerText = 'Uploading your listings to the marketplace.';
+    }
+  }
+
+  // Step Navigation Logic
+  function proceedToItemEntry() {
+    const shipping = document.getElementById('global_shipping_from').value;
+    const zones = document.getElementById('global_delivery_zones').value;
+
+    if (!shipping || !zones) {
+      alert('Please fill out shipping origin and delivery zones.');
+      return;
+    }
+
+    globalSettings = {
+      shipping_from: shipping,
+      delivery_zones: zones,
+      enable_product_pricing: document.getElementById('global_enable_product_pricing').checked,
+      enable_digital_tryon: document.getElementById('global_enable_digital_tryon').checked,
+    };
+
+    document.getElementById('step1Container').classList.add('d-none');
+    document.getElementById('step2Container').classList.remove('d-none');
+    updateHeaders('Step 2 of 3', 'Add Product Details');
+  }
+
+  function stageProduct(isDuplicate) {
+    if (isPublishingActive) {
+      alert('A batch upload is currently processing. Please wait for it to complete.');
+      return;
+    }
+
+    const title = document.getElementById('item_title').value;
+    const price = document.getElementById('item_price').value;
+    const category = document.getElementById('item_category').value;
+    const imagesInput = document.getElementById('item_images');
+
+    if (!title || !price || !category) {
+      alert('Please complete the title, price, and category fields.');
+      return;
+    }
+
+    if (!isDuplicate && imagesInput.files.length === 0) {
+      alert('Please select at least one image.');
+      return;
+    }
+
+    const productData = {
+      title: title,
+      brand: document.getElementById('item_brand').value,
+      category: category,
+      category_text: document.getElementById('item_category').options[document.getElementById('item_category').selectedIndex].text,
+      condition: document.getElementById('item_condition').value,
+      size_available: document.getElementById('item_size').value,
+      color: document.getElementById('item_color').value,
+      price: price,
+      quantity: document.getElementById('item_quantity').value,
+      description: document.getElementById('item_description').value,
+      files: Array.from(imagesInput.files)
+    };
+
+    stagedProducts.push(productData);
+    updateStagedBadge();
+
+    if (!isDuplicate) {
+      document.getElementById('itemForm').reset();
+    } else {
+      document.getElementById('item_images').value = '';
+      alert('Product details copied! Attach new image(s) for this variant.');
+    }
+
+    document.getElementById('itemCounterHeading').innerText = `Product ${stagedProducts.length + 1}`;
+  }
+
+  function goToReviewStep() {
+    if (stagedProducts.length === 0) {
+      if (document.getElementById('item_title').value) {
+        stageProduct(false);
+      } else {
+        alert('Please add at least one product before reviewing.');
+        return;
+      }
+    }
+
+    document.getElementById('step2Container').classList.add('d-none');
+    document.getElementById('step3Container').classList.remove('d-none');
+    updateHeaders('Step 3 of 3', 'Review & Publish');
+    renderReviewList();
+  }
+
+  function returnToItemEntry() {
+    document.getElementById('step3Container').classList.add('d-none');
+    document.getElementById('step2Container').classList.remove('d-none');
+    updateHeaders('Step 2 of 3', 'Add Product Details');
+  }
+
+  function renderReviewList() {
+    const container = document.getElementById('reviewList');
+    container.innerHTML = '';
+
+    stagedProducts.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'product-summary-card d-flex align-items-center justify-content-between';
+      card.innerHTML = `
+        <div>
+          <h6 class="fw-bold mb-1">${item.title} (${item.color || 'N/A'})</h6>
+          <span class="text-muted small">₦${Number(item.price).toLocaleString()} • Qty: ${item.quantity} • ${item.category_text}</span>
+          <br><span class="badge bg-light text-secondary border mt-1">${item.files.length} Image(s) Attached</span>
+        </div>
+        <div>
+          <button class="btn btn-sm btn-outline-danger" onclick="removeStagedItem(${index})" ${isPublishingActive ? 'disabled' : ''}>Remove</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    document.getElementById('publishBtn').innerText = `Publish ${stagedProducts.length} Product(s)`;
+  }
+
+  function removeStagedItem(index) {
+    if (isPublishingActive) return;
+    stagedProducts.splice(index, 1);
+    renderReviewList();
+    updateStagedBadge();
+    if (stagedProducts.length === 0) {
+      returnToItemEntry();
+    }
+  }
+
+  function updateStagedBadge() {
+    document.getElementById('stagedBadge').innerText = `${stagedProducts.length} Item(s) Staged`;
+  }
+
+  function updateHeaders(stepText, titleText) {
+    document.getElementById('stepBadge').innerText = stepText;
+    document.getElementById('stepTitle').innerText = titleText;
+  }
+
+  // Batch Submission
+  function publishBatch() {
+    if (isPublishingActive) {
+      alert('A batch upload is already in progress.');
+      return;
+    }
+
+    const btn = document.getElementById('publishBtn');
+    const loaderOverlay = document.getElementById('loaderOverlay');
+
+    isPublishingActive = true;
+    btn.disabled = true;
+
+    // Reset and trigger overlay pop-up loader
+    if (loaderOverlay) {
+      loaderOverlay.classList.remove('minimized');
+      loaderOverlay.classList.add('active');
+      document.getElementById('loaderTitle').innerText = 'Publishing Batch...';
+      document.getElementById('loaderSubtext').innerText = 'Uploading your listings to the marketplace.';
+    }
+
+    const formData = new FormData();
+
+    const cleanPayload = {
+      global_settings: globalSettings,
+      products: stagedProducts.map(p => {
+        const { files, ...rest } = p;
+        return rest;
+      })
+    };
+
+    formData.append('payload', JSON.stringify(cleanPayload));
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    stagedProducts.forEach((product, idx) => {
+      product.files.forEach(file => {
+        formData.append(`images_product_${idx}`, file);
+      });
+    });
+
+    fetch("{% url 'products:bulk_create_products' %}", {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      isPublishingActive = false;
+      if (data.status === 'success') {
+        localStorage.removeItem('imurafh_bulk_draft');
+        window.location.href = "/products/";
+      } else {
+        if (loaderOverlay) {
+          loaderOverlay.classList.remove('active', 'minimized');
+        }
+        alert('Error: ' + data.message);
+        btn.disabled = false;
+      }
+    })
+    .catch(err => {
+      isPublishingActive = false;
+      console.error(err);
+      if (loaderOverlay) {
+        loaderOverlay.classList.remove('active', 'minimized');
+      }
+      alert('An unexpected error occurred while posting listings.');
+      btn.disabled = false;
+    });
+  }
+
+  // Local Storage Draft Persistence
+  function saveDraftManually() {
+    const draftData = {
+      globalSettings,
+      stagedProducts: stagedProducts.map(p => {
+        const { files, ...rest } = p;
+        return rest;
+      })
+    };
+    localStorage.setItem('imurafh_bulk_draft', JSON.stringify(draftData));
+    alert('Draft progress saved locally!');
+  }
+</script>
+
+{% endblock %}

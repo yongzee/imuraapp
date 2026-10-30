@@ -1,76 +1,572 @@
 {% extends "products/base.html" %}
 {% load static %}
+
 {% block content %}
+<style>
+:root {
+  --primary-purple: #4f46e5;
+  --primary-dark: #3730a3;
+  --bg-light: #f8fafc;
+  --card-bg: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+}
 
-<div class="container mt-4">
+body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
 
-  <h4 class="fw-bold mb-3">👥 Discover Creators & Sellers</h4>
+.discover-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
 
-  <!-- Search -->
-  <form method="get" class="mb-4">
-    <div class="input-group">
-      <input type="text"
-            name="q"
-            value="{{ query }}"
-            class="form-control"
-            placeholder="Search users, designers, locations..."
-            aria-label="Search">
-      <button class="btn btn-dark" type="submit">
-        🔍 Search
-      </button>
+/* Back Button Styling */
+.btn-back-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dark);
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.btn-back-nav:hover {
+  background-color: var(--primary-purple);
+  color: #ffffff;
+  border-color: var(--primary-purple);
+  transform: translateX(-2px);
+}
+
+/* Header & Search Bar */
+.search-wrapper {
+  background: #ffffff;
+  border-radius: 50px;
+  padding: 4px 6px 4px 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+}
+
+.search-wrapper input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.search-wrapper input:focus {
+  box-shadow: none;
+}
+
+.search-wrapper .btn-search {
+  background-color: var(--primary-purple);
+  color: white;
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-weight: 600;
+  border: none;
+  transition: background 0.2s;
+}
+
+.search-wrapper .btn-search:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Tab Switches */
+.custom-nav-pills {
+  display: inline-flex;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 50px;
+}
+
+.custom-nav-pills .nav-link {
+  border-radius: 50px;
+  padding: 8px 24px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.custom-nav-pills .nav-link.active {
+  background-color: var(--primary-purple);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Sidebar Styles */
+.filter-sidebar {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid var(--border-light);
+  height: fit-content;
+}
+
+.category-accordion .accordion-item {
+  border: none;
+  background: transparent;
+  margin-bottom: 4px;
+}
+
+.category-accordion .accordion-button {
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: transparent;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  font-size: 0.95rem;
+}
+
+.category-accordion .accordion-button:not(.collapsed) {
+  background-color: #e0e7ff;
+  color: var(--primary-purple);
+}
+
+.category-accordion .accordion-button::after {
+  background-size: 0.8rem;
+}
+
+.subcategory-link {
+  display: block;
+  padding: 6px 12px 6px 32px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.subcategory-link:hover,
+.subcategory-link.active {
+  color: var(--primary-purple);
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+
+.category-all-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  text-decoration: none;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.category-all-link.active,
+.category-all-link:hover {
+  background-color: var(--primary-purple);
+  color: #ffffff;
+}
+
+/* User Card Styling */
+.user-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.user-avatar {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #e0e7ff;
+}
+
+/* Product Card Styling */
+.product-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+}
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* Aspect ratio 1:1 */
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+.card-img-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile Drawer Sidebar Adjustments */
+@media (max-width: 991px) {
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: -290px;
+    width: 270px;
+    height: 100vh;
+    z-index: 1080;
+    border-radius: 0;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+  
+  .filter-sidebar.show {
+    left: 0;
+  }
+}
+</style>
+
+<!-- Mobile Filter Overlay Backing -->
+<div class="modal-backdrop fade d-none" id="sidebarOverlay" style="z-index: 1070;"></div>
+
+<div class="discover-container">
+  
+  <!-- ================= TOP LEFT BACK BUTTON ================= -->
+  <div class="mb-3">
+    <a href="javascript:history.back()" class="btn-back-nav">
+      <i class="bi bi-arrow-left fs-6"></i> Back
+    </a>
+  </div>
+
+  <!-- ================= TOP HEADER & SEARCH BAR ================= -->
+  <div class="row justify-content-center text-center mb-4">
+    <div class="col-lg-8">
+      <h3 class="fw-bold text-dark mb-2">🔍 Discover Marketplace</h3>
+      <p class="text-muted small mb-4">Search for products, designers, tailors, or boutiques</p>
+
+      <form method="GET" action="." class="search-wrapper mb-4" id="searchForm">
+        <!-- Hidden input to maintain current tab, categories, & price limits on search submission -->
+        <input type="hidden" name="tab" class="tab-input-field" value="{{ active_tab|default:'products' }}">
+        {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
+        {% if request.GET.subcategory %}<input type="hidden" name="subcategory" value="{{ request.GET.subcategory }}">{% endif %}
+        {% if request.GET.min_price %}<input type="hidden" name="min_price" value="{{ request.GET.min_price }}">{% endif %}
+        {% if request.GET.max_price %}<input type="hidden" name="max_price" value="{{ request.GET.max_price }}">{% endif %}
+        
+        <i class="bi bi-search text-muted me-2 fs-5"></i>
+        <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by name, category, or location...">
+        <button type="submit" class="btn-search">Search</button>
+      </form>
+
+      <!-- TAB TOGGLES & ACCURATE COUNTERS -->
+      <div class="custom-nav-pills nav" id="discoverTabs" role="tablist">
+        <button class="nav-link {% if active_tab != 'users' %}active{% endif %}" 
+                id="products-tab" 
+                data-bs-toggle="pill" 
+                data-bs-target="#products-panel" 
+                type="button" 
+                role="tab"
+                aria-controls="products-panel"
+                aria-selected="{% if active_tab != 'users' %}true{% else %}false{% endif %}"
+                onclick="setTab('products')">
+          🛍️ Products ({{ products|length }})
+        </button>
+        
+        <button class="nav-link {% if active_tab == 'users' %}active{% endif %}" 
+                id="users-tab" 
+                data-bs-toggle="pill" 
+                data-bs-target="#users-panel" 
+                type="button" 
+                role="tab"
+                aria-controls="users-panel"
+                aria-selected="{% if active_tab == 'users' %}true{% else %}false{% endif %}"
+                onclick="setTab('users')">
+          👥 Creators & Tailors ({{ users|length }})
+        </button>
+      </div>
     </div>
-  </form>
+  </div>
 
-  <div class="row">
-  {% for u in users %}
-    <div class="col-md-3 col-6 mb-4">
-      <a href="{% url 'accounts:profile' u.username %}" class="text-decoration-none text-dark">
+  <!-- Mobile Filter Trigger Button -->
+  <div class="d-lg-none mb-3">
+    <button class="btn btn-outline-dark btn-sm rounded-pill px-3" id="sidebarToggle">
+      <i class="bi bi-funnel me-1"></i> Filter & Categories
+    </button>
+  </div>
 
-        <div class="card border-0 shadow-sm h-100 text-center">
-          {% if u.profile.avatar %}
-            <img src="{{ u.profile.avatar.url }}"
-                 class="rounded-circle mx-auto mt-3"
-                 width="90" height="90"
-                 style="object-fit:cover;">
-          {% else %}
-            <img src="{% static 'images/avatar.jpg' %}"
-                 class="rounded-circle mx-auto mt-3"
-                 width="90" height="90">
-          {% endif %}
+  <!-- ================= MAIN LAYOUT WITH SIDEBAR ================= -->
+  <div class="row g-4">
 
-          <div class="card-body">
-            <h6 class="fw-bold mb-1">{{ u.username }}</h6>
-            
-            {% if u.profile.bio %}
-              <p class="mb-2 fs-6 opacity-75 fw-light">{{ u.profile.bio }}</p>
-            {% endif %}
+    <!-- LEFT SIDEBAR: Dynamic Filters -->
+    <aside class="col-lg-3">
+      <div class="filter-sidebar shadow-sm" id="sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-3 d-lg-none">
+          <h5 class="fw-bold mb-0">Filter Options</h5>
+          <button type="button" class="btn-close" id="closeSidebarBtn" aria-label="Close"></button>
+        </div>
 
-            <div class="mb-3">
-              {% if u.profile.user_type == 'tailor' %}
-                <span class="badge bg-primary text-white px-3 py-1 rounded-pill"><i class="bi bi-scissors me-1"></i> Tailor</span>
-              {% elif u.profile.user_type == 'fashion_designer' %}
-                <span class="badge text-white px-3 py-1 rounded-pill" style="background-color: #6f42c1;"><i class="bi bi-palette me-1"></i> Designer</span>
-              {% elif u.profile.user_type == 'fabric_vendor' %}
-                <span class="badge bg-success text-white px-3 py-1 rounded-pill"><i class="bi bi-shop me-1"></i> Fabric Vendor</span>
-              {% elif u.profile.user_type == 'fashion_brand' %}
-                <span class="badge bg-dark text-white px-3 py-1 rounded-pill"><i class="bi bi-award me-1"></i> Brand</span>
-              {% else %}
-                <span class="badge bg-secondary text-white px-3 py-1 rounded-pill"><i class="bi bi-person me-1"></i> Customer</span>
-              {% endif %}
+        <h6 class="text-uppercase small text-muted fw-bold mb-3">Categories</h6>
+        
+        <!-- All Collections Link -->
+        <a href="?tab={{ active_tab|default:'products' }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" 
+           class="category-all-link category-nav-link {% if not request.GET.category and not request.GET.subcategory %}active{% endif %}">
+          <i class="bi bi-grid-fill me-2"></i>All Collections
+        </a>
+
+        <!-- Dynamic Category Accordion -->
+        <div class="accordion category-accordion mb-4" id="categoryAccordion">
+          {% for category in categories %}
+            {% with cat_id=category.id|stringformat:"s" %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ category.id }}">
+                <button class="accordion-button {% if request.GET.category != cat_id and request.GET.category != category.slug %}collapsed{% endif %}" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapse{{ category.id }}" 
+                        aria-expanded="{% if request.GET.category == cat_id or request.GET.category == category.slug %}true{% else %}false{% endif %}" 
+                        aria-controls="collapse{{ category.id }}">
+                  {% if category.name == "Clothing" %}<i class="bi bi-person-fill-gear me-2"></i>
+                  {% elif category.name == "Shoes" %}<i class="bi bi-arrow-down-up me-2"></i>
+                  {% elif category.name == "Bags" %}<i class="bi bi-bag-fill me-2"></i>
+                  {% elif category.name == "Fabrics" %}<i class="bi bi-scissors me-2"></i>
+                  {% elif category.name == "Accessories" %}<i class="bi bi-watch me-2"></i>
+                  {% elif category.name == "Beauty & Hair" %}<i class="bi bi-sparkles me-2"></i>
+                  {% elif category.name == "Traditional / Cultural" %}<i class="bi bi-palette-fill me-2"></i>
+                  {% else %}<i class="bi bi-tag-fill me-2"></i>{% endif %}
+                  {{ category.name }}
+                </button>
+              </h2>
+              <div id="collapse{{ category.id }}" 
+                   class="accordion-collapse collapse {% if request.GET.category == cat_id or request.GET.category == category.slug %}show{% endif %}" 
+                   aria-labelledby="heading{{ category.id }}" 
+                   data-bs-parent="#categoryAccordion">
+                <div class="accordion-body p-0 py-1">
+                  <!-- Filter by parent category directly -->
+                  <a href="?category={{ category.id }}&tab={{ active_tab|default:'products' }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" 
+                     class="subcategory-link category-nav-link fw-bold text-dark {% if request.GET.category == cat_id or request.GET.category == category.slug %}active{% endif %}">
+                    All {{ category.name }}
+                  </a>
+
+                  <!-- Subcategories -->
+                  {% for sub in category.subcategories.all %}
+                    {% with sub_id=sub.id|stringformat:"s" %}
+                    <a href="?subcategory={{ sub.id }}&tab={{ active_tab|default:'products' }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}" 
+                       class="subcategory-link category-nav-link {% if request.GET.subcategory == sub_id or request.GET.subcategory == sub.slug %}active{% endif %}">
+                      {{ sub.name }}
+                    </a>
+                    {% endwith %}
+                  {% endfor %}
+                </div>
+              </div>
             </div>
-            {% if u.profile.location %}
-              <small class="text-muted d-block mt-2">📍 {{ u.profile.location }}</small>
-            {% endif %}
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+        <!-- Price Filter Form -->
+        <h6 class="text-uppercase small text-muted fw-bold mb-3">Filter by Price</h6>
+        <form method="GET" action="." class="p-3 bg-light rounded-3" id="priceFilterForm">
+          <input type="hidden" name="tab" class="tab-input-field" value="{{ active_tab|default:'products' }}">
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+          {% if request.GET.category %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
+          {% if request.GET.subcategory %}<input type="hidden" name="subcategory" value="{{ request.GET.subcategory }}">{% endif %}
+          
+          <div class="mb-2">
+            <input type="number" name="min_price" placeholder="₦ Min" class="form-control form-control-sm border-0" value="{{ request.GET.min_price }}">
+          </div>
+          <div class="mb-3">
+            <input type="number" name="max_price" placeholder="₦ Max" class="form-control form-control-sm border-0" value="{{ request.GET.max_price }}">
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary w-100 rounded-pill fw-bold" style="background: var(--primary-purple); border: none;">Apply Filter</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- RIGHT DISPLAY ARENA -->
+    <main class="col-lg-9">
+      
+      <!-- ================= TAB CONTENT PANELS ================= -->
+      <div class="tab-content" id="discoverTabsContent">
+        
+        <!-- ================= PRODUCTS TAB ================= -->
+        <div class="tab-pane fade {% if active_tab != 'users' %}show active{% endif %}" id="products-panel" role="tabpanel" aria-labelledby="products-tab">
+          <div class="row g-3">
+            {% for product in products %}
+              <div class="col-6 col-md-4">
+                <div class="product-card">
+                  <a href="{% url 'products:product_detail' product.pk %}" class="text-decoration-none text-dark d-flex flex-column h-100">
+                    
+                    <!-- Product Image -->
+                    <div class="card-img-wrapper">
+                      {% if product.images.all.0 %}
+                        <img src="{{ product.images.all.0.image.url }}" alt="{{ product.title }}">
+                      {% elif product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                      {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                          <i class="bi bi-image fs-2"></i>
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <!-- Product Details: Title, Uploader & Price -->
+                    <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
+                      <div>
+                        <h6 class="fw-bold text-dark text-truncate mb-1" style="font-size: 0.9rem;">{{ product.title }}</h6>
+                        <p class="text-muted small mb-2">
+                          @{% if product.seller %}{{ product.seller.username }}{% elif product.user %}{{ product.user.username }}{% else %}vendor{% endif %}
+                        </p>
+                      </div>
+                      <div class="pt-2 border-top">
+                        <span class="fw-bold text-primary fs-6">₦{{ product.price|floatformat:2 }}</span>
+                      </div>
+                    </div>
+
+                  </a>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-12 text-center py-5 bg-white rounded-4 border">
+                <i class="bi bi-bag-x text-muted display-4"></i>
+                <p class="text-muted mt-2 mb-0">No products found matching your search.</p>
+              </div>
+            {% endfor %}
           </div>
         </div>
 
-      </a>
-    </div>
-  {% empty %}
-    <div class="col-12 text-center py-4">
-      <p class="text-muted">No users found.</p>
-    </div>
-  {% endfor %}
+        <!-- ================= USERS / CREATORS TAB ================= -->
+        <div class="tab-pane fade {% if active_tab == 'users' %}show active{% endif %}" id="users-panel" role="tabpanel" aria-labelledby="users-tab">
+          <div class="row g-3">
+            {% for u in users %}
+              <div class="col-6 col-md-4">
+                <a href="{% url 'accounts:profile' u.username %}" class="text-decoration-none text-dark">
+                  <div class="card user-card border-0 h-100 text-center p-3">
+                    {% if u.profile.avatar %}
+                      <img src="{{ u.profile.avatar.url }}" alt="{{ u.username }}" class="user-avatar mx-auto mt-2">
+                    {% else %}
+                      <img src="{% static 'images/avatar.jpg' %}" alt="{{ u.username }}" class="user-avatar mx-auto mt-2">
+                    {% endif %}
+
+                    <div class="card-body px-1 py-3">
+                      <h6 class="fw-bold text-truncate mb-1">{{ u.username }}</h6>
+                      
+                      {% if u.profile.bio %}
+                        <p class="text-muted small mb-2 text-truncate" style="max-height: 40px;">{{ u.profile.bio }}</p>
+                      {% endif %}
+
+                      <div class="mb-2">
+                        {% if u.profile.user_type == 'tailor' %}
+                          <span class="badge bg-primary text-white px-2 py-1 rounded-pill"><i class="bi bi-scissors me-1"></i> Tailor</span>
+                        {% elif u.profile.user_type == 'fashion_designer' %}
+                          <span class="badge text-white px-2 py-1 rounded-pill" style="background-color: #6f42c1;"><i class="bi bi-palette me-1"></i> Designer</span>
+                        {% elif u.profile.user_type == 'fabric_vendor' %}
+                          <span class="badge bg-success text-white px-2 py-1 rounded-pill"><i class="bi bi-shop me-1"></i> Fabric Vendor</span>
+                        {% elif u.profile.user_type == 'fashion_brand' %}
+                          <span class="badge bg-dark text-white px-2 py-1 rounded-pill"><i class="bi bi-award me-1"></i> Brand</span>
+                        {% else %}
+                          <span class="badge bg-secondary text-white px-2 py-1 rounded-pill"><i class="bi bi-person me-1"></i> Customer</span>
+                        {% endif %}
+                      </div>
+
+                      {% if u.profile.location %}
+                        <small class="text-muted d-block mt-2 text-truncate">📍 {{ u.profile.location }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% empty %}
+              <div class="col-12 text-center py-5 bg-white rounded-4 border">
+                <i class="bi bi-people text-muted display-4"></i>
+                <p class="text-muted mt-2 mb-0">No users found matching your search.</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
 </div>
 
+<script>
+function setTab(tabName) {
+  // Update all hidden tab inputs across forms
+  document.querySelectorAll('.tab-input-field').forEach(input => {
+    input.value = tabName;
+  });
+
+  // Update Category and Subcategory sidebar link query parameters
+  document.querySelectorAll('.category-nav-link').forEach(link => {
+    const url = new URL(link.href, window.location.origin);
+    url.searchParams.set('tab', tabName);
+    link.href = url.pathname + url.search;
+  });
+
+  // Sync URL history state without forcing a reload
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set('tab', tabName);
+  window.history.pushState({}, '', currentUrl);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Mobile drawer controls
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebarDrawer() {
+    if (sidebar) sidebar.classList.toggle('show');
+    if (sidebarOverlay) {
+      sidebarOverlay.classList.toggle('d-none');
+      sidebarOverlay.classList.toggle('show');
+    }
+  }
+
+  if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebarDrawer);
+  if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebarDrawer);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebarDrawer);
+
+  // Sync Bootstrap tab trigger on load based on URL query
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeTabParam = urlParams.get('tab');
+  
+  if (activeTabParam === 'users') {
+    const usersTabBtn = document.getElementById('users-tab');
+    if (usersTabBtn && window.bootstrap) {
+      const tab = new bootstrap.Tab(usersTabBtn);
+      tab.show();
+    }
+  }
+});
+</script>
 {% endblock %}

@@ -4,7 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMURAFH | Fashion Hub</title>
+    
+    <title>{% block title %}Imura | Your Fashion Account{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Access your Imura account to manage your fashion profile, connect with sellers, and keep track of your fashion activities.{% endblock %}">
+    <meta name="robots" content="noindex, follow">
+  
+
+    <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
+    <meta name="theme-color" content="#101B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Imura">
+    <link rel="apple-touch-icon" href="{% static 'pwa/icons/icon-192.png' %}">
+
     
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
     
@@ -13,21 +24,20 @@
     <style>
         :root {
             --brand-primary: #0d6efd;
-            --surface-bg: #f8f9fa;
+            --surface-bg: #796c91;
         }
         body {
             background-color: var(--surface-bg);
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
-            flex-column: unset;
             flex-direction: column;
         }
         
         /* Modern Top Bar Layout Formatting */
         .custom-navbar {
-            background-color: #ffffff !important;
-            border-bottom: 1px solid #eef1f6;
+            background-color: #0f0f0fd0 !important;
+            border-bottom: 1px solid #335185;
             padding: 0.85rem 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.01);
         }
@@ -104,7 +114,8 @@
             color: var(--brand-primary);
         }
 
-        @media (max-width: 991.98s) {
+        /* Fixed Typo: changed 991.98s to 991.98px */
+        @media (max-width: 991.98px) {
             .mobile-bottom-nav {
                 display: block;
             }
@@ -120,16 +131,19 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white custom-navbar sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="{% url 'core:dashboard' %}">
-                <i class="bi bi-layers-half text-primary"></i>IMURAFH
+        <div class="container position-relative d-flex justify-content-between justify-content-lg-start align-items-center">
+
+            <!-- Centered Brand Logo -->
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2 mx-auto ms-lg-0" href="{% url 'core:dashboard' %}">
+                <!-- Mobile Logo: Compact / Square (Logo 1) -->
+                <img src="{% static 'pwa/icons/icon-192.png' %}" alt="Imura Logo" height="32" class="d-block d-lg-none">
+                
+                <!-- Desktop Logo: Full Wide Brand (Logo 3) -->
+                <img src="{% static 'images/logo3.png' %}" alt="Imura Logo" height="32" class="d-none d-lg-block">
             </a>
             
-            <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-3"></i>
-            </button>
             
+            <!-- Collapsible Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto gap-1 mt-2 mt-lg-0">
                     {% if user.is_authenticated %}
@@ -159,7 +173,6 @@
             </div>
         </div>
     </nav>
-
     <main class="container main-wrapper">
         {% block content %}
         {% endblock %}
@@ -204,7 +217,21 @@
     </div>
     {% endif %}
 
+    <!-- Scripts -->
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <!-- Added Popper.js CDN required for Bootstrap collapse toggles -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'pwa/install.js' %}?v=2.1" defer></script>
+    <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js")
+          .catch(function (error) {
+            console.error("Imura service worker registration failed:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
