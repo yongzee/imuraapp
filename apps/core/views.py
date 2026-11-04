@@ -84,10 +84,13 @@ def robots_txt(request):
     )
     return HttpResponse(content, content_type="text/plain")
   
-@login_required
+
 def dashboard(request):
     products = Product.objects.all().order_by("-created_at")
 
     return render(request, "core/dashboard.html", {
         "products": products,
     })
+    
+def onboarding(request):
+    return render(request, "core/onboarding.html")

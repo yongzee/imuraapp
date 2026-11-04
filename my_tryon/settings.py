@@ -91,9 +91,6 @@ MIDDLEWARE = [
 # Django sites framework
 SITE_ID = 1
 
-# Redirects
-LOGIN_REDIRECT_URL = "products:product_list"   # where to go after login    
-LOGIN_URL = "account_login"             # login page
 
 
 ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']
@@ -112,11 +109,17 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 
-# Session & Logout Fixes
-ACCOUNT_SESSION_REMEMBER = False              # Do not force persistent login sessions
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True        # Terminate session when the browser/app is closed
-ACCOUNT_LOGOUT_REDIRECT_URL = "account_login" # Redirect to login page after logout
-ACCOUNT_LOGOUT_ON_GET = True
+# Authentication redirects
+LOGIN_REDIRECT_URL = "products:product_list"
+LOGIN_URL = "account_login"
+LOGOUT_REDIRECT_URL = "core:dashboard"
+
+# Session settings
+ACCOUNT_SESSION_REMEMBER = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Logout settings
+ACCOUNT_LOGOUT_ON_GET = False
 
 # Zoho SMTP settings
 # Temporary toggle to see if SMTP is the bottleneck
@@ -256,10 +259,3 @@ CSRF_TRUSTED_ORIGINS = [
     "https://imurafh.onrender.com",
 ]
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "Africa/Lagos"
