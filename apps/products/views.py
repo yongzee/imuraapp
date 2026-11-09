@@ -7,12 +7,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
-
+from django.db.models import Q
 from .forms import ProductForm
 from .models import Product, Category, Subcategory, ProductImage, ProductVideo
 from apps.streaming.models import Like, StreamVideo
 from apps.notifications.models import Notification
-
+from apps.accounts.models import Profile
 
 ALLOWED_IMAGE_TYPES = [
     "image/jpeg",
@@ -139,8 +139,10 @@ def product_list(request):
     max_price = request.GET.get("max_price")
     search_query = request.GET.get("q")
 
-    # Prefetch images & videos so they render instantly without extra DB queries
-    products = Product.objects.all().prefetch_related('images', 'videos').order_by("-created_at")
+    # Base Products Query with optimizations
+    products = Product.objects.select_related(
+        "seller", "category", "subcategory"
+    ).prefetch_related('images', 'videos').order_by("-created_at")
 
     # FLASH NOTIFICATIONS
     notifications = Notification.objects.filter(
@@ -178,7 +180,12 @@ def product_list(request):
         products = products.filter(price__lte=max_price)
 
     if search_query:
-        products = products.filter(title__icontains=search_query)
+        products = products.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(brand__icontains=search_query) |
+            Q(color__icontains=search_query)
+        )
 
     liked_products = []
     if request.user.is_authenticated:
@@ -190,24 +197,35 @@ def product_list(request):
 
         liked_products = Product.objects.filter(id__in=liked_ids)
 
-    categories = Category.objects.all()
+    # Fetch Categories with subcategories for sidebar accordions
+    categories = Category.objects.prefetch_related("subcategories").all()
+
+    # --- FASHION PROFESSIONALS DISCOVERY QUERY ---
+    # Filters profiles matching tailors, fashion designers, brands, and fabric vendors
+    allowed_types = ['tailor', 'fashion_designer', 'fashion_brand', 'fabric_vendor']
+    fashion_pros = Profile.objects.filter(
+        user_type__in=allowed_types
+    ).select_related('user').order_by('-created_at')[:6]
 
     return render(request, "products/product_list.html", {
         "products": products,
         "categories": categories,
         "liked_products": liked_products,
         "search_query": search_query,
+        "fashion_pros": fashion_pros,
     })
-
-
 def product_detail(request, pk):
-    product = get_object_or_404(Product.objects.prefetch_related('images', 'videos'), pk=pk)
+    # Fetch product with prefetched media and relational fields to eliminate N+1 DB queries
+    product = get_object_or_404(
+        Product.objects.select_related("seller", "category", "subcategory").prefetch_related("images", "videos"),
+        pk=pk
+    )
 
     images = product.images.all()
-    primary_image = images.first()  # Primary garment image for try-on
+    primary_image = images.first()
+    videos = product.videos.all()  # Or StreamVideo.objects.filter(product=product)
 
-    videos = StreamVideo.objects.filter(product=product)
-
+    # Handle proposed price parameter from GET query
     proposed_price = request.GET.get("proposed_price")
     if proposed_price:
         try:
@@ -218,7 +236,49 @@ def product_detail(request, pk):
     has_images = images.exists()
     has_videos = videos.exists()
 
-    return render(request, "products/product_detail.html", {
+    # --- RECOMMENDED PRODUCTS LOGIC ---
+    # 1. Primary recommendations: Same category (excluding current product)
+    same_category_products = list(
+        Product.objects.filter(category=product.category)
+        .exclude(id=product.id)
+        .prefetch_related("images")
+        .order_by("-created_at")[:8]
+    )
+
+    # 2. Fallback recommendations: Subcategory or similar categories
+    needed_count = 8 - len(same_category_products)
+    if needed_count > 0:
+        exclude_ids = [product.id] + [p.id for p in same_category_products]
+        
+        fallback_query = Q(category__name__icontains=product.category.name)
+        if product.subcategory:
+            fallback_query |= Q(subcategory=product.subcategory)
+
+        fallback_products = list(
+            Product.objects.filter(fallback_query)
+            .exclude(id__in=exclude_ids)
+            .prefetch_related("images")
+            .order_by("-created_at")[:needed_count]
+        )
+        
+        # 3. Final fallback: Any latest products if still below 8
+        total_so_far = len(same_category_products) + len(fallback_products)
+        if total_so_far < 8:
+            all_exclude_ids = exclude_ids + [p.id for p in fallback_products]
+            extra_count = 8 - total_so_far
+            
+            general_fallback = list(
+                Product.objects.exclude(id__in=all_exclude_ids)
+                .prefetch_related("images")
+                .order_by("-created_at")[:extra_count]
+            )
+            recommended_products = same_category_products + fallback_products + general_fallback
+        else:
+            recommended_products = same_category_products + fallback_products
+    else:
+        recommended_products = same_category_products
+
+    context = {
         "product": product,
         "images": images,
         "primary_image": primary_image,
@@ -226,8 +286,9 @@ def product_detail(request, pk):
         "proposed_price": proposed_price,
         "has_images": has_images,
         "has_videos": has_videos,
-    })
-
+        "recommended_products": recommended_products,
+    }
+    return render(request, "products/product_detail.html", context)
 
 @login_required
 def product_edit(request, pk):

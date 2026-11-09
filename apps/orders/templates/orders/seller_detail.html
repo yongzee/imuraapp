@@ -77,19 +77,49 @@
           {% endif %}
         </div>
 
-        <!-- BUYER LOCATION -->
+        <!-- BUYER LOCATION & CONTACT DETAILS -->
         <div class="info-box">
-          <h6 class="section-title">📍 Buyer Delivery Location</h6>
+          <h6 class="section-title">📍 Buyer Delivery Location & Contact</h6>
           <p><span class="label">State:</span> {{ order.buyer_state|default:"Not provided" }}</p>
           <p><span class="label">LGA:</span> {{ order.buyer_lga|default:"Not provided" }}</p>
           <p><span class="label">Address:</span> {{ order.buyer_address|default:"Not provided" }}</p>
+          
+          <hr class="my-2">
+          
+          {% with buyer_phone=order.buyer.profile.phone|default:order.buyer.profile.whatsapp %}
+            <p class="mb-2">
+              <span class="label">Phone:</span> 
+              {% if buyer_phone %}
+                {{ buyer_phone }}
+              {% else %}
+                <span class="text-muted fst-italic">Not provided</span>
+              {% endif %}
+            </p>
+
+            {% if buyer_phone %}
+              <div class="d-flex gap-2 mt-2">
+                <!-- Direct Phone Call Button -->
+                <a class="btn btn-outline-secondary btn-sm" href="tel:{{ buyer_phone }}">
+                  <i class="bi bi-telephone"></i> Call Buyer
+                </a>
+
+                <!-- WhatsApp Chat Button -->
+                <a class="btn btn-success btn-sm text-white" 
+                   href="https://wa.me/{{ buyer_phone|slugify }}?text=Hello%20{{ order.buyer.username }},%20I%20am%20contacting%20you%20regarding%20your%20order%20for%20{{ order.product_title|urlencode }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                  <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+              </div>
+            {% endif %}
+          {% endwith %}
         </div>
 
         <!-- SELLER INPUT -->
         <div class="info-box">
           <h6 class="section-title">🚚 Delivery & Collection Details</h6>
 
-          <form method="post">
+          <form method="post" id="sellerUpdateForm">
             {% csrf_token %}
 
             <div class="mb-3">
@@ -115,17 +145,21 @@
               {{ form.seller_notes }}
             </div>
 
-            <button
-              name="seller_update"
-              class="btn btn-dark w-100 py-2">
-              💾 Save Delivery Details
-            </button>
-          {% if order.is_paid %}
-            <a href="{% url 'orders:seller_tracking' order.pk %}"
-              class="btn btn-outline-success w-100 mt-2">
-              🚚 Delivery & Tracking
-            </a>
-          {% endif %}
+            {% if order.transport_cost or order.days_to_deliver %}
+              <button name="seller_update" type="submit" id="submitDetailsBtn" class="btn btn-success w-100 py-2">
+                ✅ Delivery Details Sent
+              </button>
+            {% else %}
+              <button name="seller_update" type="submit" id="submitDetailsBtn" class="btn btn-dark w-100 py-2">
+                💾 Send Delivery Details to buyer
+              </button>
+            {% endif %}
+
+            {% if order.is_paid %}
+              <a href="{% url 'orders:seller_tracking' order.pk %}" class="btn btn-outline-success w-100 mt-2">
+                🚚 Delivery & Tracking
+              </a>
+            {% endif %}
 
           </form>
         </div>
@@ -134,5 +168,20 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("sellerUpdateForm");
+  const btn = document.getElementById("submitDetailsBtn");
+
+  if (form && btn) {
+    form.addEventListener("submit", function() {
+      btn.classList.remove("btn-dark");
+      btn.classList.add("btn-success");
+      btn.innerHTML = "✅ Delivery Details Sent";
+    });
+  }
+});
+</script>
 
 {% endblock %}

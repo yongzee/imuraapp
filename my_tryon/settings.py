@@ -253,6 +253,12 @@ PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 
+# settings.py
+OPAY_MERCHANT_ID = "256626110911872"  # Replace with your actual Merchant ID
+OPAY_PUBLIC_KEY = "OPAYPUB17942326482980.855528840880387"    # Replace with your Public Key
+OPAY_SECRET_KEY = "OPAYPRV17942326482980.8694799586610844"   # Replace with your Secret Key
+# For Sandbox / Testing
+OPAY_BASE_URL = "https://testapi.opaycheckout.com/api/v1/international/cashier/create"
 
 # 👇 Allow your production domain to securely submit POST forms
 CSRF_TRUSTED_ORIGINS = [

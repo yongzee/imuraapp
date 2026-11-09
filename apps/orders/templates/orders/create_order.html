@@ -1,4 +1,6 @@
 {% extends "products/base.html" %}
+{% load humanize %}
+
 {% block content %}
 
 <style>
@@ -13,69 +15,71 @@
 }
 </style>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
   <h3 class="fw-bold mb-3">🛒 Order {{ product.title }}</h3>
 
   <div class="card order-card p-4">
     <div class="row g-4">
 
-      <!-- PRODUCT -->
+      <!-- PRODUCT & SELLER INFO -->
       <div class="col-md-5">
         {% if product.images.first %}
-          <img src="{{ product.images.first.image.url }}"
-              class="img-fluid order-img w-100">
+          <img src="{{ product.images.first.image.url }}" class="img-fluid order-img w-100">
         {% endif %}
 
         {% if proposed_price %}
           <h5 class="mt-3 fw-bold text-success">
-            ₦{{ proposed_price }}
+            ₦{{ proposed_price|intcomma }}
             <small class="text-muted text-decoration-line-through">
-              ₦{{ product.price }}
+              ₦{{ product.price|intcomma }}
             </small>
           </h5>
         {% else %}
           <h5 class="mt-3 fw-bold">
-            ₦{{ product.price }}
+            ₦{{ product.price|intcomma }}
           </h5>
         {% endif %}
-      </div>
 
+        <hr class="my-3">
+
+        <!-- Seller WhatsApp Quick Box -->
+        <div class="p-3 bg-light rounded-3 border">
+          <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shop"></i> Merchant Details</h6>
+          <p class="small text-muted mb-1"><strong>Seller:</strong> {{ product.seller.username }}</p>
+          
+          {% with seller_wa=product.seller.profile.whatsapp|default:product.seller.profile.phone %}
+            {% if seller_wa %}
+              <p class="small mb-2">
+                <strong>WhatsApp:</strong> <span class="text-success fw-semibold">{{ seller_wa }}</span>
+              </p>
+              <a href="https://wa.me/{{ seller_wa|slugify }}?text=Hello%20{{ product.seller.username }},%20I%20have%20an%20inquiry%20regarding%20{{ product.title|urlencode }}" target="_blank" class="btn btn-success btn-sm w-100 text-white">
+                <i class="bi bi-whatsapp"></i> Chat with Seller Directly
+              </a>
+            {% else %}
+              <p class="small text-muted fst-italic mb-0">No direct WhatsApp listed.</p>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
 
       <!-- FORM -->
       <div class="col-md-7">
         <form method="post">
           {% csrf_token %}
-          <div class="mb-3">
-            {{ form.quantity.label_tag }}
-            {{ form.quantity }}
-          </div>
+          
+          <!-- Render form fields with bootstrap class additions if needed -->
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
 
-          <hr>
-
-          <h6 class="fw-bold">📍 Delivery Address</h6>
-
-          <div class="mb-2">
-            {{ form.buyer_state.label_tag }}
-            {{ form.buyer_state }}
-          </div>
-
-          <div class="mb-2">
-            {{ form.buyer_lga.label_tag }}
-            {{ form.buyer_lga }}
-          </div>
-
-          <div class="mb-3">
-            {{ form.buyer_address.label_tag }}
-            {{ form.buyer_address }}
-          </div>
-
-          <div class="mb-3">
-            {{ form.buyer_notes.label_tag }}
-            {{ form.buyer_notes }}
-          </div>
-
-          <button class="btn btn-danger w-100 py-2 fw-bold">
-            🚀 Submit Order Request
+          <button type="submit" class="btn btn-danger w-100 py-2 fw-bold shadow-sm">
+            🚀 Submit Order Request & Forward to WhatsApp
           </button>
         </form>
       </div>
@@ -83,5 +87,16 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Add Bootstrap 'form-control' class dynamically to Django form inputs if not already styled
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("input, select, textarea").forEach(function(element) {
+      if (!element.classList.contains("form-control") && !element.classList.contains("form-check-input")) {
+        element.classList.add("form-control");
+      }
+    });
+  });
+</script>
 
 {% endblock %}

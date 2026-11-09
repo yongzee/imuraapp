@@ -3,8 +3,8 @@ from apps.products.models import Product
 from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
-
-
+from apps.accounts.models import Profile
+from django.db.models import Count  
 def service_worker(request):
     javascript = """
     const CACHE_NAME = "imura-static-v1";
@@ -88,8 +88,23 @@ def robots_txt(request):
 def dashboard(request):
     products = Product.objects.all().order_by("-created_at")
 
+    # Fetch Boutiques, Fashion Brands & Fabric Vendors (annotated with total product count if available)
+    boutique_types = ['fashion_brand', 'fabric_vendor', 'fashion_designer']
+    boutiques = Profile.objects.filter(
+        user_type__in=boutique_types
+    ).select_related('user').annotate(
+        product_count=Count('user__products')
+    ).order_by('-created_at')[:6]
+
+    # Fetch Tailors
+    tailors = Profile.objects.filter(
+        user_type='tailor'
+    ).select_related('user').order_by('-created_at')[:6]
+
     return render(request, "core/dashboard.html", {
         "products": products,
+        "boutiques": boutiques,
+        "tailors": tailors,
     })
     
 def onboarding(request):

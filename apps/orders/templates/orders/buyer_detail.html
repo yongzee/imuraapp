@@ -16,6 +16,10 @@
   font-weight: 700;
   margin-bottom: 8px;
 }
+.label {
+  font-weight: 600;
+  color: #333;
+}
 </style>
 
 <div class="container mt-4">
@@ -69,8 +73,41 @@
       </p>
     </div>
 
+    <!-- ================= SELLER CONTACT INFO ================= -->
+    <div class="info-box">
+      <h6 class="section-title">🏪 Seller Information & Contact</h6>
+      <p><span class="label">Seller:</span> {{ order.seller.username }}</p>
+
+      {% with seller_phone=order.seller.profile.whatsapp|default:order.seller.profile.phone %}
+        <p class="mb-2">
+          <span class="label">Phone:</span> 
+          {% if seller_phone %}
+            {{ seller_phone }}
+          {% else %}
+            <span class="text-muted fst-italic">Not provided</span>
+          {% endif %}
+        </p>
+
+        {% if seller_phone %}
+          <div class="d-flex gap-2 mt-2">
+            <!-- Direct Phone Call Button -->
+            <a class="btn btn-outline-secondary btn-sm" href="tel:{{ seller_phone }}">
+              <i class="bi bi-telephone"></i> Call Seller
+            </a>
+
+            <!-- WhatsApp Chat Button -->
+            <a class="btn btn-success btn-sm text-white" 
+               href="https://wa.me/{{ seller_phone|slugify }}?text=Hello%20{{ order.seller.username }},%20I%20am%20contacting%20you%20regarding%20my%20order%20for%20{{ order.product_title|urlencode }}" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+            </a>
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
     <!-- ================= SEND ORDER (INITIAL) ================= -->
-    
     {% if order.status == "pending" %}
 
       {% if not order.is_sent_to_seller %}
@@ -93,8 +130,7 @@
     {% endif %}
 
 
-
-<!-- ================= AFTER SELLER REVIEW ================= -->
+    <!-- ================= AFTER SELLER REVIEW ================= -->
     {% if order.status == "completed_by_seller" %}
       <form method="post">
         {% csrf_token %}
@@ -149,8 +185,6 @@
         </small>
       </div>
     {% endif %}
-
-
 
   </div>
 </div>

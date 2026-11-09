@@ -1,6 +1,6 @@
 {% extends "products/base.html" %}
 {% load static %}
-{% block title %}Upload Photos for Body Measurement| Imura{% endblock %}
+{% block title %}Upload Photos for Body Measurement | Imura{% endblock %}
 {% block content %}
 
 <style>
@@ -84,18 +84,26 @@
 
       <!-- Page Title -->
       <div class="text-center mb-4">
-        <h2 class="fw-bold">📏 Upload Images for Pose Detection</h2>
+        <h2 class="fw-bold text-dark">📏 Upload Images for Pose Detection</h2>
         <p class="text-muted">Please provide clear front and side view images along with your height.</p>
-        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#poseInstructionsModal">
-          📋 View Instructions
-        </button>
+        
+        <!-- AI Development Notice -->
+        <div class="alert alert-warning d-inline-block px-4 py-2 mt-2 mb-2 small shadow-sm rounded-pill" role="alert" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;">
+          ⚠️ <strong>Please Note:</strong> AI measurement is still in development and not all measurements may be fully accurate.
+        </div>
+
+        <div>
+          <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#poseInstructionsModal">
+            📋 View Instructions
+          </button>
+        </div>
       </div>
 
       <!-- Form Card -->
       <div class="card shadow-lg border-0">
         <div class="card-body p-4">
 
-          <form method="post" enctype="multipart/form-data">
+          <form method="post" enctype="multipart/form-data" id="measurementForm">
             {% csrf_token %}
 
             <!-- Height Input -->
@@ -127,9 +135,9 @@
               <img id="sidePreview" src="#" alt="Side Preview" class="img-fluid mt-2 rounded shadow-sm d-none" style="max-height: 200px;">
             </div>
 
-            <!-- Submit -->
+            <!-- Submit Button with Processing Animation -->
             <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">
+              <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" onclick="handleProcessing(this)">
                 🚀 Upload & Detect
               </button>
             </div>
@@ -176,16 +184,41 @@
   </div>
 </div>
 
-<!-- Image Preview Script -->
+<!-- Image Preview & Loading Script -->
+<!-- Image Preview & Loading Script -->
 <script>
   function previewImage(event, targetId) {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const output = document.getElementById(targetId);
-      output.src = reader.result;
-      output.classList.remove('d-none');
-    };
-    reader.readAsDataURL(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const output = document.getElementById(targetId);
+        output.src = reader.result;
+        output.classList.remove('d-none');
+      };
+      reader.readAsDataURL(file);
+    }
   }
+
+  document.getElementById('measurementForm').addEventListener('submit', function(event) {
+    const form = this;
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Check if HTML5 validation passes
+    if (form.checkValidity()) {
+      // Disable button and show spinner
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Processing AI Measurement...
+      `;
+      
+      // Safety fallback: if server takes too long or fails silently, re-enable after 35 seconds
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `🚀 Upload & Detect`;
+      }, 35000);
+    }
+  });
 </script>
 {% endblock %}

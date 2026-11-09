@@ -552,87 +552,137 @@ body {
 
             <!-- Discover Fashion Boutiques -->
             <div class="mb-5">
-                <div class="section-header">
-                    <h3 class="section-title">Discover Fashion Boutiques</h3>
-                    <a href="{% url 'accounts:user_list' %}" class="view-all-link">View all</a>
+            <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="section-title fw-bold mb-0">Discover Fashion Boutiques</h3>
+                <a href="{% url 'accounts:user_list' %}" class="view-all-link">View all</a>
+            </div>
+
+            <div class="dashboard-scroll-wrapper">
+                <div class="row g-3 dashboard-scroll-track">
+                {% if boutiques %}
+                    <!-- Original List -->
+                    {% for profile in boutiques %}
+                    <div class="col-md-6 col-xl-4 dashboard-scroll-item">
+                        <div class="profile-mini-card d-flex align-items-center p-3 border rounded bg-white h-100">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="profile-avatar rounded me-3" width="60" height="60" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                        {% else %}
+                            <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar rounded me-3" width="60" height="60" style="object-fit: cover;" alt="Default Avatar">
+                        {% endif %}
+
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="fw-bold mb-0 text-truncate">
+                            {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                            </h6>
+                            <p class="small text-muted mb-2 text-truncate">
+                            {{ profile.state|default:profile.location|default:"Nigeria" }} • {{ profile.product_count|default:"0" }} products
+                            </p>
+                            <a href="{% url 'accounts:profile' profile.user.username %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">Visit Store</a>
+                        </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Duplicated Loop for Seamless Infinite Mobile Loop -->
+                    {% for profile in boutiques %}
+                    <div class="col-md-6 col-xl-4 dashboard-scroll-item d-md-none">
+                        <div class="profile-mini-card d-flex align-items-center p-3 border rounded bg-white h-100">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="profile-avatar rounded me-3" width="60" height="60" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                        {% else %}
+                            <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar rounded me-3" width="60" height="60" style="object-fit: cover;" alt="Default Avatar">
+                        {% endif %}
+
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="fw-bold mb-0 text-truncate">
+                            {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                            </h6>
+                            <p class="small text-muted mb-2 text-truncate">
+                            {{ profile.state|default:profile.location|default:"Nigeria" }} • {{ profile.product_count|default:"0" }} products
+                            </p>
+                            <a href="{% url 'accounts:profile' profile.user.username %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">Visit Store</a>
+                        </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                    <p class="text-muted fs-7 mb-0">No boutiques found yet.</p>
+                    </div>
+                {% endif %}
                 </div>
-                <div class="row g-3">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="profile-avatar" alt="Boutique">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">Zara's Fashion Hub</h6>
-                                <p class="small text-muted mb-2">Benin City • 128 products</p>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">Visit Store</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80" class="profile-avatar" alt="Boutique">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">House of Damiola</h6>
-                                <p class="small text-muted mb-2">Lagos • 96 products</p>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">Visit Store</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&q=80" class="profile-avatar" alt="Boutique">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">Teez Collections</h6>
-                                <p class="small text-muted mb-2">Abuja • 65 products</p>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">Visit Store</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
             </div>
 
             <!-- Find a Tailor -->
             <div class="mb-4">
-                <div class="section-header">
-                    <h3 class="section-title">Find a Tailor</h3>
-                    <a href="{% url 'accounts:user_list' %}" class="view-all-link">View all</a>
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" class="profile-avatar-circle" alt="Tailor">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">David Couture</h6>
-                                <p class="small text-muted mb-1">Benin City</p>
-                                <div class="small text-warning fw-bold mb-2">★ 4.8</div>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">View Profile</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=80" class="profile-avatar-circle" alt="Tailor">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">Stitch by Bola</h6>
-                                <p class="small text-muted mb-1">Lagos</p>
-                                <div class="small text-warning fw-bold mb-2">★ 4.7</div>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">View Profile</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xl-4">
-                        <div class="profile-mini-card">
-                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" class="profile-avatar-circle" alt="Tailor">
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 text-truncate">Clasay Stitches</h6>
-                                <p class="small text-muted mb-1">Abuja</p>
-                                <div class="small text-warning fw-bold mb-2">★ 4.6</div>
-                                <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">View Profile</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="section-header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="section-title fw-bold mb-0">Find a Tailor</h3>
+                <a href="{% url 'accounts:user_list' %}" class="view-all-link">View all</a>
             </div>
 
+            <div class="dashboard-scroll-wrapper">
+                <div class="row g-3 dashboard-scroll-track">
+                {% if tailors %}
+                    <!-- Original List -->
+                    {% for profile in tailors %}
+                    <div class="col-md-6 col-xl-4 dashboard-scroll-item">
+                        <div class="profile-mini-card d-flex align-items-center p-3 border rounded bg-white h-100">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="profile-avatar-circle rounded-circle me-3" width="60" height="60" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                        {% else %}
+                            <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar-circle rounded-circle me-3" width="60" height="60" style="object-fit: cover;" alt="Default Avatar">
+                        {% endif %}
+
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="fw-bold mb-0 text-truncate">
+                            {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                            </h6>
+                            <p class="small text-muted mb-1 text-truncate">
+                            {{ profile.state|default:profile.location|default:"Nigeria" }}
+                            </p>
+                            <p class="small text-muted mb-2 text-truncate">
+                            {% if profile.phone %}📞 {{ profile.phone }}{% else %}<span class="fst-italic text-secondary">No phone listed</span>{% endif %}
+                            </p>
+                            <a href="{% url 'accounts:profile' profile.user.username %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">View Profile</a>
+                        </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Duplicated Loop for Seamless Infinite Mobile Loop -->
+                    {% for profile in tailors %}
+                    <div class="col-md-6 col-xl-4 dashboard-scroll-item d-md-none">
+                        <div class="profile-mini-card d-flex align-items-center p-3 border rounded bg-white h-100">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="profile-avatar-circle rounded-circle me-3" width="60" height="60" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                        {% else %}
+                            <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar-circle rounded-circle me-3" width="60" height="60" style="object-fit: cover;" alt="Default Avatar">
+                        {% endif %}
+
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 class="fw-bold mb-0 text-truncate">
+                            {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                            </h6>
+                            <p class="small text-muted mb-1 text-truncate">
+                            {{ profile.state|default:profile.location|default:"Nigeria" }}
+                            </p>
+                            <p class="small text-muted mb-2 text-truncate">
+                            {% if profile.phone %}📞 {{ profile.phone }}{% else %}<span class="fst-italic text-secondary">No phone listed</span>{% endif %}
+                            </p>
+                            <a href="{% url 'accounts:profile' profile.user.username %}" class="btn btn-sm btn-outline-purple py-0 px-3 fs-7">View Profile</a>
+                        </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                    <p class="text-muted fs-7 mb-0">No tailors found yet.</p>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+            </div>
         </div>
 
         <!-- RIGHT COLUMN: Promotional Sidebars -->

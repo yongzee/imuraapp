@@ -168,11 +168,12 @@ def orders_list(request):
 def create_order(request, product_pk):
     product = get_object_or_404(Product, pk=product_pk)
     
+    # Prevent ordering your own product
     if product.seller == request.user:
         messages.error(request, "You cannot order your own product.")
         return redirect(product.get_absolute_url())
 
-    # ✅ get proposed price from URL
+    # Get proposed price from URL
     proposed_price = request.GET.get("proposed_price")
     try:
         proposed_price = float(proposed_price)
@@ -183,11 +184,13 @@ def create_order(request, product_pk):
         form = OrderCreateForm(request.POST)
 
         if form.is_valid():
+            # Determine final price (use proposed price if negotiated)
+            final_price = proposed_price if proposed_price is not None else product.price
+
             order = Order.objects.create(
                 buyer=request.user,
                 seller=product.seller,
                 product=product,
-
                 product_title=product.title,
                 product_image=(
                     product.images.first().image.url
@@ -195,22 +198,49 @@ def create_order(request, product_pk):
                     else ""
                 ),
                 description=product.description,
-
                 quantity=form.cleaned_data["quantity"],
-
-                # ✅ FINAL PRICE LOGIC
-                price_at_order=proposed_price if proposed_price else product.price,
+                
+                # Field names mapping based on your custom model setup
+                price_at_order=final_price,
                 suggested_price=proposed_price,
 
                 buyer_state=form.cleaned_data["buyer_state"],
                 buyer_lga=form.cleaned_data["buyer_lga"],
                 buyer_address=form.cleaned_data["buyer_address"],
                 buyer_notes=form.cleaned_data.get("buyer_notes", ""),
-
                 status="pending",
             )
 
             messages.success(request, "Order sent to seller successfully.")
+
+            # --- WHATSAPP FORWARDING INTEGRATION ---
+            seller_profile = getattr(product.seller, 'profile', None)
+            seller_phone = seller_profile.whatsapp if (seller_profile and seller_profile.whatsapp) else (seller_profile.phone if seller_profile else None)
+            
+            if seller_phone:
+                # Clean up phone number (remove non-digits like +, spaces, etc.)
+                clean_phone = "".join(filter(str.isdigit, str(seller_phone)))
+                
+                # Construct message payload
+                total_amount = final_price * order.quantity
+                msg = (
+                    f"Hello *{product.seller.username}*, I just placed a new order on IMURA!%0a%0a"
+                    f"📦 *Product:* {product.title}%0a"
+                    f"🔢 *Quantity:* {order.quantity}%0a"
+                    f"💰 *Total Price:* ₦{total_amount:,.2f}%0a"
+                    f"📍 *Delivery Address:* {order.buyer_address}, {order.buyer_lga}, {order.buyer_state}%0a"
+                    f"{'📝 *Notes:* ' + order.buyer_notes if order.buyer_notes else ''}"
+                )
+                whatsapp_url = f"https://wa.me/{clean_phone}?text={msg}"
+                
+                # Render success page with automatic WhatsApp redirect script
+                return render(request, "orders/order_success.html", {
+                    "order": order,
+                    "whatsapp_url": whatsapp_url,
+                    "seller_phone": seller_phone,
+                })
+            
+            # Fallback if seller has no phone number configured
             return redirect(order.get_absolute_url())
 
     else:
@@ -219,10 +249,8 @@ def create_order(request, product_pk):
     return render(request, "orders/create_order.html", {
         "product": product,
         "form": form,
-        "proposed_price": proposed_price,  # ✅ REQUIRED
+        "proposed_price": proposed_price,
     })
-
-
 
 @login_required
 def buyer_orders_list(request):
@@ -233,8 +261,6 @@ def buyer_orders_list(request):
 def seller_orders_list(request):
     qs = Order.objects.filter(seller=request.user).order_by("-created_at")
     return render(request, "orders/seller_list.html", {"orders": qs})
-
-
 
 @login_required
 def checkout(request, pk):
@@ -255,6 +281,78 @@ def checkout(request, pk):
         order.payment_reference = f"ORD-{uuid.uuid4().hex[:10]}"
         order.save()
 
+    # ---- HANDLE OPAY POST OR DIRECT GET SUBMISSION ----
+    is_opay_request = (
+        (request.method == "POST" and request.POST.get("payment_gateway") == "opay") or
+        (request.GET.get("gateway") == "opay_direct")
+    )
+
+    if is_opay_request:
+        callback_url = request.build_absolute_uri(
+            reverse("orders:verify_payment", kwargs={"pk": order.pk}) + f"?gateway=opay&ref={order.payment_reference}"
+        )
+        
+        # OPay V1 International Cashier Endpoint (Staging/Test URL)
+        # Switch to https://liveapi.opaycheckout.com/api/v1/international/cashier/create when going live
+        opay_url = getattr(
+            settings, 
+            'OPAY_BASE_URL', 
+            'https://testapi.opaycheckout.com/api/v1/international/cashier/create'
+        )
+        
+        user_phone = getattr(request.user.profile, 'phone', '') or getattr(request.user.profile, 'whatsapp', '')
+        clean_phone = "".join(filter(str.isdigit, str(user_phone)))
+        if not clean_phone.startswith("+"):
+            clean_phone = f"+234{clean_phone.lstrip('0')}" if clean_phone else "+2348000000000"
+
+        # OPay V1 Strict Nested Payload Structure
+        payload = {
+            "country": "NG",
+            "reference": str(order.payment_reference),
+            "amount": {
+                "total": int(round(total * 100)),  # Must be an integer in Kobo/Cents
+                "currency": "NGN"
+            },
+            "returnUrl": callback_url,
+            "callbackUrl": callback_url,
+            "cancelUrl": callback_url,
+            "expireAt": 30,  # Integer minutes
+            "customerVisitSource": "BROWSER",
+            "userInfo": {
+                "userEmail": str(request.user.email),
+                "userId": str(request.user.pk),
+                "userMobile": str(clean_phone),
+                "userName": str(request.user.username)
+            },
+            "product": {
+                "name": str(order.product_title[:20]),
+                "description": str(f"Payment for {order.product_title}"[:40])
+            }
+        }
+
+        # OPay V1 Headers: Requires PUBLIC KEY in Authorization Bearer & MerchantId
+        headers = {
+            "Authorization": f"Bearer {settings.OPAY_PUBLIC_KEY}",
+            "MerchantId": str(settings.OPAY_MERCHANT_ID),
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.post(opay_url, json=payload, headers=headers, timeout=15)
+            res_data = response.json()
+
+            if res_data.get("code") == "00000":
+                cashier_url = res_data.get("data", {}).get("cashierUrl")
+                if cashier_url:
+                    return redirect(cashier_url)
+            
+            err_msg = res_data.get('message', 'Initialization failed.')
+            messages.error(request, f"OPay Error ({res_data.get('code')}): {err_msg}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"OPay Connection Exception: {e}")
+            messages.error(request, "Unable to connect to OPay server. Please try again or switch to Paystack.")
+
     context = {
         "order": order,
         "product_cost": product_cost,
@@ -263,11 +361,90 @@ def checkout(request, pk):
         "total": total,
         "paystack_public_key": settings.PAYSTACK_PUBLIC_KEY,
         "reference": order.payment_reference,
-        "amount_kobo": int(total * 100),  # Paystack uses kobo
+        "amount_kobo": int(total * 100),
         "email": request.user.email,
     }
 
     return render(request, "orders/checkout.html", context)
+@login_required
+def verify_payment(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    gateway = request.GET.get("gateway")
+    reference = request.GET.get("ref", order.payment_reference)
+
+    # ---- SAFE GATEWAY DETECTION ----
+    if not gateway:
+        if "paystack" in request.GET:
+            gateway = "paystack"
+        else:
+            # Default to OPay if not explicitly tagged as paystack
+            gateway = "opay"
+
+    # ---- OPAY VERIFICATION ----
+    if gateway == "opay":
+        # Staging: https://testapi.opaycheckout.com/api/v1/international/cashier/status
+        # Production: https://liveapi.opaycheckout.com/api/v1/international/cashier/status
+        verify_url = getattr(
+            settings,
+            'OPAY_VERIFY_URL',
+            'https://testapi.opaycheckout.com/api/v1/international/cashier/status'
+        )
+        
+        headers = {
+            "Authorization": f"Bearer {settings.OPAY_PUBLIC_KEY}",
+            "MerchantId": str(settings.OPAY_MERCHANT_ID),
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "merchantId": str(settings.OPAY_MERCHANT_ID),
+            "reference": str(reference)
+        }
+
+        try:
+            response = requests.post(verify_url, json=payload, headers=headers, timeout=15)
+            res_data = response.json()
+
+            # Status code "00000" and status "SUCCESS" or "INITIAL"/"PENDING" checks
+            if res_data.get("code") == "00000":
+                status = res_data.get("data", {}).get("status")
+                if status in ["SUCCESS", "INITIAL", "PENDING"]:
+                    order.is_paid = True
+                    order.status = "paid"
+                    order.save()
+                    messages.success(request, "Payment verified successfully via OPay!")
+                    return redirect("orders:buyer_tracking", pk=order.pk)
+            
+            err_msg = res_data.get("message", "Payment was not successful.")
+            messages.error(request, f"OPay verification notice: {err_msg}")
+            return redirect("orders:checkout", pk=order.pk)
+            
+        except requests.exceptions.RequestException as e:
+            print(f"OPay Verification Request Exception: {e}")
+            messages.error(request, "An error occurred while contacting OPay server.")
+            return redirect("orders:checkout", pk=order.pk)
+
+    # ---- PAYSTACK VERIFICATION ----
+    url = f"https://api.paystack.co/transaction/verify/{reference}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        res_data = response.json()
+        if res_data.get("status") and res_data.get("data", {}).get("status") == "success":
+            order.is_paid = True
+            order.status = "paid"
+            order.save()
+            messages.success(request, "Payment verified successfully via Paystack!")
+            return redirect("orders:buyer_tracking", pk=order.pk)
+        else:
+            messages.error(request, "Paystack payment verification failed.")
+    except requests.exceptions.RequestException as e:
+        print(f"Paystack Verification Request Exception: {e}")
+        messages.error(request, "Error verifying Paystack transaction.")
+
+    return redirect("orders:checkout", pk=order.pk)
+
 @login_required
 def tracking(request, pk):
     order = get_object_or_404(Order, pk=pk)
@@ -319,40 +496,92 @@ def delete_order(request, pk):
 
 @login_required
 def verify_payment(request, pk):
-    order = get_object_or_404(Order, pk=pk, buyer=request.user)
+    order = get_object_or_404(Order, pk=pk)
+    gateway = request.GET.get("gateway")
+    
+    # Catch all possible reference parameter names sent by Paystack or OPay
+    reference = (
+        request.GET.get("reference") or 
+        request.GET.get("trxref") or 
+        request.GET.get("ref") or 
+        order.payment_reference
+    )
 
-    if not order.payment_reference:
-        messages.error(request, "No payment reference found.")
-        return redirect(order.get_absolute_url())
+    # ---- SAFE GATEWAY DETECTION ----
+    if not gateway:
+        if "reference" in request.GET or "trxref" in request.GET or "paystack" in request.GET:
+            gateway = "paystack"
+        else:
+            gateway = "opay"
 
-    url = f"https://api.paystack.co/transaction/verify/{order.payment_reference}"
+    # ---- OPAY VERIFICATION ----
+    if gateway == "opay":
+        verify_url = getattr(
+            settings,
+            'OPAY_VERIFY_URL',
+            'https://testapi.opaycheckout.com/api/v1/international/cashier/status'
+        )
+        
+        headers = {
+            "Authorization": f"Bearer {settings.OPAY_PUBLIC_KEY}",
+            "MerchantId": str(settings.OPAY_MERCHANT_ID),
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "merchantId": str(settings.OPAY_MERCHANT_ID),
+            "reference": str(reference)
+        }
 
-    headers = {
-        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-    }
+        try:
+            response = requests.post(verify_url, json=payload, headers=headers, timeout=15)
+            res_data = response.json()
 
-    response = requests.get(url, headers=headers)
-    result = response.json()
+            if res_data.get("code") == "00000":
+                status = res_data.get("data", {}).get("status")
+                if status in ["SUCCESS", "INITIAL", "PENDING"]:
+                    order.is_paid = True
+                    order.status = "paid"
+                    order.payment_reference = reference
+                    order.save()
+                    messages.success(request, "Payment verified successfully via OPay!")
+                    return redirect("orders:buyer_tracking", pk=order.pk)
+            
+            err_msg = res_data.get("message", "Payment was not successful.")
+            messages.error(request, f"OPay verification notice: {err_msg}")
+            return redirect("orders:checkout", pk=order.pk)
+            
+        except requests.exceptions.RequestException as e:
+            print(f"OPay Verification Request Exception: {e}")
+            messages.error(request, "An error occurred while contacting OPay server.")
+            return redirect("orders:checkout", pk=order.pk)
 
-    if result["status"] and result["data"]["status"] == "success":
-        order.is_paid = True
-        order.status = "paid"
-        order.paid_at = timezone.now() 
-        order.save()
+    # ---- PAYSTACK VERIFICATION ----
+    verify_paystack_url = f"https://api.paystack.co/transaction/verify/{reference}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    
+    try:
+        response = requests.get(verify_paystack_url, headers=headers, timeout=15)
+        res_data = response.json()
+        
+        # Debug print to terminal
+        print("Paystack Verification Response:", res_data)
 
-        messages.success(request, "Payment successful!")
-        if request.user == order.buyer:
+        if res_data.get("status") and res_data.get("data", {}).get("status") == "success":
+            order.is_paid = True
+            order.status = "paid"
+            order.payment_reference = reference
+            order.save()
+            messages.success(request, "Payment verified successfully via Paystack!")
             return redirect("orders:buyer_tracking", pk=order.pk)
         else:
-            return redirect("orders:seller_tracking", pk=order.pk)
+            paystack_err = res_data.get("message", "Unknown Paystack error")
+            messages.error(request, f"Paystack verification failed: {paystack_err}")
+    except requests.exceptions.RequestException as e:
+        print(f"Paystack Verification Request Exception: {e}")
+        messages.error(request, "Error connecting to Paystack verification server.")
 
-
-    messages.error(request, "Payment verification failed.")
     return redirect("orders:checkout", pk=order.pk)
-
-
-
-
 @login_required
 def buyer_tracking(request, pk):
     order = get_object_or_404(Order, pk=pk, buyer=request.user)

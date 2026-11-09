@@ -1,0 +1,31 @@
+{% extends "products/base.html" %}
+{% block content %}
+<div class="container text-center mt-5 py-5">
+  <div class="card p-5 shadow-sm mx-auto rounded-4" style="max-width: 500px;">
+    <div class="mb-3 text-success">
+      <i class="bi bi-check-circle-fill display-3"></i>
+    </div>
+    <h2 class="fw-bold mb-2">Order Placed Successfully!</h2>
+    <p class="text-muted small mb-4">Your order request has been logged. To speed up fulfillment, please forward your order details directly to the merchant on WhatsApp.</p>
+
+    {% if whatsapp_url %}
+      <a href="{{ whatsapp_url }}" target="_blank" class="btn btn-success btn-lg w-100 py-3 fw-bold mb-3 shadow">
+        <i class="bi bi-whatsapp fs-5 me-2"></i> Open Seller WhatsApp Chat
+      </a>
+    {% endif %}
+
+    <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary btn-sm w-100">
+      Return to Marketplace
+    </a>
+  </div>
+</div>
+
+{% if whatsapp_url %}
+<script>
+  // Automatically open WhatsApp chat tab after a brief moment
+  setTimeout(function() {
+    window.open("{{ whatsapp_url }}", "_blank");
+  }, 1000);
+</script>
+{% endif %}
+{% endblock %}

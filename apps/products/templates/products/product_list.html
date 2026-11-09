@@ -440,6 +440,42 @@ body {
   text-overflow: ellipsis;
   margin-top: 4px;
 }
+
+/* Custom scrollbar styling */
+  .fashion-scroll-container {
+    white-space: nowrap;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Auto-scroll effect specifically for screens smaller than 768px */
+  @media (max-width: 767.98px) {
+    .fashion-scroll-wrapper {
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    .fashion-scroll-track {
+      display: flex;
+      width: max-content;
+      animation: autoScrollMobile 20s linear infinite;
+    }
+
+    /* Pause scrolling on touch/hover so users can tap profiles easily */
+    .fashion-scroll-track:hover,
+    .fashion-scroll-track:active {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes autoScrollMobile {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
 </style>
 
 <div class="market-container">
@@ -596,46 +632,78 @@ body {
       </div>
     </div>
 
-    <!-- Boutiques & Tailors Discovery Section -->
     <div class="row g-3">
-      <div class="col-md-6">
+      <div class="col-12">
         <div class="profile-grid-box">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="fw-bold mb-0">Boutiques You May Like</h6>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">Tailors, Designers & Vendors You May Like</h6>
             <a href="{% url 'accounts:user_list' %}" class="view-all-link fs-7">View all</a>
           </div>
-          <div class="avatar-bubble-group">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="avatar-bubble" alt="Boutique">
-            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80" class="avatar-bubble" alt="Boutique">
-            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&q=80" class="avatar-bubble" alt="Boutique">
-            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&q=80" class="avatar-bubble" alt="Boutique">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" class="avatar-bubble" alt="Boutique">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" class="avatar-bubble" alt="Boutique">
-          </div>
-        </div>
-      </div>
+          
+          <!-- Outer wrapper handling responsive layout -->
+          <div class="fashion-scroll-wrapper">
+            <div class="d-flex flex-row overflow-x-auto gap-3 pb-2 fashion-scroll-container fashion-scroll-track">
+              
+              {% if fashion_pros %}
+                <!-- Original Loop -->
+                {% for profile in fashion_pros %}
+                  <a href="{% url 'accounts:profile' profile.user.username %}" class="text-decoration-none text-dark d-flex align-items-center p-2 border rounded bg-light flex-shrink-0" style="min-width: 220px;" title="{{ profile.business_name|default:profile.full_name|default:profile.user.username }}">
+                    <div class="me-3">
+                      {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                      {% else %}
+                        <img src="{% static 'images/avatar.jpg' %}" class="rounded-circle" width="50" height="50" style="object-fit: cover;" alt="Default Avatar">
+                      {% endif %}
+                    </div>
+                    <div class="overflow-hidden">
+                      <h6 class="mb-0 text-truncate fw-bold fs-6">
+                        {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                      </h6>
+                      <p class="mb-0 text-muted fs-7 text-truncate">
+                        {% if profile.phone %}
+                          📞 {{ profile.phone }}
+                        {% else %}
+                          <span class="fst-italic text-secondary">No phone listed</span>
+                        {% endif %}
+                      </p>
+                    </div>
+                  </a>
+                {% endfor %}
 
-      <div class="col-md-6">
-        <div class="profile-grid-box">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="fw-bold mb-0">Tailors You May Like</h6>
-            <a href="{% url 'accounts:user_list' %}" class="view-all-link">View all</a>
+                <!-- Duplicated Loop (enables seamless infinite loop on mobile) -->
+                {% for profile in fashion_pros %}
+                  <a href="{% url 'accounts:profile' profile.user.username %}" class="text-decoration-none text-dark d-flex align-items-center p-2 border rounded bg-light flex-shrink-0 d-md-none" style="min-width: 220px;" title="{{ profile.business_name|default:profile.full_name|default:profile.user.username }}">
+                    <div class="me-3">
+                      {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" class="rounded-circle" width="50" height="50" style="object-fit: cover;" alt="{{ profile.user.username }}">
+                      {% else %}
+                        <img src="{% static 'images/avatar.jpg' %}" class="rounded-circle" width="50" height="50" style="object-fit: cover;" alt="Default Avatar">
+                      {% endif %}
+                    </div>
+                    <div class="overflow-hidden">
+                      <h6 class="mb-0 text-truncate fw-bold fs-6">
+                        {{ profile.business_name|default:profile.full_name|default:profile.user.username }}
+                      </h6>
+                      <p class="mb-0 text-muted fs-7 text-truncate">
+                        {% if profile.phone %}
+                          📞 {{ profile.phone }}
+                        {% else %}
+                          <span class="fst-italic text-secondary">No phone listed</span>
+                        {% endif %}
+                      </p>
+                    </div>
+                  </a>
+                {% endfor %}
+              {% else %}
+                <p class="text-muted fs-7 mb-0">No tailors or fashion professionals found yet.</p>
+              {% endif %}
+
+            </div>
           </div>
-          <div class="avatar-bubble-group">
-            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" class="avatar-bubble" alt="Tailor">
-            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=80" class="avatar-bubble" alt="Tailor">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" class="avatar-bubble" alt="Tailor">
-            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" class="avatar-bubble" alt="Tailor">
-            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&q=80" class="avatar-bubble" alt="Tailor">
-            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80" class="avatar-bubble" alt="Tailor">
-          </div>
+
         </div>
       </div>
     </div>
-
-  </main>
-</div>
-
 <!-- ===== SAVED ITEMS MODAL ===== -->
 <div class="modal fade" id="savedItemsModal" tabindex="-1" aria-labelledby="savedItemsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
