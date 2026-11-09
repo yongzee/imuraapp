@@ -31,9 +31,14 @@ FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 SECRET_KEY = "django-insecure-!#b@-1x5o*qw-v3yi_mstr4$$flpe$p(rwpi=%4n5z!oki-jld"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+ALLOWED_HOSTS = [
+    "imurafh.com.ng",
+    "www.imurafh.com.ng",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -262,6 +267,18 @@ OPAY_BASE_URL = "https://testapi.opaycheckout.com/api/v1/international/cashier/c
 
 # 👇 Allow your production domain to securely submit POST forms
 CSRF_TRUSTED_ORIGINS = [
-    "https://imurafh.onrender.com",
+    "https://imurafh.com.ng",
+    "https://www.imurafh.com.ng",
 ]
 
+SECURE_SSL_REDIRECT = True
+
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
