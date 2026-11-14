@@ -8,6 +8,7 @@
     <title>{% block title %}Imura | Your Fashion Account{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Access your Imura account to manage your fashion profile, connect with sellers, and keep track of your fashion activities.{% endblock %}">
     <meta name="robots" content="noindex, follow">
+    <script src="https://api.easyeasy.ng/static/ee-pixel.js"></script>
   
 
     <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
@@ -233,5 +234,34 @@
       });
     }
   </script>
+    {% if request.easyeasy_signup_pending and user.is_authenticated and request.easyeasy_signup_pending.user_id == user.id %}
+    <script>
+    (function () {
+        const newUserId = {{ user.id }};
+        let attempts = 0;
+
+        function trackSignup() {
+            const ee = window.EasyEasy;
+
+            if (ee && typeof ee.track === "function") {
+                ee.track('signup', {
+                    subid: ee.getClickId(),
+                    order_id: 'registration:' + newUserId
+                });
+                return;
+            }
+
+            if (attempts < 10) {
+                attempts++;
+                setTimeout(trackSignup, 500);
+            } else {
+                console.warn("EasyEasy pixel failed to initialize.");
+            }
+        }
+
+        trackSignup();
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>
