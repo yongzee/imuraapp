@@ -18,7 +18,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-DEBUG = os.getenv("DEBUG", "0") == "1"
+DEBUG = True
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 
@@ -31,7 +31,8 @@ FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0") == "1"
+#DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "imurafh.com.ng",
@@ -62,7 +63,7 @@ INSTALLED_APPS = [
     
     
      # Local apps
-    "apps.core",
+    "apps.core.apps.CoreConfig",
     "apps.accounts",
     "apps.products",
     "apps.streaming",
@@ -78,14 +79,17 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 
    
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "apps.core.middleware.EasyEasyAttributionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -104,15 +108,24 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'apps.accounts.forms.CustomSignupForm'
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    "allauth.account.auth_backends.AuthenticationBackend",  # allauth
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Allauth Settings
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"  # Users can login with email or username
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
+# Allauth authentication configuration
+
+ACCOUNT_LOGIN_METHODS = {"email", "username"}
+
+ACCOUNT_SIGNUP_FIELDS = [
+    "username*",
+    "email*",
+    "password1*",
+    "password2*",
+]
+
+ACCOUNT_SIGNUP_FORM_CLASS = "apps.accounts.forms.CustomSignupForm"
+
 ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 
 # Authentication redirects
 LOGIN_REDIRECT_URL = "products:product_list"
@@ -126,23 +139,36 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Logout settings
 ACCOUNT_LOGOUT_ON_GET = False
 
-# Zoho SMTP settings
-# Temporary toggle to see if SMTP is the bottleneck
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-#EMAIL_HOST = "smtp.zoho.com"
-
-# 👇 Using Port 465 with SSL is significantly more stable in production environments
-#EMAIL_PORT = 465
-#EMAIL_USE_SSL = True
-#EMAIL_USE_TLS = False
-
-#EMAIL_HOST_USER = "679store@zohomail.com"
-#DEFAULT_FROM_EMAIL = "679store@zohomail.com"
-
-# 👇 Fetch the password securely from Render's configuration dashboard
-#EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp-relay.brevo.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+DEFAULT_FROM_EMAIL = "Imurafh Fashion Tech and Innovation <imura@imurafh.com.ng>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+EMAIL_TIMEOUT = 30
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "prompt": "select_account",
+        },
+    }
+}
 
 ROOT_URLCONF = "my_tryon.urls"
 
@@ -270,6 +296,16 @@ CSRF_TRUSTED_ORIGINS = [
     "https://imurafh.com.ng",
     "https://www.imurafh.com.ng",
 ]
+
+# Security settings - Development
+
+#SECURE_SSL_REDIRECT = False
+
+#SECURE_HSTS_SECONDS = 0
+
+#SESSION_COOKIE_SECURE = False
+#CSRF_COOKIE_SECURE = False
+
 
 SECURE_SSL_REDIRECT = True
 

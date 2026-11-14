@@ -27,7 +27,7 @@ class CustomSignupForm(forms.Form):
         validators=[
             RegexValidator(
                 regex=r"^\+?\d{10,15}$",
-                message="Enter a valid phone number.",
+                message="Enter a valid whatsapp phone number.",
             )
         ],
         widget=forms.TextInput(attrs={
