@@ -47,19 +47,23 @@ def log_user_logout(sender, request, user, **kwargs):
 @receiver(user_signed_up)
 def save_easyeasy_referral(sender, request, user, **kwargs):
 
-    subid = request.session.get("easyeasy_subid")
-
-    if not subid:
-        return
-
     profile, created = Profile.objects.get_or_create(
         user=user
     )
 
-    # Never overwrite an existing referral.
-    if not profile.easyeasy_subid:
-        profile.easyeasy_subid = subid
+    # Preserve the original referral ID.
+    subid = request.session.get("easyeasy_subid")
 
+    if subid and not profile.easyeasy_subid:
+        profile.easyeasy_subid = subid
         profile.save(
             update_fields=["easyeasy_subid", "updated_at"]
         )
+
+    # Mark this as a newly completed registration.
+    # The frontend will consume this flag on the next page.
+    request.session["easyeasy_signup_pending"] = {
+        "user_id": user.pk
+    }
+
+    request.session.modified = True
