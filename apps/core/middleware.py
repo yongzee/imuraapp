@@ -10,6 +10,10 @@ class EasyEasyAttributionMiddleware:
             or request.GET.get("subid")
         )
 
+        if subid:
+            subid = subid.strip()[:255]
+
+        # Preserve the first referral identifier.
         if subid and not request.session.get("easyeasy_subid"):
             request.session["easyeasy_subid"] = subid
 

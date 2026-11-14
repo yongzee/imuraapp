@@ -18,7 +18,6 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-DEBUG = True
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 
@@ -31,8 +30,8 @@ FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-DEBUG = False
+DEBUG = True
+#DEBUG = False
 
 ALLOWED_HOSTS = [
     "imurafh.com.ng",
@@ -299,22 +298,22 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Security settings - Development
 
-#SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = False
 
-#SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_SECONDS = 0
 
-#SESSION_COOKIE_SECURE = False
-#CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 
-SECURE_SSL_REDIRECT = True
+#SECURE_SSL_REDIRECT = True
 
-SECURE_HSTS_SECONDS = 3600
+#SECURE_HSTS_SECONDS = 3600
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
 
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REFERRER_POLICY = "same-origin"
+#SECURE_CONTENT_TYPE_NOSNIFF = True
+#SECURE_REFERRER_POLICY = "same-origin"

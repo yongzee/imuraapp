@@ -130,6 +130,11 @@ class Profile(models.Model):
     verified = models.BooleanField(
         default=False
     )
+    easyeasy_subid = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True
+    )
 
     profile_completed = models.BooleanField(
         default=False
@@ -191,3 +196,45 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action} ({self.timestamp.strftime('%Y-%m-%d %H:%M')})"
+
+
+
+class EasyEasyConversion(models.Model):
+
+    STATUS_CHOICES = [
+        ("queued", "Queued"),
+        ("retry_pending", "Retry Pending"),
+        ("delivered", "Delivered"),
+        ("needs_review", "Needs Review"),
+    ]
+
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="easyeasy_conversion"
+    )
+
+    subid = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=100, unique=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="queued"
+    )
+
+    attempts = models.PositiveIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(null=True, blank=True)
+
+    last_http_status = models.PositiveIntegerField(null=True, blank=True)
+    last_response = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"EasyEasy signup - {self.profile.user.username}"

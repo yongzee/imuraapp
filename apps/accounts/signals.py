@@ -2,6 +2,8 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from .models import UserActivity
+from allauth.account.signals import user_signed_up
+from .models import Profile
 
 User = get_user_model()
 
@@ -40,4 +42,24 @@ def log_user_logout(sender, request, user, **kwargs):
             user=user,
             action="logout",
             ip_address=get_client_ip(request),
+        )
+
+@receiver(user_signed_up)
+def save_easyeasy_referral(sender, request, user, **kwargs):
+
+    subid = request.session.get("easyeasy_subid")
+
+    if not subid:
+        return
+
+    profile, created = Profile.objects.get_or_create(
+        user=user
+    )
+
+    # Never overwrite an existing referral.
+    if not profile.easyeasy_subid:
+        profile.easyeasy_subid = subid
+
+        profile.save(
+            update_fields=["easyeasy_subid", "updated_at"]
         )
