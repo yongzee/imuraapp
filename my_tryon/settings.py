@@ -17,6 +17,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / "imura-private.env")
 
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 FASHN_API_KEY = os.environ.get("FASHN_API_KEY", "").strip()
@@ -257,6 +258,15 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+EASYEASY_API_BASE = os.getenv(
+    "EASYEASY_API_BASE",
+    "https://api.easyeasy.ng"
+)
+
+EASYEASY_CONNECTION_ID = os.getenv("EASYEASY_CONNECTION_ID", "")
+EASYEASY_PRIVATE_KEY = os.getenv("EASYEASY_PRIVATE_KEY", "")
+EASYEASY_CAMPAIGN_ID = os.getenv("EASYEASY_CAMPAIGN_ID", "69")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
