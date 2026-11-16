@@ -365,18 +365,28 @@
     <div class="hero-glow-overlay"></div>
     <div class="profile-header-content d-flex align-items-center position-relative">
       
-      <!-- RADIANTA PROFILE AVATAR -->
+      <!-- RADIANTA PROFILE AVATAR (CLICKABLE) -->
       <div class="avatar-container me-4">
-        {% if profile_user.profile.avatar %}
-          <img src="{{ profile_user.profile.avatar.url }}" class="profile-avatar" alt="Profile Avatar">
-        {% else %}
-          <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar" alt="Default Avatar">
-        {% endif %}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#avatarPreviewModal" class="d-inline-block text-decoration-none" title="View Profile Picture">
+          {% if profile_user.profile.avatar %}
+            <img src="{{ profile_user.profile.avatar.url }}" class="profile-avatar" style="cursor: pointer;" alt="Profile Avatar">
+          {% else %}
+            <img src="{% static 'images/avatar.jpg' %}" class="profile-avatar" style="cursor: pointer;" alt="Default Avatar">
+          {% endif %}
+        </a>
       </div>
 
       <!-- BIO METRICS & TEXT -->
       <div class="profile-info">
-        <h2 class="fw-bold mb-1 tracking-tight">{{ profile_user.username }}</h2>
+        <h2 class="fw-bold mb-1 tracking-tight">
+          {% if user.is_authenticated and user == profile_user %}
+            <a href="{% url 'accounts:profile_edit' %}" class="text-white text-decoration-none stretched-link-hover" title="Edit Profile">
+              {{ profile_user.username }} <i class="bi bi-pencil-square fs-6 opacity-50 ms-1"></i>
+            </a>
+          {% else %}
+            {{ profile_user.username }}
+          {% endif %}
+        </h2>
         <p class="mb-3 fs-6 opacity-75 fw-light">
           {{ profile_user.profile.bio|default:profile_user.profile.get_user_type_display }}
         </p>
@@ -423,6 +433,11 @@
               <i class="bi bi-rulers me-1"></i> Take Measurement
             </a>
           {% endif %}
+
+          <!-- SHARE PROFILE BUTTON -->
+          <button type="button" id="shareProfileBtn" class="btn btn-outline-light rounded-pill px-4 btn-sm" onclick="shareProfile()">
+            <i class="bi bi-share-fill me-1"></i> Share Profile
+          </button>
         </div>
 
       </div>
@@ -566,6 +581,21 @@
 
   </div>
 </div>
+<!-- AVATAR PREVIEW MODAL -->
+<div class="modal fade" id="avatarPreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-transparent border-0 text-center">
+      <div class="modal-body p-0 position-relative">
+        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% if profile_user.profile.avatar %}
+          <img src="{{ profile_user.profile.avatar.url }}" class="img-fluid rounded-4 shadow-lg" alt="Profile Avatar Full">
+        {% else %}
+          <img src="{% static 'images/avatar.jpg' %}" class="img-fluid rounded-4 shadow-lg" alt="Default Avatar Full">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   /* ---------------- INTERACTIVE TAB CONTROLS ---------------- */
@@ -703,6 +733,27 @@
         }
       });
     });
+  }
+
+  function shareProfile() {
+    const shareData = {
+      title: "{{ profile_user.username }}'s Profile",
+      text: "Check out {{ profile_user.username }}'s profile!",
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch((err) => console.log('Share canceled:', err));
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const btn = document.getElementById('shareProfileBtn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 me-1"></i> Link Copied!';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      });
+    }
   }
 </script>
 
