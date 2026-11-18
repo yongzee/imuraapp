@@ -13,6 +13,10 @@ from .models import Product, Category, Subcategory, ProductImage, ProductVideo
 from apps.streaming.models import Like, StreamVideo
 from apps.notifications.models import Notification
 from apps.accounts.models import Profile
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+User = get_user_model()
 
 ALLOWED_IMAGE_TYPES = [
     "image/jpeg",
@@ -29,7 +33,36 @@ ALLOWED_VIDEO_TYPES = [
     "video/x-matroska",
     "application/octet-stream"
 ]
+def notify_all_users_about_product(product):
+    """
+    Notify every active registered user except the product seller.
+    """
+    recipients = User.objects.filter(
+        is_active=True
+    ).exclude(
+        id=product.seller_id
+    )
 
+    notifications = [
+        Notification(
+            sender=product.seller,
+            recipient=user,
+            type="product_post",
+            verb=f"{product.seller.username} just posted a new product: {product.title}",
+            data={
+                "product_id": product.id,
+                "product_title": product.title,
+                "product_url": reverse(
+                    "products:product_detail",
+                    args=[product.pk]
+                ),
+                "seller_username": product.seller.username,
+            }
+        )
+        for user in recipients.iterator()
+    ]
+
+    Notification.objects.bulk_create(notifications)
 
 @login_required
 def product_post(request):
@@ -111,7 +144,7 @@ def product_post(request):
                     "products/product_post.html",
                     {"form": form}
                 )
-
+            notify_all_users_about_product(product)
             messages.success(
                 request,
                 f"Product posted successfully ({valid_images} images, {valid_videos} videos)."
@@ -149,7 +182,7 @@ def product_list(request):
         recipient=request.user,
         read=False
     )
-
+    
     for n in notifications:
         if n.type == "success":
             messages.success(request, n.verb)
@@ -428,10 +461,13 @@ def bulk_create_products(request):
 
                     created_products.append(product.id)
 
+            # Notify users only after the product creation transaction commits.
+            for product in Product.objects.filter(id__in=created_products):
+                notify_all_users_about_product(product)
+
             return JsonResponse(
                 {"status": "success", "created_count": len(created_products)}
             )
-
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({"status": "error", "message": str(e)}, status=500)

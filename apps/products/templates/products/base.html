@@ -199,6 +199,31 @@
       display: none !important;
     }
   }
+
+  /* Mobile notification counter */
+.notification-icon-btn {
+    position: relative;
+}
+
+.notification-counter {
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dc3545;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 50px;
+    border: 2px solid #000000;
+    z-index: 5;
+}
 </style>
 
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -222,11 +247,24 @@
         </a>
 
         <!-- Mobile Notifications/Alerts Icon Button -->
-        <a href="{% url 'notifications:list' %}" class="mobile-header-btn me-1" title="Alerts">
-          <i class="bi bi-bell"></i>
-          {% if unread_notifications_count and unread_notifications_count > 0 %}
-            <span class="badge bg-danger">{{ unread_notifications_count }}</span>
-          {% endif %}
+        <!-- Mobile Notifications Icon Button -->
+        <a href="{% url 'notifications:list' %}"
+          class="mobile-header-btn notification-icon-btn me-1"
+          title="Notifications"
+          aria-label="Notifications">
+
+            <i class="bi bi-bell"></i>
+
+            {% if unread_notifications_count %}
+                <span class="notification-counter">
+                    {% if unread_notifications_count > 99 %}
+                        99+
+                    {% else %}
+                        {{ unread_notifications_count }}
+                    {% endif %}
+                </span>
+            {% endif %}
+
         </a>
 
         <!-- Hamburger Menu Trigger -->
@@ -234,6 +272,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
       </div>
+
 
       <!-- Offcanvas container moving content in from right side -->
       <div class="offcanvas offcanvas-end offcanvas-right-menu" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">

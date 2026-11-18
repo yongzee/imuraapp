@@ -399,8 +399,19 @@
     <div class="col-md-6">
       <div class="sticky-details-panel">
         
-        <h1 class="product-title">{{ product.title }}</h1>
-        
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <h1 class="product-title mb-0">{{ product.title }}</h1>
+
+          <button
+              type="button"
+              id="shareProductBtn"
+              class="btn btn-light rounded-circle shadow-sm flex-shrink-0"
+              style="width: 44px; height: 44px;"
+              title="Share this product"
+              aria-label="Share this product">
+              <i class="bi bi-share fs-5"></i>
+          </button>
+        </div>
         <div class="price-tag-wrapper">
           {% if proposed_price %}
             <span class="proposed-label">Proposed Price</span>
@@ -784,6 +795,33 @@ document.addEventListener("DOMContentLoaded", () => {
       initialVideo.muted = true;
       initialVideo.play().catch(() => {});
     }
+  }
+  // ===== PRODUCT SHARE BUTTON =====
+  const shareProductBtn = document.getElementById("shareProductBtn");
+
+  if (shareProductBtn) {
+      shareProductBtn.addEventListener("click", async () => {
+          const shareData = {
+              title: "{{ product.title|escapejs }}",
+              text: "Check out this product on Imura!",
+              url: window.location.href
+          };
+
+          try {
+              if (navigator.share) {
+                  await navigator.share(shareData);
+              } else if (navigator.clipboard && window.isSecureContext) {
+                  await navigator.clipboard.writeText(shareData.url);
+                  alert("Product link copied! You can now share it.");
+              } else {
+                  window.prompt("Copy this product link:", shareData.url);
+              }
+          } catch (error) {
+              if (error.name !== "AbortError") {
+                  console.error("Sharing failed:", error);
+              }
+          }
+      });
   }
 });
 </script>

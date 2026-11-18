@@ -86,9 +86,11 @@
               {% elif n.type == "price_proposal" %}
                 <i class="bi bi-cash-coin"></i>
               {% elif n.type == "measurement_share" %}
-                <i class="bi bi-rulers"></i>
+                  <i class="bi bi-rulers"></i>
+              {% elif n.type == "product_post" %}
+                  <i class="bi bi-bag-check"></i>
               {% else %}
-                <i class="bi bi-info-circle"></i>
+                  <i class="bi bi-info-circle"></i>
               {% endif %}
             </div>
 
@@ -99,6 +101,27 @@
               </div>
               
               <div class="text-secondary small mb-2">{{ n.verb }}</div>
+
+                {% if n.type == "product_post" %}
+                  <div class="mt-3 p-3 bg-light rounded-3 border">
+                      <div class="small fw-semibold text-dark mb-2">
+                          <i class="bi bi-bag-check me-1"></i>
+                          New Product Available
+                      </div>
+
+                      <p class="small text-secondary mb-3">
+                          {{ n.data.product_title }}
+                      </p>
+
+                      {% if n.data.product_url %}
+                          <a href="{{ n.data.product_url }}"
+                            class="btn btn-sm btn-primary rounded-pill px-3">
+                              View Product
+                              <i class="bi bi-arrow-right ms-1"></i>
+                          </a>
+                      {% endif %}
+                  </div>
+              {% endif %}
 
               {% if n.type == "measurement_share" %}
                 <div class="mt-3 p-3 bg-light rounded-3 border-start border-info border-3">

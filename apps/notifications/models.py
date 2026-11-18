@@ -5,15 +5,11 @@ from django.urls import reverse
 User = get_user_model()
 
 NOTIFICATION_TYPE_CHOICES = [
-
-    ("message","Message"),
-
-    ("price_proposal","Price Proposal"),
-
-    ("measurement_share","Measurement Share"),
-
-    ("info","Info"),
-
+    ("message", "Message"),
+    ("price_proposal", "Price Proposal"),
+    ("measurement_share", "Measurement Share"),
+    ("product_post", "Product Post"),
+    ("info", "Info"),
 ]
 
 class Notification(models.Model):

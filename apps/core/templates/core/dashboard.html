@@ -382,6 +382,35 @@ body {
         display: none;
     }
 }
+
+.product-share-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f3f5;
+    color: #101B35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+
+.product-share-btn:hover {
+    background: #101B35;
+    color: white;
+    transform: scale(1.08);
+}
+
+.card-body-content {
+    position: relative;
+    padding-right: 40px;
+}
 </style>
 
 <div class="market-container">
@@ -477,6 +506,13 @@ body {
                                     <div class="item-price">₦{{ product.price }}</div>
                                 </div>
                                 <div class="item-seller">@{{ product.seller.username }}</div>
+                                <button class="product-share-btn"
+                                        type="button"
+                                        data-title="{{ product.title|escapejs }}"
+                                        data-url="{{ request.scheme }}://{{ request.get_host }}{% url 'products:product_detail' product.pk %}"
+                                        aria-label="Share {{ product.title|escape }}">
+                                    <i class="bi bi-share"></i>
+                                </button>
                             </div>
                         </div>
                     {% empty %}
@@ -539,6 +575,13 @@ body {
                                     <div class="item-price">₦{{ product.price }}</div>
                                 </div>
                                 <div class="item-seller">@{{ product.seller.username }}</div>
+                                <button class="product-share-btn"
+                                        type="button"
+                                        data-title="{{ product.title|escapejs }}"
+                                        data-url="{{ request.scheme }}://{{ request.get_host }}{% url 'products:product_detail' product.pk %}"
+                                        aria-label="Share {{ product.title|escape }}">
+                                    <i class="bi bi-share"></i>
+                                </button>
                             </div>
                         </div>
                     {% empty %}
@@ -779,6 +822,36 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+});
+</script>
+
+<script>
+document.addEventListener("click", async function(e) {
+    const button = e.target.closest(".product-share-btn");
+
+    if (!button) return;
+
+    const title = button.dataset.title;
+    const url = button.dataset.url;
+
+    const shareData = {
+        title: title,
+        text: `Check out ${title} on Imura!`,
+        url: url
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.clipboard.writeText(url);
+            alert("Product link copied! Share it with your friends.");
+        }
+    } catch (error) {
+        if (error.name !== "AbortError") {
+            console.error("Sharing failed:", error);
+        }
+    }
 });
 </script>
 {% endblock %}
